@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>body{margin:0}#g{width:100%;height:100vh}</style>
+</head>
+<body>
+  <div id="g"></div>
+  <script>
+    // Generar la malla de Schwefel en JS
+    const N = 80, LIM = 500;
+    const xs = [], ys = [], zs = [];
+    for (let i = 0; i < N; i++) {
+      xs.push(-LIM + 2*LIM*i/(N-1));
+      ys.push(-LIM + 2*LIM*i/(N-1));
+    }
+    const Z = [];
+    for (let j = 0; j < N; j++) {
+      const row = [];
+      for (let i = 0; i < N; i++) {
+        const x = xs[i], y = ys[j];
+        const f = 418.9829*2
+                - x*Math.sin(Math.sqrt(Math.abs(x)))
+                - y*Math.sin(Math.sqrt(Math.abs(y)));
+        row.push(f);
+      }
+      Z.push(row);
+    }
+    Plotly.newPlot('g', [{
+      type: 'surface', x: xs, y: ys, z: Z,
+      colorscale: 'Viridis',
+      contours: { z: { show: true, usecolormap: true, project: {z: true} } }
+    }], {
+      margin: {l:0,r:0,t:0,b:0},
+      scene: { xaxis:{title:'x1'}, yaxis:{title:'x2'}, zaxis:{title:'f(x)'} }
+    }, {responsive: true, displayModeBar: false});
+  </script>
+</body>
+</html>

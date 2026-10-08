@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redes neuronales y algoritmos bioinspirados</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"rel="stylesheet">
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"onload="renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError : false
+        });">
+    </script>
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+    <header class="bg-dark text-white py-4">
+        <div class="container-fluid px-4 px-lg-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-uppercase small text-secondary">
+                        Parte 1
+                    </span>
+                    <h1 class="display-4 fw-bold mb-1">
+                        Optimización numérica
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ================================================= -->
+    <!-- CONTENIDO -->
+    <!-- ================================================= -->
+    <main class="container-fluid px-4 px-lg-5 py-5">
+        <!-- ================================================= -->
+        <!-- INTRODUCCIÓN / PROBLEMA -->
+        <!-- ================================================= -->
+        <section class="row align-items-center g-5 mb-5">
+            <!-- Texto -->
+            <div class="col-lg-5">
+                <span class="text-uppercase small text-secondary fw-bold">
+                    El problema
+                </span>
+                <h2 class="display-6 fw-bold mt-2">¿Qué se optimizó?</h2>
+                <p class="text-secondary">
+                La funcion de <strong>Schwefel</strong> (Schwefel, 1981), es una de las funciones de prueba más desafiantes en la optimización continua no lineal. 
+                La escogimos por su <strong>naturaleza extremista y engañosa</strong>: su paisaje de búsqueda es altamente <em>multimodal</em> y contiene múltiples 
+                mínimos locales que actúan como trampas. Su característica más crítica es que sus mejores mínimos secundarios se encuentran muy alejados del óptimo global, 
+                lo que pone a prueba la capacidad de exploración de cualquier algoritmo.
+                </p>
+                <!-- Tarjeta con la ficha técnica y fórmula -->
+                <div class="card p-4 my-4 bg-light border-0 shadow-sm">
+                <h3 class="h5 fw-bold mb-3">Ficha Técnica de la Función de Schwefel</h3>
+                <p class="mb-2"><strong>Fórmula Matemática ($d$ dimensiones):</strong></p>
+                <p class="text-center fs-5 py-2">
+                    $$f(\mathbf{x}) = 418.9829 \cdot d - \sum_{i=1}^{d} x_i \sin\left(\sqrt{|x_i|}\right)$$
+                </p>
+                <ul class="list-unstyled mb-3">
+                    <li><strong>Dominio de Búsqueda:</strong> $x_i \in [-500, 500]$ para todo $i = 1, \dots, d$.</li>
+                    <li><strong>Mínimo Global:</strong> $f(\mathbf{x}^*) = 0$, ubicado en el punto $\mathbf{x}^* = (420.9687, \dots, 420.9687)$.</li>
+                    <li><strong>Tipo de Paisaje:</strong> Continuo, multimodal, no convexo y no separable.</li>
+                </ul>
+                <hr class="my-3">
+                <p class="small text-muted mb-0">
+                    <strong>Referencia (APA 7):</strong><br>
+                    Schwefel, H.-P. (1981). <em>Numerical Optimization of Computer Models</em>. Birkhäuser Verlag.
+                </p>
+                </div>
+            </div>
+            <!-- Visualización -->
+            <div class="col-lg-7">
+                <div class="border rounded-4 overflow-hidden shadow-sm">
+                    <iframe
+                        src="graphs/schwefel_3d.html"
+                        title="Superficie 3D de Schwefel"
+                        style="width: 100%; height: 500px; border: 0;">
+                    </iframe>
+                </div>
+            </div>
+        </section>
+        <!-- ================================================= -->
+        <!-- QUÉ SE EVALUÓ -->
+        <!-- ================================================= -->
+
+        <section class="py-5 border-top border-bottom mb-5">
+
+            <div class="row text-center g-4">
+
+                <div class="col-md-4">
+
+                    <div class="p-4">
+
+                        <div class="display-6 fw-bold">
+                            2D / 3D
+                        </div>
+
+                        <p class="text-secondary mb-0">
+                            Dimensiones evaluadas
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="p-4">
+
+                        <div class="display-6 fw-bold">
+                            4
+                        </div>
+
+                        <p class="text-secondary mb-0">
+                            Métodos de optimización
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="p-4">
+
+                        <div class="display-6 fw-bold">
+                            Schwefel
+                        </div>
+
+                        <p class="text-secondary mb-0">
+                            Función de prueba
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- MÉTODOS -->
+        <!-- ================================================= -->
+
+        <section class="mb-5">
+
+            <div class="mb-4">
+
+                <span class="text-uppercase small text-secondary fw-bold">
+                    Métodos
+                </span>
+
+                <h2 class="display-6 fw-bold">
+                    Cuatro formas de buscar el mínimo
+                </h2>
+
+            </div>
+
+
+            <div class="row g-4">
+
+
+                <!-- Gradiente -->
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <span class="text-secondary small">
+                            01
+                        </span>
+
+                        <h3 class="h4 fw-bold mt-2">
+                            Descenso por gradiente
+                        </h3>
+
+                        <p class="text-secondary">
+                            Método determinista que sigue la direccion de maximo descenso de la función objetivo, usando su gradiente.
+                        </p>
+
+                        <div class="text-center my-4">
+
+                            $$
+                            x_{t+1}
+                            =
+                            x_t-\eta\nabla f(x_t)
+                            $$
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PSO -->
+
+                <div class="col-lg-4">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">
+                            02
+                        </span>
+                        <h3 class="h4 fw-bold mt-2">
+                            Particle Swarm Optimization
+                        </h3>
+                        <p class="text-secondary">
+                            Enjambre de particulas guiadas por su mejor posicion individual y la mejor global.
+                        </p>
+                        <div class="text-center my-4">
+                            $$ v_i \leftarrow w v_i + c_1 r_1 (p_i - x_i) + c_2 r_2 (g - x_i) $$
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- DE -->
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <span class="text-secondary small">
+                            03
+                        </span>
+
+                        <h3 class="h4 fw-bold mt-2">
+                            Evolución diferencial
+                        </h3>
+
+                        <p class="text-secondary">
+                            Mutación basada en diferencias entre individuos y cruce binomial con seleccion uno a uno.
+                        </p>
+                        <div class="text-center my-4">
+                            $$ u = x_a + F (x_b - x_c) $$
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Algoritmo evolutivo -->
+                 <div class="col-lg-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">04</span>
+                        <h3 class="h4 fw-bold mt-2">Algoritmo evolutivo</h3>
+                        <p class="text-secondary">
+                            Selección por torneo, cruce BLX-α, mutación gaussiana
+                            decreciente y elitismo.
+                        </p>
+                        <div class="text-center my-4">
+                            $$ x' = \text{BLX-}\alpha(x_p, x_m) + \sigma_t \cdot \mathcal{N}(0,1) $$
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- EXPERIMENTO -->
+        <!-- ================================================= -->
+
+        <section class="mb-5">
+
+            <div class="mb-4">
+                <span class="text-uppercase small text-secondary fw-bold">
+                    Experimento
+                </span>
+
+                <h2 class="display-6 fw-bold">
+                    De la función a la solución
+                </h2>
+
+                <p class="text-secondary mb-0">
+                    Se comparó el comportamiento de los métodos sobre la función de
+                    Schwefel en dos dimensiones.
+                </p>
+            </div>
+
+
+            <!-- ==================== MÉTODOS ==================== -->
+
+            <div class="row g-5">
+
+                <!-- DESCENSO POR GRADIENTE -->
+                <div class="col-lg-6">
+
+                    <article>
+
+                        <div class="mb-3">
+                            <span class="text-secondary small">
+                                MÉTODO 01
+                            </span>
+
+                            <h3 class="h3 fw-bold mb-2">
+                                Descenso por gradiente
+                            </h3>
+
+                            <p class="text-secondary mb-0">
+                                Un único punto desciende siguiendo el gradiente de la
+                                función y puede quedar atrapado en un mínimo local.
+                            </p>
+                        </div>
+
+
+                        <!-- Gráfica -->
+                        <div class="border rounded-4 overflow-hidden shadow-sm">
+                            <iframe
+                                src="graphs/gd_2d_plotly.html"
+                                title="Descenso por gradiente en Schwefel 2D"
+                                style="width:100%; height:500px; border:0;">
+                            </iframe>
+                        </div>
+
+
+                        <!-- Configuración -->
+                        <div class="mt-4 border rounded-4 p-4 bg-light">
+
+                            <h4 class="h6 fw-bold mb-3">
+                                Configuración del experimento
+                            </h4>
+
+                            <dl class="row mb-0">
+
+                                <dt class="col-7 text-secondary">
+                                    Dimensión
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    2D
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Iteraciones
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    ...
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Learning rate
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    ...
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Tolerancia
+                                </dt>
+                                <dd class="col-5 text-end mb-0">
+                                    ...
+                                </dd>
+
+                            </dl>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- EVOLUCIÓN DIFERENCIAL -->
+                <div class="col-lg-6">
+
+                    <article>
+
+                        <div class="mb-3">
+                            <span class="text-secondary small">
+                                MÉTODO 02
+                            </span>
+
+                            <h3 class="h3 fw-bold mb-2">
+                                Evolución diferencial
+                            </h3>
+
+                            <p class="text-secondary mb-0">
+                                Una población de soluciones explora el paisaje
+                                multimodal mediante mutación, cruce y selección.
+                            </p>
+                        </div>
+
+
+                        <!-- Gráfica -->
+                        <div class="border rounded-4 overflow-hidden shadow-sm">
+                            <iframe
+                                src="graphs/de_2d_plotly.html"
+                                title="Evolución diferencial en Schwefel 2D"
+                                style="width:100%; height:500px; border:0;">
+                            </iframe>
+                        </div>
+
+
+                        <!-- Configuración -->
+                        <div class="mt-4 border rounded-4 p-4 bg-light">
+
+                            <h4 class="h6 fw-bold mb-3">
+                                Configuración del experimento
+                            </h4>
+
+                            <dl class="row mb-0">
+
+                                <dt class="col-7 text-secondary">
+                                    Dimensión
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    2D
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Iteraciones
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    ...
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Población
+                                </dt>
+                                <dd class="col-5 text-end mb-2">
+                                    ...
+                                </dd>
+
+                                <dt class="col-7 text-secondary">
+                                    Factor de mutación
+                                </dt>
+                                <dd class="col-5 text-end mb-0">
+                                    ...
+                                </dd>
+
+                            </dl>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================== SEPARACIÓN ==================== -->
+
+            <div class="my-5">
+                <hr>
+            </div>
+
+
+            <!-- ==================== NOTA DEL EXPERIMENTO ==================== -->
+
+            <div class="row">
+
+                <div class="col-lg-8">
+
+                    <p class="text-secondary small mb-0">
+                        Las visualizaciones muestran la trayectoria de búsqueda de
+                        cada método sobre el paisaje de la función de Schwefel.
+                        Los resultados numéricos se presentan en la siguiente sección.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+        <!-- ================================================= -->
+        <!-- RESULTADOS -->
+        <!-- ================================================= -->
+
+        <section class="py-5 border-top mb-5">
+
+            <div class="mb-5">
+
+                <span class="text-uppercase small text-secondary fw-bold">
+                    Resultados
+                </span>
+
+                <h2 class="display-6 fw-bold mb-2">
+                    ¿Qué ocurrió durante la optimización?
+                </h2>
+
+                <p class="text-secondary mb-0">
+                    Comparación de las soluciones obtenidas y de la convergencia
+                    de los métodos evaluados.
+                </p>
+
+            </div>
+
+
+            <!-- RESULTADOS 2D -->
+
+            <div class="row g-4 mb-5">
+
+                <div class="col-lg-6">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <h3 class="h4 fw-bold mb-3">
+                            Experimento 2D
+                        </h3>
+
+                        <!-- Gráfica -->
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-lg-6">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <h3 class="h4 fw-bold mb-3">
+                            Evolución de la convergencia
+                        </h3>
+
+                        <!-- Gráfica -->
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESULTADOS 3D -->
+
+            <div class="row g-4">
+
+                <div class="col-lg-8">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <h3 class="h4 fw-bold mb-3">
+                            Experimento 3D
+                        </h3>
+
+                        <!-- Gráfica -->
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-4 p-4 h-100">
+
+                        <h3 class="h4 fw-bold mb-3">
+                            Mejor solución
+                        </h3>
+
+                        <!-- Datos finales -->
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================================================= -->
+        <!-- COMPARACIÓN -->
+        <!-- ================================================= -->
+
+        <section class="mb-5">
+
+            <div class="mb-4">
+
+                <span class="text-uppercase small text-secondary fw-bold">
+                    Comparación
+                </span>
+
+                <h2 class="display-6 fw-bold">
+                    Resultados obtenidos
+                </h2>
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Método</th>
+                            <th>Mejor valor</th>
+                            <th>Iteraciones</th>
+                            <th>Tiempo</th>
+                            <th>Error</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Descenso por gradiente</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+
+                        <tr>
+                            <td>PSO</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+
+                        <tr>
+                            <td>Evolución diferencial</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- ANÁLISIS -->
+        <!-- ================================================= -->
+
+        <section class="py-5 border-top">
+
+            <div class="row">
+
+                <div class="col-lg-8">
+
+                    <span class="text-uppercase small text-secondary fw-bold">
+                        Análisis
+                    </span>
+
+                    <h2 class="display-6 fw-bold mb-4">
+                        Lo que muestran los experimentos
+                    </h2>
+
+                    <p>
+                        <!-- Análisis de los resultados -->
+                    </p>
+
+                    <p>
+                        <!-- Comparación entre métodos -->
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- Bootstrap -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+</body>
+
+</html>
