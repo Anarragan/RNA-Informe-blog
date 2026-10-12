@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redes neuronales y algoritmos bioinspirados</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+        });">
+    </script>
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="../utils/css/styles.css">
+</head>
+
+<body>
+
+    <!-- ================================================= -->
+    <!-- HEADER                                            -->
+    <!-- ================================================= -->
+    <header class="bg-dark text-white py-4">
+        <div class="container-fluid px-4 px-lg-5">
+            <span class="text-uppercase small text-secondary">Parte 1</span>
+            <h1 class="display-4 fw-bold mb-2">Optimización numérica</h1>
+            <p class="lead text-secondary mb-3">
+                ¿Seguir la pendiente o explorar? Cuatro métodos frente a la función de Schwefel en 2D y 3D.
+            </p>
+            <nav class="small">
+                <a class="link-light me-3" href="#resumen">Resumen</a>
+                <a class="link-light me-3" href="#problema">El problema</a>
+                <a class="link-light me-3" href="#metodos">Métodos</a>
+                <a class="link-light me-3" href="#comparacion-justa">Comparación justa</a>
+                <a class="link-light me-3" href="#visualizacion">Visualización</a>
+                <a class="link-light me-3" href="#resultados">Resultados</a>
+                <a class="link-light" href="#discusion">Discusión</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container-fluid px-4 px-lg-5 py-5">
+
+        <!-- ================================================= -->
+        <!-- RESUMEN: lo que hay que recordar                  -->
+        <!-- ================================================= -->
+        <section id="resumen" class="mb-5">
+            <span class="text-uppercase small text-secondary fw-bold">Resumen</span>
+            <h2 class="display-6 fw-bold mb-4">Lo que encontramos</h2>
+
+            <div class="row g-4 text-center">
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <div class="display-5 fw-bold">100 %</div>
+                        <p class="text-secondary mb-0">
+                            de las corridas de <strong>evolución diferencial</strong> llegaron al mínimo global en 2D
+                            (97 % en 3D).
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <div class="display-5 fw-bold">3 %</div>
+                        <p class="text-secondary mb-0">
+                            de éxito del <strong>descenso por gradiente</strong> en 2D (0 % en 3D), aunque es el método
+                            más barato.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <div class="display-5 fw-bold">≈ 12×</div>
+                        <p class="text-secondary mb-0">
+                            más evaluaciones gasta el <strong>algoritmo evolutivo</strong> que DE en 2D
+                            (59 462 frente a 5 040) para un éxito mucho menor.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <div class="display-5 fw-bold">$8^d$</div>
+                        <p class="text-secondary mb-0">
+                            mínimos locales en $d$ dimensiones: 64 en 2D y 512 en 3D. Solo uno es el global.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- EL PROBLEMA                                       -->
+        <!-- ================================================= -->
+        <section id="problema" class="row align-items-start g-5 mb-5">
+
+            <div class="col-lg-5">
+                <span class="text-uppercase small text-secondary fw-bold">El problema</span>
+                <h2 class="display-6 fw-bold mt-2">¿Qué se optimizó?</h2>
+                <p class="text-secondary">
+                    La función de <strong>Schwefel</strong> (Schwefel, 1981) es una de las funciones de prueba más
+                    engañosas de la optimización continua. La escogimos porque su paisaje es
+                    <em>multimodal</em> y sus mejores mínimos secundarios están lejos del óptimo global, lo que
+                    pone a prueba la capacidad de exploración de cualquier algoritmo.
+                </p>
+
+                <div class="card p-4 my-4 bg-light border-0 shadow-sm">
+                    <h3 class="h5 fw-bold mb-3">Ficha técnica</h3>
+                    <p class="text-center fs-5 py-1 mb-3">
+                        $$f(\mathbf{x}) = 418.9829 \cdot d - \sum_{i=1}^{d} x_i \sin\left(\sqrt{|x_i|}\right)$$
+                    </p>
+                    <ul class="list-unstyled mb-3">
+                        <li><strong>Dominio:</strong> $x_i \in [-500, 500]$ para todo $i = 1, \dots, d$.</li>
+                        <li><strong>Mínimo global:</strong> $f(\mathbf{x}^*) = 0$ en
+                            $\mathbf{x}^* = (420.9687, \dots, 420.9687)$.</li>
+                        <li><strong>Paisaje:</strong> continuo, multimodal, no convexo y separable.</li>
+                    </ul>
+                    <hr class="my-3">
+                    <p class="small text-muted mb-0">
+                        <strong>Referencia (APA 7):</strong><br>
+                        Schwefel, H.-P. (1981). <em>Numerical Optimization of Computer Models</em>. Birkhäuser Verlag.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="border rounded-4 overflow-hidden shadow-sm mb-4">
+                    <iframe src="../utils/graphs/schwefel_3d.html" title="Superficie 3D de Schwefel"
+                        style="width: 100%; height: 420px; border: 0;"></iframe>
+                </div>
+
+                <h3 class="h5 fw-bold">¿Qué la hace difícil?</h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="fw-bold mb-1">Muchas trampas</div>
+                            <p class="small text-secondary mb-0">
+                                Cada eje tiene 8 mínimos locales (7 interiores y 1 en el borde). En $d$ dimensiones
+                                se combinan: $8^d$.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="fw-bold mb-1">Un señuelo lejano</div>
+                            <p class="small text-secondary mb-0">
+                                El segundo mejor mínimo está en $x \approx -302.5$, al otro lado del dominio, y solo
+                                118.44 por encima del óptimo en cada eje.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="fw-bold mb-1">Curvatura suave</div>
+                            <p class="small text-secondary mb-0">
+                                Cerca del óptimo $f'' \approx 0.25$ en cada eje: localmente convexo y bien
+                                condicionado. El problema no es la curvatura sino la multimodalidad.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- MÉTODOS                                           -->
+        <!-- ================================================= -->
+        <section id="metodos" class="mb-5">
+            <div class="mb-4">
+                <span class="text-uppercase small text-secondary fw-bold">Métodos</span>
+                <h2 class="display-6 fw-bold">Cuatro formas de buscar el mínimo</h2>
+                <p class="text-secondary mb-0">
+                    Uno usa la pendiente de la función; los otros tres solo necesitan poder evaluarla.
+                </p>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">01</span>
+                        <h3 class="h5 fw-bold mt-2">Descenso por gradiente</h3>
+                        <span class="badge text-bg-dark mb-3">Usa ∇f</span>
+                        <p class="text-secondary small">
+                            Un único punto que sigue la dirección de máximo descenso.
+                        </p>
+                        <div class="text-center my-3">$$x_{t+1} = x_t - \eta\,\nabla f(x_t)$$</div>
+                        <p class="small mb-0"><strong>Aporta:</strong> convergencia local rápida y barata. No explora.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">02</span>
+                        <h3 class="h5 fw-bold mt-2">Algoritmo evolutivo</h3>
+                        <span class="badge text-bg-secondary mb-3">Solo f</span>
+                        <p class="text-secondary small">
+                            Torneo, cruce BLX-α, mutación gaussiana decreciente y elitismo.
+                        </p>
+                        <div class="text-center my-3">$$x' = \text{BLX-}\alpha(x_p, x_m) + \sigma_t\,\mathcal{N}(0,1)$$</div>
+                        <p class="small mb-0"><strong>Aporta:</strong> diversidad por recombinación y mutación.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">03</span>
+                        <h3 class="h5 fw-bold mt-2">Particle Swarm Optimization</h3>
+                        <span class="badge text-bg-secondary mb-3">Solo f</span>
+                        <p class="text-secondary small">
+                            Partículas guiadas por su mejor posición personal y la mejor global.
+                        </p>
+                        <div class="text-center my-3">$$v_i \leftarrow w v_i + c_1 r_1 (p_i - x_i) + c_2 r_2 (g - x_i)$$</div>
+                        <p class="small mb-0"><strong>Aporta:</strong> memoria colectiva del enjambre.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="border rounded-4 p-4 h-100">
+                        <span class="text-secondary small">04</span>
+                        <h3 class="h5 fw-bold mt-2">Evolución diferencial</h3>
+                        <span class="badge text-bg-secondary mb-3">Solo f</span>
+                        <p class="text-secondary small">
+                            Mutación por diferencias entre individuos, cruce binomial y selección uno a uno.
+                        </p>
+                        <div class="text-center my-3">$$u = x_a + F\,(x_b - x_c)$$</div>
+                        <p class="small mb-0"><strong>Aporta:</strong> pasos que se adaptan a la dispersión de la población.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- REGLA DE COMPARACIÓN JUSTA                        -->
+        <!-- ================================================= -->
+        <section id="comparacion-justa" class="py-5 border-top mb-5">
+            <div class="row g-5">
+                <div class="col-lg-6">
+                    <span class="text-uppercase small text-secondary fw-bold">Comparación justa</span>
+                    <h2 class="display-6 fw-bold mb-3">Contar el esfuerzo en una sola unidad</h2>
+                    <p class="text-secondary">
+                        Comparar por número de iteraciones sería injusto: una iteración de PSO evalúa $f$ en 40
+                        partículas, mientras que una de descenso por gradiente calcula un solo gradiente. Por eso
+                        reportamos <strong>por separado</strong> las evaluaciones de $f$ ($E_f$) y de $\nabla f$
+                        ($E_{\nabla f}$), y las unimos con una equivalencia.
+                    </p>
+                    <p class="text-secondary">
+                        Si no se dispusiera de la fórmula del gradiente, habría que aproximarlo por diferencias
+                        centrales, que cuestan <strong>dos evaluaciones de $f$ por coordenada</strong>:
+                    </p>
+                    <div class="text-center">
+                        $$\frac{\partial f}{\partial x_i} \approx \frac{f(\mathbf{x} + h\mathbf{e}_i) - f(\mathbf{x} - h\mathbf{e}_i)}{2h}$$
+                    </div>
+                    <p class="text-secondary">
+                        Un gradiente equivale entonces a $2d$ evaluaciones de $f$ en dimensión $d$:
+                    </p>
+                    <div class="text-center">
+                        $$E_{eq} = E_f + 2d \cdot E_{\nabla f}$$
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="border rounded-4 p-4 mb-4">
+                        <h3 class="h6 fw-bold mb-3">Equivalencia usada</h3>
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr><th>Dimensión $d$</th><th class="text-end">1 gradiente =</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>2</td><td class="text-end">4 evaluaciones de $f$</td></tr>
+                                <tr><td>3</td><td class="text-end">6 evaluaciones de $f$</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="border rounded-4 p-4 bg-light">
+                        <h3 class="h6 fw-bold mb-2">Qué se cuenta y qué no</h3>
+                        <ul class="small text-secondary mb-0">
+                            <li>Solo las evaluaciones que el algoritmo necesita. Las que se hacen para dibujar la
+                                trayectoria o el GIF no cuentan.</li>
+                            <li>En el algoritmo evolutivo los individuos élite no se reevalúan, así que no se cuentan
+                                de nuevo.</li>
+                            <li>Nuestro gradiente es analítico y su costo real es del mismo orden que el de una
+                                evaluación de $f$. Usamos $2d$ por ser la regla conservadora; con costo 1 el descenso por gradiente
+                                sería aún más barato (553 en 2D y 575 en 3D) y las conclusiones no cambian.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- PROTOCOLO                                         -->
+        <!-- ================================================= -->
+        <section id="protocolo" class="mb-5">
+            <div class="mb-4">
+                <span class="text-uppercase small text-secondary fw-bold">Protocolo</span>
+                <h2 class="display-6 fw-bold">Cómo se hizo el experimento</h2>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="border rounded-4 p-4 h-100">
+                        <h3 class="h6 fw-bold mb-3">Reglas comunes</h3>
+                        <dl class="row mb-0 small">
+                            <dt class="col-7 text-secondary">Corridas independientes</dt>
+                            <dd class="col-5 text-end">30 por método y dimensión</dd>
+                            <dt class="col-7 text-secondary">Semillas</dt>
+                            <dd class="col-5 text-end">42 a 71 </dd>
+                            <dt class="col-7 text-secondary">Dominio</dt>
+                            <dd class="col-5 text-end">$[-500, 500]^d$</dd>
+                            <dt class="col-7 text-secondary">Inicio</dt>
+                            <dd class="col-5 text-end">aleatorio uniforme</dd>
+                            <dt class="col-7 text-secondary">Máx. iteraciones</dt>
+                            <dd class="col-5 text-end">2000</dd>
+                            <dt class="col-7 text-secondary">Parada</dt>
+                            <dd class="col-5 text-end">paso o diversidad &lt; $10^{-6}$</dd>
+                            <dt class="col-7 text-secondary">Éxito</dt>
+                            <dd class="col-5 text-end">$f \le 10^{-3}$</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="border rounded-4 p-4 h-100">
+                        <h3 class="h6 fw-bold mb-3">Hiperparámetros</h3>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0 small">
+                                <thead>
+                                    <tr><th>Método</th><th>Parámetros</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Descenso por gradiente</td><td>$\eta = 0.1$, tolerancia $10^{-6}$</td></tr>
+                                    <tr><td>Algoritmo evolutivo</td><td>población 40, tasa de mutación 0.1, escala de mutación 0.1</td></tr>
+                                    <tr><td>PSO</td><td>población 40, $w = 0.7$, $c_1 = c_2 = 1.5$</td></tr>
+                                    <tr><td>Evolución diferencial</td><td>población 40, $F = 0.8$, $CR = 0.9$</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="small text-secondary mt-3 mb-0">
+                            Reproducir: <code>python run.py --compare --dim 2</code> y
+                            <code>python run.py --compare --dim 3</code>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- VISUALIZACIÓN                                     -->
+        <!-- ================================================= -->
+        <section id="visualizacion" class="py-5 border-top mb-5">
+            <div class="mb-4">
+                <span class="text-uppercase small text-secondary fw-bold">Visualización</span>
+                <h2 class="display-6 fw-bold">Un punto frente a una nube</h2>
+                <p class="text-secondary mb-0">
+                    La misma función en 2D, el mismo óptimo marcado con una estrella roja. Cambia la forma de buscar.
+                </p>
+            </div>
+
+            <div class="row g-5">
+                <div class="col-lg-6">
+                    <article>
+                        <span class="text-secondary small">MÉTODO 01</span>
+                        <h3 class="h4 fw-bold mb-2">Descenso por gradiente</h3>
+                        <div class="border rounded-4 overflow-hidden shadow-sm">
+                            <img src="../utils/graphs/gd_2d.gif" class="img-fluid w-100"
+                                alt="Animación del descenso por gradiente sobre Schwefel 2D">
+                        </div>
+                        <p class="small text-secondary mt-3 mb-0">
+                            <strong>Qué observar:</strong> un único punto baja por la ladera más cercana y se detiene
+                            en el primer valle. Si ese valle no es el global, no hay forma de salir de él.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="col-lg-6">
+                    <article>
+                        <span class="text-secondary small">MÉTODO 03</span>
+                        <h3 class="h4 fw-bold mb-2">Particle Swarm Optimization</h3>
+                        <div class="border rounded-4 overflow-hidden shadow-sm">
+                            <img src="../utils/graphs/pso_2d.gif" class="img-fluid w-100"
+                                alt="Animación de PSO sobre Schwefel 2D">
+                        </div>
+                        <p class="small text-secondary mt-3 mb-0">
+                            <strong>Qué observar:</strong> la nube empieza repartida por todo el dominio y se va
+                            concentrando; el panel de diversidad baja a medida que el enjambre se compromete con un
+                            valle.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- RESULTADOS                                        -->
+        <!-- ================================================= -->
+        <section id="resultados" class="py-5 border-top mb-5">
+            <div class="mb-4">
+                <span class="text-uppercase small text-secondary fw-bold">Resultados</span>
+                <h2 class="display-6 fw-bold">30 corridas por método</h2>
+                <p class="text-secondary mb-0">
+                    Valor final de $f$ (menor es mejor) y costo en evaluaciones (promedio por corrida).
+                </p>
+            </div>
+
+            <ul class="nav nav-pills mb-4" id="tabs-dim" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-2d" data-bs-toggle="pill" data-bs-target="#panel-2d"
+                        type="button" role="tab" aria-controls="panel-2d" aria-selected="true">2 dimensiones</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-3d" data-bs-toggle="pill" data-bs-target="#panel-3d"
+                        type="button" role="tab" aria-controls="panel-3d" aria-selected="false">3 dimensiones</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+
+                <div class="tab-pane fade show active" id="panel-2d" role="tabpanel" aria-labelledby="tab-2d" tabindex="0">
+<div class="table-responsive">
+<table class="table align-middle">
+<thead>
+<tr><th>Método</th><th class="text-end">Media ± desv.</th><th class="text-end">Mejor</th><th class="text-end">Peor</th><th class="text-end">Éxito</th><th class="text-end">$E_f$</th><th class="text-end">$E_{\nabla f}$</th><th class="text-end">$E_{eq}$</th><th class="text-end">Iter.</th><th class="text-end">Tiempo (s)</th></tr>
+</thead>
+<tbody>
+<tr><td>Descenso por gradiente</td><td class="text-end">456.37 ± 174.96</td><td class="text-end">≈ 0</td><td class="text-end">710.70</td><td class="text-end">3 % (1/30)</td><td class="text-end">0</td><td class="text-end">553</td><td class="text-end fw-bold">2 214</td><td class="text-end">553</td><td class="text-end">0.010</td></tr>
+<tr><td>Algoritmo evolutivo</td><td class="text-end">55.27 ± 60.10</td><td class="text-end">≈ 0</td><td class="text-end">118.44</td><td class="text-end">53 % (16/30)</td><td class="text-end">59 462</td><td class="text-end">0</td><td class="text-end">59 462</td><td class="text-end">1 564</td><td class="text-end">0.179</td></tr>
+<tr><td>PSO</td><td class="text-end">74.35 ± 77.88</td><td class="text-end">≈ 0</td><td class="text-end">236.88</td><td class="text-end">47 % (14/30)</td><td class="text-end">10 720</td><td class="text-end">0</td><td class="text-end">10 720</td><td class="text-end">267</td><td class="text-end">0.015</td></tr>
+<tr><td>Evolución diferencial</td><td class="text-end fw-bold">≈ 0</td><td class="text-end">≈ 0</td><td class="text-end">≈ 0</td><td class="text-end fw-bold">100 % (30/30)</td><td class="text-end">5 040</td><td class="text-end">0</td><td class="text-end">5 040</td><td class="text-end">125</td><td class="text-end">0.016</td></tr>
+</tbody>
+</table>
+</div>
+                    <div class="row g-4 mt-1">
+                        <div class="col-lg-6">
+<h3 class="h6 fw-bold mb-3">Tasa de éxito (más es mejor)</h3>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Descenso por gradiente</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Descenso por gradiente" aria-valuenow="3" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:3.3%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">3 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Algoritmo evolutivo</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Algoritmo evolutivo" aria-valuenow="53" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:53.3%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">53 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">PSO</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="PSO" aria-valuenow="47" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:46.7%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">47 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Evolución diferencial</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Evolución diferencial" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:100.0%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">100 %</div></div>
+                        </div>
+                        <div class="col-lg-6">
+<h3 class="h6 fw-bold mb-3">Costo $E_{eq}$ (menos es mejor)</h3>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Descenso por gradiente</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Descenso por gradiente" aria-valuenow="4" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:3.7%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">2 214</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Algoritmo evolutivo</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Algoritmo evolutivo" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:100.0%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">59 462</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">PSO</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="PSO" aria-valuenow="18" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:18.0%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">10 720</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Evolución diferencial</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Evolución diferencial" aria-valuenow="8" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:8.5%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">5 040</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="panel-3d" role="tabpanel" aria-labelledby="tab-3d" tabindex="0">
+<div class="table-responsive">
+<table class="table align-middle">
+<thead>
+<tr><th>Método</th><th class="text-end">Media ± desv.</th><th class="text-end">Mejor</th><th class="text-end">Peor</th><th class="text-end">Éxito</th><th class="text-end">$E_f$</th><th class="text-end">$E_{\nabla f}$</th><th class="text-end">$E_{eq}$</th><th class="text-end">Iter.</th><th class="text-end">Tiempo (s)</th></tr>
+</thead>
+<tbody>
+<tr><td>Descenso por gradiente</td><td class="text-end">667.84 ± 222.47</td><td class="text-end">118.44</td><td class="text-end">1125.73</td><td class="text-end">0 % (0/30)</td><td class="text-end">0</td><td class="text-end">575</td><td class="text-end fw-bold">3 449</td><td class="text-end">575</td><td class="text-end">0.011</td></tr>
+<tr><td>Algoritmo evolutivo</td><td class="text-end">86.85 ± 92.96</td><td class="text-end">≈ 0</td><td class="text-end">355.32</td><td class="text-end">43 % (13/30)</td><td class="text-end">76 040</td><td class="text-end">0</td><td class="text-end">76 040</td><td class="text-end">2 000</td><td class="text-end">0.234</td></tr>
+<tr><td>PSO</td><td class="text-end">101.99 ± 95.32</td><td class="text-end">≈ 0</td><td class="text-end">335.58</td><td class="text-end">37 % (11/30)</td><td class="text-end">13 828</td><td class="text-end">0</td><td class="text-end">13 828</td><td class="text-end">345</td><td class="text-end">0.018</td></tr>
+<tr><td>Evolución diferencial</td><td class="text-end fw-bold">4.42 ± 24.21</td><td class="text-end">≈ 0</td><td class="text-end">132.61</td><td class="text-end fw-bold">97 % (29/30)</td><td class="text-end">8 343</td><td class="text-end">0</td><td class="text-end">8 343</td><td class="text-end">208</td><td class="text-end">0.018</td></tr>
+</tbody>
+</table>
+</div>
+                    <div class="row g-4 mt-1">
+                        <div class="col-lg-6">
+<h3 class="h6 fw-bold mb-3">Tasa de éxito (más es mejor)</h3>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Descenso por gradiente</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Descenso por gradiente" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:0.8%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">0 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Algoritmo evolutivo</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Algoritmo evolutivo" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:43.3%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">43 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">PSO</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="PSO" aria-valuenow="37" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:36.7%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">37 %</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Evolución diferencial</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Evolución diferencial" aria-valuenow="97" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" style="width:96.7%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">97 %</div></div>
+                        </div>
+                        <div class="col-lg-6">
+<h3 class="h6 fw-bold mb-3">Costo $E_{eq}$ (menos es mejor)</h3>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Descenso por gradiente</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Descenso por gradiente" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:4.5%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">3 449</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Algoritmo evolutivo</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Algoritmo evolutivo" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:100.0%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">76 040</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">PSO</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="PSO" aria-valuenow="18" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:18.2%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">13 828</div></div>
+<div class="d-flex align-items-center gap-3 mb-2"><div class="small fw-bold" style="width:9.5rem">Evolución diferencial</div><div class="progress flex-grow-1" style="height:.9rem" role="progressbar" aria-label="Evolución diferencial" aria-valuenow="11" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-secondary" style="width:11.0%"></div></div><div class="small text-secondary text-end" style="width:6.5rem">8 343</div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="small text-secondary mt-4 mb-0">
+                $E_{eq} = E_f + 2d \cdot E_{\nabla f}$. Los valores de $f$ próximos a cero (menores que $10^{-9}$) se
+                muestran como ≈ 0. El éxito cuenta las corridas con $f \le 10^{-3}$.
+            </p>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- DISCUSIÓN                                         -->
+        <!-- ================================================= -->
+        <section id="discusion" class="py-5 border-top mb-5">
+            <div class="row">
+                <div class="col-lg-9">
+                    <span class="text-uppercase small text-secondary fw-bold">Discusión</span>
+                    <h2 class="display-6 fw-bold mb-4">¿Qué aportó cada familia de métodos?</h2>
+
+                    <h3 class="h5 fw-bold">El descenso por gradiente: rápido, barato y miope</h3>
+                    <p>
+                        Fue el método más barato (2 214 evaluaciones equivalentes en 2D y 3 449 en 3D), pero también
+                        el peor en calidad: 3 % de éxito en 2D y ninguna corrida exitosa en 3D, con un valor medio de
+                        $f$ de 456 y 668. La razón es geométrica. El gradiente es información local, y con unos
+                        $8^d$ mínimos locales, el punto termina en el valle donde empezó. La probabilidad de que
+                        <em>todas</em> las coordenadas caigan en el valle correcto cae al subir la dimensión, por eso
+                        en 3D su mejor corrida se quedó en 118.44. Donde sí aporta es en la parte final: cerca del
+                        óptimo la función es localmente convexa ($f'' \approx 0.25$) y bien condicionada, así que el
+                        gradiente refina la solución sin desperdicio.
+                    </p>
+
+                    <h3 class="h5 fw-bold mt-4">Los métodos heurísticos: exploran, pero cuestan</h3>
+                    <p>
+                        PSO, el algoritmo evolutivo y DE llegaron al mínimo global en al menos una corrida y sus
+                        valores medios de $f$ fueron mucho menores que los del gradiente, a cambio de más
+                        evaluaciones. Cuando fallan, no lo hacen al azar: en PSO y en el algoritmo evolutivo, 64 de
+                        sus 66 fallos terminaron en un múltiplo exacto de 118.44 (118.44, 236.88, 355.32), que es la
+                        diferencia entre el óptimo y el segundo mejor mínimo de un eje. Es decir, la población quedó
+                        comprometida con el valle señuelo en una, dos o tres coordenadas. DE falló una sola vez en
+                        las 60 corridas (en 3D).
+                    </p>
+                    <p>
+                        Entre ellos hay diferencias claras. <strong>DE</strong> fue el mejor compromiso: 100 % de éxito
+                        en 2D y 97 % en 3D con solo 5 040 y 8 343 evaluaciones. <strong>PSO</strong> costó entre 1.7 y
+                        2.1 veces lo que DE y acertó menos de la mitad de las veces (47 % y 37 %). El
+                        <strong>algoritmo evolutivo</strong> fue el más caro (59 462 y 76 040), en parte porque su
+                        criterio de parada por diversidad tarda en cumplirse: en 3D agotó las 2000 iteraciones en todas
+                        las corridas, así que su costo refleja también ese criterio y no solo el algoritmo.
+                    </p>
+
+                    <h3 class="h5 fw-bold mt-4">Qué cambia al pasar de 2D a 3D</h3>
+                    <p>
+                        Los $8^d$ mínimos locales pasan de 64 a 512, y todos los métodos empeoran: el éxito baja y el
+                        costo sube. DE es el que menos lo siente (100 % a 97 %). La multimodalidad crece de forma
+                        exponencial con la dimensión, y es ahí, y no en el condicionamiento, donde se decide el
+                        resultado.
+                    </p>
+
+                    <div class="border rounded-4 p-4 bg-light mt-4">
+                        <h3 class="h6 fw-bold mb-2">Conclusión</h3>
+                        <p class="mb-0">
+                            En un paisaje como el de Schwefel, <strong>explorar</strong> importa más que seguir la
+                            pendiente: el gradiente por sí solo no alcanza el óptimo global. Aun así, no es inútil.
+                            Una estrategia razonable sería usar un método poblacional como DE para encontrar el valle
+                            correcto y el gradiente para pulir la solución final.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================= -->
+        <!-- LIMITACIONES                                      -->
+        <!-- ================================================= -->
+        <section id="limitaciones" class="mb-5">
+            <h2 class="h4 fw-bold mb-3">Limitaciones</h2>
+            <ul class="text-secondary">
+                <li>Todos los métodos comparten el mismo límite de iteraciones (2000), no el mismo presupuesto de
+                    evaluaciones; por eso comparamos con $E_{eq}$ y no con el número de iteraciones.</li>
+                <li>El descenso por gradiente se ejecutó una sola vez por punto inicial y con $\eta = 0.1$ fijo. Con
+                    reinicios aleatorios o un paso mayor su tasa de éxito probablemente mejoraría.</li>
+                <li>Los hiperparámetros no se ajustaron para cada método; se usaron valores estándar.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer class="border-top py-4">
+        <div class="container-fluid px-4 px-lg-5 small text-secondary">
+            Schwefel, H.-P. (1981). <em>Numerical Optimization of Computer Models</em>. Birkhäuser Verlag.
+        </div>
+    </footer>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
