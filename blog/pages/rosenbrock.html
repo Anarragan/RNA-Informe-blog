@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte 1: Función de Rosenbrock</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- KaTeX para fórmulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+        });">
+    </script>
+
+    <!-- CSS del blog del equipo -->
+    <link rel="stylesheet" href="../utils/css/styles.css">
+</head>
+
+<body>
+    <header class="bg-dark text-white py-4">
+    <div class="container-fluid px-4 px-lg-5">
+        <p class="small text-secondary mb-2">
+            <a href="../../index.html" class="link-light text-decoration-none">← Volver al inicio</a>
+        </p>
+        <span class="text-uppercase small text-secondary">Parte 1</span>
+        <h1 class="display-5 fw-bold mb-2">Función de Rosenbrock</h1>
+        <p class="lead text-secondary mb-0">
+            Comparación de métodos basados en gradiente y metaheurísticos en 2D y 3D.
+        </p>
+    </div>
+</header>
+
+    <main class="container-fluid px-4 px-lg-5 py-5">
+
+        <!-- Sección 1: Introducción -->
+<section id="introduccion" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">1. Introducción</h2>
+
+    <p>
+        La optimización es el proceso de encontrar los valores de entrada que
+        minimizan o maximizan una función. En el contexto de las ciencias
+        computacionales y la ingeniería, este problema aparece constantemente:
+        desde ajustar los parámetros de un modelo de aprendizaje automático
+        hasta encontrar la ruta más corta entre dos puntos. La dificultad de
+        resolverlo depende de la geometría de la función objetivo, y en
+        particular de dos factores: cuántos mínimos locales tiene y qué tan
+        estrecho o mal condicionado es su valle principal.
+    </p>
+
+    <p>
+        En este trabajo se comparan dos familias de métodos de optimización
+        sobre una función de prueba clásica: la <strong>función de Rosenbrock</strong>.
+        Por un lado, un método de primer orden basado en el gradiente
+        (<em>descenso por gradiente</em>); por el otro, tres metaheurísticas
+        poblacionales: <em>optimización por enjambre de partículas</em> (PSO),
+        <em>evolución diferencial</em> (DE) y un <em>algoritmo evolutivo</em>
+        con codificación real (EA). El objetivo es analizar qué aporta cada
+        familia en términos de calidad de la solución y costo computacional,
+        medido en número de evaluaciones de la función y de su gradiente.
+    </p>
+
+    <p>
+        La elección de Rosenbrock no es casual. Esta función es uno de los
+        <em>benchmarks</em> más utilizados en optimización numérica porque
+        presenta una geometría especialmente difícil: posee un único mínimo
+        global, pero está inmerso en un valle muy estrecho, curvo y mal
+        condicionado. Esta propiedad hace que los métodos basados en gradiente
+        avancen con mucha lentitud por el valle, mientras que las técnicas
+        poblacionales —que no dependen del gradiente— pueden explorar el
+        espacio de búsqueda de manera más efectiva. El contraste entre ambas
+        familias se analiza en dos y tres dimensiones, con 30 corridas
+        independientes por configuración.
+    </p>
+
+    <p>
+        El presente informe está organizado de la siguiente manera. La
+        Sección 2 define formalmente la función de Rosenbrock y sus
+        propiedades. La Sección 3 describe los cuatro métodos implementados.
+        La Sección 4 introduce la regla de comparación justa entre métodos
+        que usan y no usan gradiente. La Sección 5 presenta los resultados
+        experimentales. La Sección 6 discute los hallazgos a la luz de la
+        geometría de la función. Finalmente, la Sección 7 cierra con las
+        conclusiones y se incluye la bibliografía consultada.
+    </p>
+
+    <!-- Sección 2: Fundamento matemático -->
+<section id="fundamento" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">2. Fundamento matemático</h2>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">2.1. Definición de la función</h3>
+
+    <p>
+        La función de Rosenbrock, también conocida como <em>función banana</em>
+        por la forma característica de sus curvas de nivel, fue propuesta por
+        Howard H. Rosenbrock en 1960 como un caso de prueba para evaluar el
+        desempeño de algoritmos de optimización (Rosenbrock, 1960). En su
+        forma general para $n$ dimensiones se define como:
+    </p>
+
+    <div class="formula">
+        $$f(x) = \sum_{i=1}^{n-1} \left[ 100(x_{i+1} - x_i^2)^2 + (1 - x_i)^2 \right]$$
+    </div>
+
+    <p>
+        Para el caso bidimensional, la expresión se reduce a:
+    </p>
+
+    <div class="formula">
+        $$f(x_1, x_2) = 100(x_2 - x_1^2)^2 + (1 - x_1)^2$$
+    </div>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">2.2. Dominio y mínimo global</h3>
+
+    <p>
+        El dominio de búsqueda considerado en este trabajo es el rectángulo
+        $[-5, 10]^n$, que corresponde al dominio estándar utilizado en la
+        literatura de optimización para esta función (Surjanovic &amp;
+        Bingham, 2013; Nocedal &amp; Wright, 2006). Este dominio contiene al
+        mínimo global y es lo bastante amplio para reflejar el reto real de
+        partir desde una condición inicial aleatoria potencialmente lejana
+        del óptimo.
+    </p>
+
+    <p>
+        La función tiene un único mínimo global, ubicado en:
+    </p>
+
+    <div class="formula">
+        $$x^* = (1, 1, \dots, 1) \quad \text{con} \quad f(x^*) = 0$$
+    </div>
+
+    <p>
+        A pesar de tener un único mínimo global, Rosenbrock es considerada una
+        función difícil porque el mínimo está inmerso en un valle muy estrecho,
+        curvo y mal condicionado. En la Figura 1 se muestran las curvas de
+        nivel de la función en 2D, donde se aprecia la forma de "banana" y la
+        posición del mínimo global.
+    </p>
+
+    <figure class="mb-4">
+    <figcaption>
+        <p class="apa-num">Figura 1</p>
+        <p class="apa-titulo">Curvas de nivel de la función de Rosenbrock en 2D</p>
+    </figcaption>
+    <div class="border rounded-4 overflow-hidden shadow-sm">
+        <img src="..." class="img-fluid w-100" alt="...">
+    </div>
+    <p class="apa-nota"><em>Nota.</em> La estrella roja marca el mínimo global en (1, 1). Fuente: elaboración propia.</p>
+</figure>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">2.3. Gradiente</h3>
+
+    <p>
+        El gradiente de la función es necesario para el método de descenso por
+        gradiente. Para cada componente $i$, la derivada parcial está dada por:
+    </p>
+
+    <div class="formula">
+        $$\frac{\partial f}{\partial x_1} = -400\, x_1 (x_2 - x_1^2) - 2(1 - x_1)$$
+    </div>
+
+    <div class="formula">
+        $$\frac{\partial f}{\partial x_i} = 200(x_i - x_{i-1}^2) - 400\, x_i (x_{i+1} - x_i^2) - 2(1 - x_i) \quad \text{para } 1 < i < n$$
+    </div>
+
+    <div class="formula">
+        $$\frac{\partial f}{\partial x_n} = 200(x_n - x_{n-1}^2)$$
+    </div>
+
+    <p>
+        Este gradiente se implementó de forma analítica, evitando el uso de
+        diferencias finitas, lo cual permite reducir el costo computacional
+        de cada iteración del descenso por gradiente. En la Sección 4 se
+        justifica la equivalencia entre evaluaciones del gradiente y
+        evaluaciones de la función para efectos de comparación.
+    </p>
+</section>
+       <!-- Sección 3: Metodología -->
+<section id="metodologia" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">3. Metodología</h2>
+
+    <p>
+        Se implementaron cuatro métodos de optimización, todos partiendo de
+        condiciones iniciales aleatorias dentro del dominio $[-5, 10]^n$ y
+        deteniéndose al alcanzar un número máximo de iteraciones o al cumplir
+        un criterio de convergencia. Los hiperparámetros utilizados son los
+        definidos en la configuración estándar del proyecto, y se describen
+        a continuación junto con las ecuaciones de actualización de cada
+        método.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">3.1. Descenso por gradiente (GD)</h3>
+
+    <p>
+        El descenso por gradiente es un método de primer orden que actualiza
+        iterativamente la posición en dirección opuesta al gradiente de la
+        función. La regla de actualización es:
+    </p>
+
+    <div class="formula">
+        $$x^{(t+1)} = x^{(t)} - \alpha \nabla f(x^{(t)})$$
+    </div>
+
+    <p>
+        donde $\alpha > 0$ es la tasa de aprendizaje y $\nabla f$ es el
+        gradiente de la función en el punto actual. En este trabajo se
+        utiliza $\alpha = 10^{-4}$ y una tolerancia de convergencia
+        $\|\nabla f\| < 10^{-8}$. Este valor de $\alpha$ es muy pequeño,
+        pero necesario para evitar la divergencia que se produce con
+        valores mayores (como se documenta en la Sección 6.4). El
+        gradiente se calcula de forma analítica, sin recurrir a
+        diferencias finitas.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">3.2. Optimización por enjambre de partículas (PSO)</h3>
+
+    <p>
+        PSO es una metaheurística inspirada en el comportamiento colectivo de
+        bandadas de aves y cardúmenes. Cada partícula $i$ tiene una posición
+        $x_i$ y una velocidad $v_i$, que se actualizan en cada iteración
+        según:
+    </p>
+
+    <div class="formula">
+        $$v_i^{(t+1)} = w \, v_i^{(t)} + c_1 r_1 (p_i - x_i^{(t)}) + c_2 r_2 (g - x_i^{(t)})$$
+    </div>
+
+    <div class="formula">
+        $$x_i^{(t+1)} = x_i^{(t)} + v_i^{(t+1)}$$
+    </div>
+
+    <p>
+        donde $p_i$ es la mejor posición personal de la partícula $i$, $g$ es
+        la mejor posición global del enjambre, $w$ es el peso de inercia y
+        $c_1, c_2$ son los coeficientes cognitivo y social. Los valores
+        usados son $w = 0.7$ y $c_1 = c_2 = 1.5$, con 40 partículas y un
+        máximo de 2000 iteraciones. Las posiciones se recortan al dominio
+        $[-5, 10]^n$ en cada paso para evitar que las partículas salgan del
+        espacio de búsqueda.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">3.3. Evolución diferencial (DE)</h3>
+
+    <p>
+        La evolución diferencial es una metaheurística poblacional que genera
+        nuevos individuos combinando tres vectores aleatorios de la población.
+        Para cada individuo $i$, se construye un vector mutante:
+    </p>
+
+    <div class="formula">
+        $$u_i = x_a + F (x_b - x_c)$$
+    </div>
+
+    <p>
+        donde $x_a, x_b, x_c$ son tres individuos distintos entre sí y
+        distintos del individuo $i$, y $F \in (0, 2]$ es el factor de
+        mutación. Luego se aplica un cruce binomial con probabilidad $CR$:
+    </p>
+
+    <div class="formula">
+        $$y_{i,j} = \begin{cases} u_{i,j} & \text{si } r_j \leq CR \\ x_{i,j} & \text{si } r_j > CR \end{cases}$$
+    </div>
+
+    <p>
+        Finalmente, el individuo prueba $y_i$ reemplaza al padre $x_i$ solo si
+        tiene mejor valor de función objetivo. Se usaron los valores
+        $F = 0.8$ y $CR = 0.9$, con una población de 40 individuos.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">3.4. Algoritmo evolutivo (EA)</h3>
+
+    <p>
+        El algoritmo evolutivo de codificación real combina selección por
+        torneo, cruce BLX-$\alpha$, mutación gaussiana y elitismo. En cada
+        generación:
+    </p>
+
+    <p>
+        <strong>Selección por torneo:</strong> cada padre se elige tomando el
+        mejor entre $k = 3$ individuos aleatorios de la población.
+    </p>
+
+    <p>
+        <strong>Cruce BLX-$\alpha$:</strong> dos padres $p_1$ y $p_2$ generan
+        un hijo $h$ con cada componente muestreada uniformemente en un
+        intervalo extendido:
+    </p>
+
+    <div class="formula">
+        $$h_j \sim U\!\left[\min(p_{1,j}, p_{2,j}) - \alpha d_j, \; \max(p_{1,j}, p_{2,j}) + \alpha d_j \right]$$
+    </div>
+
+    <p>
+        donde $d_j = |p_{1,j} - p_{2,j}|$ y $\alpha = 0.5$.
+    </p>
+
+    <p>
+        <strong>Mutación gaussiana:</strong> cada componente del hijo se
+        perturba con probabilidad $p_m = 0.1$ y una desviación que decrece
+        con las generaciones:
+    </p>
+
+    <div class="formula">
+        $$\sigma_t = 0.1 \cdot (\text{hi} - \text{lo}) \cdot \left(1 - \frac{t}{T}\right) + 10^{-4}$$
+    </div>
+
+    <p>
+        <strong>Elitismo:</strong> los 2 mejores individuos pasan intactos a
+        la siguiente generación, sin ser re-evaluados.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">3.5. Protocolo experimental</h3>
+
+    <p>
+        Cada método se ejecutó en dos configuraciones: 2D y 3D. Para cada
+        configuración se realizaron 30 corridas independientes con semillas
+        fijas y documentadas (semilla base 42, corrida $i$ usa semilla
+        $42 + i$). Se reportan las siguientes estadísticas:
+    </p>
+
+    <ul>
+        <li><strong>Media</strong>, <strong>mediana</strong> y <strong>desviación estándar</strong> del valor final $f(x^*)$.</li>
+        <li><strong>Mejor</strong> y <strong>peor</strong> valor alcanzado.</li>
+        <li><strong>Tasa de éxito</strong>: proporción de corridas con $f(x^*) \leq 10^{-3}$.</li>
+        <li><strong>Tasa de convergencia</strong>: proporción de corridas que cumplieron el criterio de parada antes del límite de iteraciones.</li>
+        <li><strong>Evaluaciones de $f$</strong>, <strong>evaluaciones de $\nabla f$</strong> y <strong>costo equivalente</strong> (ver Sección 4).</li>
+    </ul>
+
+    <p>
+        Todos los experimentos se implementaron en Python con NumPy, y los
+        resultados son completamente reproducibles a partir del repositorio
+        Git del proyecto. La semilla base y los hiperparámetros están
+        especificados en el archivo <code>configs/CLI_defaults_rosenbrock.json</code>.
+    </p>
+</section>
+
+        <!-- Sección 4: Comparación justa -->
+<section id="comparacion" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">4. Comparación justa</h2>
+
+    <p>
+        Comparar métodos que usan gradiente con métodos que no lo usan no es
+        directo: el gradiente es una operación más costosa que una simple
+        evaluación de la función. Para que la comparación sea justa, se deben
+        reportar por separado el número de evaluaciones de $f$ y el número de
+        evaluaciones de $\nabla f$, y luego proponer una equivalencia entre
+        ambas.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">4.1. Conteo de evaluaciones</h3>
+
+    <p>
+        El conteo se implementó de la siguiente manera:
+    </p>
+
+    <ul>
+        <li>
+            <strong>Evaluaciones de $f$:</strong> cada vez que el algoritmo
+            necesita evaluar la función objetivo. Para GD, las evaluaciones
+            de $f$ que se realizan solo para guardar el historial gráfico
+            <em>no se cuentan</em>, porque no forman parte del algoritmo
+            en sí. Para PSO, DE y EA, cada evaluación de un individuo de la
+            población sí se cuenta.
+        </li>
+        <li>
+            <strong>Evaluaciones de $\nabla f$:</strong> cada vez que se
+            llama al gradiente se incrementa un contador independiente. Solo
+            el método de descenso por gradiente realiza estas llamadas; las
+            metaheurísticas poblacionales nunca evalúan el gradiente.
+        </li>
+    </ul>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">4.2. Equivalencia propuesta</h3>
+
+    <p>
+        Para comparar los métodos en una misma escala, se propone la siguiente
+        equivalencia, ampliamente usada en la literatura de optimización
+        (Nocedal &amp; Wright, 2006): una evaluación del gradiente analítico
+        cuesta aproximadamente lo mismo que aproximarlo por diferencias
+        centrales, lo cual requiere $2n$ evaluaciones de $f$ en dimensión $n$.
+    </p>
+
+    <div class="formula">
+        $$1 \text{ eval. de } \nabla f \;\equiv\; 2n \text{ eval. de } f$$
+    </div>
+
+    <p>
+        Por lo tanto, el <strong>costo equivalente</strong> de cada método se
+        calcula como:
+    </p>
+
+    <div class="formula">
+        $$\text{costo} = n_f + 2n \cdot n_{\nabla f}$$
+    </div>
+
+    <p>
+        donde $n_f$ es el número de evaluaciones de $f$ y $n_{\nabla f}$ el
+        número de evaluaciones del gradiente.
+    </p>
+
+    <p>
+        Esta equivalencia tiene una justificación clara: si el gradiente no
+        se conoce de forma analítica, una de las formas más comunes de
+        aproximarlo es mediante <em>diferencias centrales</em>, que para cada
+        componente $i$ requiere dos evaluaciones de la función:
+    </p>
+
+    <div class="formula">
+        $$\frac{\partial f}{\partial x_i} \approx \frac{f(x + h\, e_i) - f(x - h\, e_i)}{2h}$$
+    </div>
+
+    <p>
+        Como hay $n$ componentes, calcular el gradiente completo por
+        diferencias centrales cuesta $2n$ evaluaciones de $f$. Usar este
+        factor como equivalencia permite comparar de manera consistente
+        métodos que internamente usan analíticamente el gradiente con
+        métodos que solo evalúan la función.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">4.3. Ejemplo de aplicación</h3>
+
+    <p>
+        A modo de ejemplo, en 2D el factor de equivalencia es $2n = 4$. Si el
+        descenso por gradiente realizó 2000 iteraciones y evaluó el gradiente
+        2000 veces, su costo equivalente sería:
+    </p>
+
+    <div class="formula">
+        $$\text{costo}_{GD} = 0 + 4 \times 2000 = 8000 \text{ evaluaciones equivalentes}$$
+    </div>
+
+    <p>
+        En cambio, DE realizó 5092 evaluaciones de $f$ y ninguna del
+        gradiente, por lo que su costo equivalente es simplemente 5092.
+        Como se puede observar, aunque DE evalúa más veces la función
+        directamente, su costo equivalente es <strong>menor</strong> que el
+        de GD. En la Sección 5 se presenta la tabla completa de costos
+        equivalentes para todos los métodos y todas las dimensiones.
+    </p>
+</section>
+        
+<!-- Sección 5: Resultados -->
+<section id="resultados" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">5. Resultados</h2>
+
+    <p>
+        En esta sección se presentan los resultados de los cuatro métodos
+        implementados, en dos y tres dimensiones, sobre la función de
+        Rosenbrock. Se realizaron 30 corridas independientes por
+        configuración, con semilla base 42. El umbral de éxito se definió
+        como $f(x^*) \leq 10^{-3}$, un valor exigente que permite distinguir
+        claramente entre métodos.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">5.1. Resultados en 2D</h3>
+
+    <p>
+        La Tabla 1 resume las estadísticas de las 30 corridas en 2D para cada
+        método.
+    </p>
+
+    <div class="table-responsive my-4">
+        <table class="table table-bordered tabla-resultados">
+            <caption class="figura-caption">
+                <strong>Tabla 1.</strong> Resultados en 2D tras 30 corridas
+                independientes por método. Fuente: elaboración propia.
+            </caption>
+            <thead>
+                <tr>
+                    <th>Método</th>
+                    <th>Media</th>
+                    <th>Desv. estándar</th>
+                    <th>Mejor</th>
+                    <th>Peor</th>
+                    <th>Tasa éxito</th>
+                    <th>Iter. medias</th>
+                    <th>Evals eq.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GD</td>
+                    <td>$4.89$</td>
+                    <td>$4.96$</td>
+                    <td>$4.97 \times 10^{-1}$</td>
+                    <td>$1.57 \times 10^{1}$</td>
+                    <td>0 %</td>
+                    <td>2000</td>
+                    <td>8000</td>
+                </tr>
+                <tr>
+                    <td>PSO</td>
+                    <td>$2.22 \times 10^{-20}$</td>
+                    <td>$8.36 \times 10^{-20}$</td>
+                    <td>$0$</td>
+                    <td>$4.39 \times 10^{-19}$</td>
+                    <td>100 %</td>
+                    <td>544</td>
+                    <td>21813</td>
+                </tr>
+                <tr>
+                    <td>DE</td>
+                    <td>$2.03 \times 10^{-14}$</td>
+                    <td>$1.90 \times 10^{-14}$</td>
+                    <td>$1.53 \times 10^{-15}$</td>
+                    <td>$6.47 \times 10^{-14}$</td>
+                    <td>100 %</td>
+                    <td>126</td>
+                    <td>5092</td>
+                </tr>
+                <tr>
+                    <td>EA</td>
+                    <td>$4.44 \times 10^{-2}$</td>
+                    <td>$1.48 \times 10^{-1}$</td>
+                    <td>$3.48 \times 10^{-11}$</td>
+                    <td>$6.14 \times 10^{-1}$</td>
+                    <td>57 %</td>
+                    <td>1627</td>
+                    <td>61884</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">5.2. Resultados en 3D</h3>
+
+    <p>
+        La Tabla 2 muestra los resultados equivalentes en 3D. El problema es
+        considerablemente más difícil en esta configuración, y esto se
+        refleja en el desempeño de todos los métodos.
+    </p>
+
+    <div class="table-responsive my-4">
+        <table class="table table-bordered tabla-resultados">
+            <caption class="figura-caption">
+                <strong>Tabla 2.</strong> Resultados en 3D tras 30 corridas
+                independientes por método. Fuente: elaboración propia.
+            </caption>
+            <thead>
+                <tr>
+                    <th>Método</th>
+                    <th>Media</th>
+                    <th>Desv. estándar</th>
+                    <th>Mejor</th>
+                    <th>Peor</th>
+                    <th>Tasa éxito</th>
+                    <th>Iter. medias</th>
+                    <th>Evals eq.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GD</td>
+                    <td>$2.29$</td>
+                    <td>$2.65$</td>
+                    <td>$9.23 \times 10^{-3}$</td>
+                    <td>$1.02 \times 10^{1}$</td>
+                    <td>0 %</td>
+                    <td>2000</td>
+                    <td>12000</td>
+                </tr>
+                <tr>
+                    <td>PSO</td>
+                    <td>$4.37 \times 10^{-11}$</td>
+                    <td>$7.84 \times 10^{-11}$</td>
+                    <td>$2.64 \times 10^{-16}$</td>
+                    <td>$3.58 \times 10^{-10}$</td>
+                    <td>100 %</td>
+                    <td>2000</td>
+                    <td>80040</td>
+                </tr>
+                <tr>
+                    <td>DE</td>
+                    <td>$2.09 \times 10^{-13}$</td>
+                    <td>$1.48 \times 10^{-13}$</td>
+                    <td>$1.35 \times 10^{-14}$</td>
+                    <td>$5.63 \times 10^{-13}$</td>
+                    <td>100 %</td>
+                    <td>219</td>
+                    <td>8815</td>
+                </tr>
+                <tr>
+                    <td>EA</td>
+                    <td>$8.23 \times 10^{-1}$</td>
+                    <td>$1.20$</td>
+                    <td>$3.95 \times 10^{-4}$</td>
+                    <td>$4.91$</td>
+                    <td>3 %</td>
+                    <td>2000</td>
+                    <td>76040</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">5.3. Costo equivalente</h3>
+
+    <p>
+        Aplicando la equivalencia propuesta en la Sección 4
+        ($1 \nabla f \equiv 2n$ evaluaciones de $f$), se obtiene la Tabla 3.
+        En 2D el factor es $2n = 4$ y en 3D es $2n = 6$.
+    </p>
+
+    <div class="table-responsive my-4">
+        <table class="table table-bordered tabla-resultados">
+            <caption class="figura-caption">
+                <strong>Tabla 3.</strong> Costo equivalente en evaluaciones de
+                $f$. Fuente: elaboración propia.
+            </caption>
+            <thead>
+                <tr>
+                    <th>Método</th>
+                    <th>Evals $f$ (2D)</th>
+                    <th>Evals $\nabla f$ (2D)</th>
+                    <th>Costo equiv. (2D)</th>
+                    <th>Costo equiv. (3D)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GD</td>
+                    <td>0</td>
+                    <td>2000</td>
+                    <td>$0 + 4 \times 2000 = 8000$</td>
+                    <td>$0 + 6 \times 2000 = 12000$</td>
+                </tr>
+                <tr>
+                    <td>PSO</td>
+                    <td>21813</td>
+                    <td>0</td>
+                    <td>21813</td>
+                    <td>80040</td>
+                </tr>
+                <tr>
+                    <td>DE</td>
+                    <td>5092</td>
+                    <td>0</td>
+                    <td>5092</td>
+                    <td>8815</td>
+                </tr>
+                <tr>
+                    <td>EA</td>
+                    <td>61884</td>
+                    <td>0</td>
+                    <td>61884</td>
+                    <td>76040</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">5.4. Visualización del proceso de optimización</h3>
+
+    <p>
+        Las Figuras 2 y 3 muestran la evolución de GD y PSO en 2D. En cada
+        figura se presenta, a la izquierda, la trayectoria sobre las curvas
+        de nivel de Rosenbrock, y a la derecha tres paneles con la evolución
+        del valor objetivo, las coordenadas y (cuando aplica) el gradiente o
+        la diversidad de la población.
+    </p>
+
+    <figure class="my-4 text-center">
+        <img src="../utils/graphs/rosenbrock_gd_2d.gif"
+             alt="GIF del descenso por gradiente en 2D"
+             class="gif-figura">
+        <figcaption class="figura-caption">
+            <strong>Figura 2.</strong> Evolución del descenso por gradiente en
+            Rosenbrock 2D. El punto se desplaza hacia el valle pero no alcanza
+            el mínimo global antes del límite de iteraciones.
+            Fuente: elaboración propia.
+        </figcaption>
+    </figure>
+
+    <figure class="my-4 text-center">
+        <img src="../utils/graphs/rosenbrock_pso_2d.gif"
+             alt="GIF de PSO en 2D"
+             class="gif-figura">
+        <figcaption class="figura-caption">
+            <strong>Figura 3.</strong> Evolución de PSO en Rosenbrock 2D. Las
+            partículas se concentran progresivamente en el mínimo global,
+            alcanzando alta precisión en pocas iteraciones.
+            Fuente: elaboración propia.
+        </figcaption>
+    </figure>
+</section>
+
+       <!-- Sección 6: Discusión -->
+<section id="discusion" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">6. Discusión</h2>
+
+    <p>
+        Los resultados presentados en la Sección 5 permiten extraer varias
+        conclusiones sobre el comportamiento de los métodos basados en
+        gradiente y de las metaheurísticas poblacionales cuando se enfrentan
+        a la función de Rosenbrock. A continuación se analizan los datos
+        desde cuatro perspectivas: calidad de la solución, robustez, costo
+        computacional y relación con la geometría de la función.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.1. Desempeño del descenso por gradiente</h3>
+
+    <p>
+        El descenso por gradiente (GD) obtuvo los peores resultados en
+        términos de calidad. En 2D, la media fue de $4.89$ con una tasa de
+        éxito del 0 %; en 3D, la media fue de $2.29$ con la misma tasa de
+        éxito del 0 %. Es decir, <strong>en ninguna de las 60 corridas
+        totales (30 en 2D y 30 en 3D) el método logró alcanzar el umbral
+        $f \leq 10^{-3}$</strong>. El mejor valor obtenido fue $0.497$ en
+        2D y $0.0092$ en 3D, ambos muy por encima del umbral.
+    </p>
+
+    <p>
+        La Figura 2 muestra visualmente lo que ocurre. El punto se desplaza
+        lentamente hacia el valle, pero después de 2000 iteraciones apenas
+        ha avanzado una fracción del camino hacia el mínimo. El panel de la
+        derecha confirma que la norma del gradiente $\\|\nabla f\\|$ se
+        mantiene en valores del orden de $10^{-1}$ durante toda la
+        trayectoria: <strong>el gradiente sigue siendo grande, pero el paso
+        es demasiado pequeño para avanzar</strong>.
+    </p>
+
+    <p>
+        Este comportamiento se explica por la geometría de Rosenbrock. La
+        función posee un valle muy estrecho y curvo, cuyo fondo es casi
+        plano. El gradiente apunta hacia el fondo del valle, pero al ser
+        el valle tan angosto, cualquier tasa de aprendizaje que sea lo
+        bastante grande para avanzar rápido hace que el método se salga
+        del valle y diverja. Como se documenta en la Sección 6.4, valores
+        de $\alpha \geq 0.002$ producen divergencia (<code>NaN</code>) en
+        pocas iteraciones. Por lo tanto, el método se ve forzado a usar
+        valores de $\alpha$ muy pequeños —en este trabajo $10^{-4}$—,
+        avanzando lentamente y sin alcanzar el mínimo antes del límite de
+        iteraciones.
+    </p>
+
+    <p>
+        Además, ninguna corrida del descenso por gradiente cumplió el
+        criterio de convergencia por tolerancia
+        ($\\|\nabla f\\| < 10^{-8}$). En todos los casos el algoritmo se
+        detuvo al alcanzar las 2000 iteraciones máximas, lo que confirma
+        que el método no está cerca de un punto crítico al detenerse.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.2. Desempeño de las metaheurísticas poblacionales</h3>
+
+    <p>
+        Las tres metaheurísticas —PSO, DE y EA— superaron ampliamente al
+        descenso por gradiente en calidad. En 2D, PSO alcanzó una media de
+        $2.22 \times 10^{-20}$ y DE de $2.03 \times 10^{-14}$; incluso EA,
+        el peor de los tres, alcanzó $4.44 \times 10^{-2}$. En 3D la
+        tendencia se mantiene: PSO $4.37 \times 10^{-11}$, DE
+        $2.09 \times 10^{-13}$, y EA $8.23 \times 10^{-1}$.
+    </p>
+
+    <p>
+        <strong>PSO fue el más preciso.</strong> En 2D, su media es
+        $2.22 \times 10^{-20}$, lo cual representa 20 órdenes de magnitud
+        por debajo del umbral. Incluso su peor corrida ($4.39 \times
+        10^{-19}$) está muy por debajo del umbral. En 3D, la precisión
+        baja a $10^{-11}$ pero sigue siendo excelente. La razón de su alta
+        precisión es que las partículas, una vez que se concentran cerca
+        del mínimo, ajustan sus velocidades de forma fina y terminan
+        convergiendo con precisión casi arbitraria.
+    </p>
+
+    <p>
+        <strong>DE fue el más eficiente.</strong> En 2D utilizó 5092
+        evaluaciones equivalentes con una media de $2.03 \times 10^{-14}$,
+        mientras que PSO necesitó 21813 evaluaciones para alcanzar una
+        media de $2.22 \times 10^{-20}$. Es decir, <strong>DE fue 4.3
+        veces más económico que PSO</strong>, a cambio de una precisión
+        menor pero igualmente suficiente (14 órdenes de magnitud por
+        debajo del umbral). En 3D, la diferencia es aún más marcada:
+        DE usó 8815 evaluaciones contra 80040 de PSO, una diferencia de
+        <strong>9.1 veces</strong>.
+    </p>
+
+    <p>
+        <strong>EA fue el menos robusto.</strong> En 2D alcanzó una tasa
+        de éxito del 57 %, es decir, 13 de las 30 corridas no lograron
+        alcanzar el umbral. En 3D, la tasa de éxito cayó al 3 % (solo 1
+        de 30 corridas). Su mejor valor es competitivo
+        ($3.48 \times 10^{-11}$ en 2D), pero su <strong>alta
+        variabilidad</strong> (desviación estándar de $0.148$ en 2D y
+        $1.20$ en 3D) indica que el método es inestable. Esto sugiere
+        que la combinación de operadores (torneo, cruce BLX-α, mutación
+        gaussiana con elitismo) es adecuada para problemas de baja
+        dimensión pero se degrada rápidamente al aumentar el número de
+        variables.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.3. Análisis del costo computacional</h3>
+
+    <p>
+        Si se compara únicamente el número de evaluaciones de $f$, PSO y EA
+        son los más costosos (21813 y 61884 evaluaciones en 2D). Sin embargo,
+        al aplicar la equivalencia de la Sección 4, el descenso por gradiente
+        deja de ser "el más barato": su costo equivalente es 8000 en 2D y
+        12000 en 3D, muy por encima de DE (5092 en 2D y 8815 en 3D).
+    </p>
+
+    <p>
+        El resultado es contundente: <strong>DE logra la mejor calidad por
+        el menor costo equivalente</strong>. En 2D, DE necesita 1.57 veces
+        menos evaluaciones que GD para alcanzar una solución infinitamente
+        mejor. En 3D, la diferencia es aún más marcada: DE usa 1.36 veces
+        menos evaluaciones que GD y su media es 10 órdenes de magnitud
+        inferior.
+    </p>
+
+    <p>
+        PSO, por su parte, es el método más preciso en ambos casos (llega a
+        $10^{-20}$ en 2D), pero paga ese nivel de precisión con un costo
+        equivalente considerablemente mayor. Para aplicaciones donde la
+        precisión extrema sea crítica, PSO es la mejor opción; para
+        aplicaciones donde el presupuesto de evaluaciones sea limitado,
+        DE es preferible.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.4. Sensibilidad a la tasa de aprendizaje en GD</h3>
+
+    <p>
+        Durante el desarrollo de los experimentos se hizo un barrido sobre
+        la tasa de aprendizaje $\alpha$ del descenso por gradiente, en un
+        experimento preliminar con dominio $[-2, 2]$ y $n = 2$. Los
+        resultados, mostrados en la Tabla 4, evidencian una sensibilidad
+        extrema del método a este hiperparámetro.
+    </p>
+
+    <div class="table-responsive my-4">
+        <table class="table table-bordered tabla-resultados">
+            <caption class="figura-caption">
+                <strong>Tabla 4.</strong> Sensibilidad del descenso por
+                gradiente a la tasa de aprendizaje en Rosenbrock 2D
+                (experimento preliminar con dominio $[-2, 2]$).
+                Fuente: elaboración propia.
+            </caption>
+            <thead>
+                <tr>
+                    <th>$\alpha$</th>
+                    <th>Valor final de $f$</th>
+                    <th>Comportamiento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>0.0005</td><td>9.15</td><td>Avance demasiado lento</td></tr>
+                <tr><td>0.0010</td><td>3.30</td><td>Avance lento</td></tr>
+                <tr><td>0.0012</td><td>NaN</td><td>Divergencia</td></tr>
+                <tr><td>0.0014</td><td>NaN</td><td>Divergencia</td></tr>
+                <tr><td>0.0020</td><td>NaN</td><td>Divergencia</td></tr>
+                <tr><td>0.0050</td><td>NaN</td><td>Divergencia</td></tr>
+                <tr><td>0.0100</td><td>NaN</td><td>Divergencia</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        La ventana útil de $\alpha$ es extremadamente estrecha: entre
+        0.0010 y 0.0011 aproximadamente. Valores ligeramente menores
+        producen avances imperceptibles; valores ligeramente mayores
+        hacen que el método diverja y produzca <code>NaN</code> en pocas
+        iteraciones. Este comportamiento es típico de Rosenbrock y
+        confirma la dificultad intrínseca que esta función presenta
+        para los métodos de primer orden.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.5. Efecto de la dimensión</h3>
+
+    <p>
+        Al comparar los resultados en 2D y 3D se observa un deterioro
+        generalizado en el desempeño de todos los métodos. Sin embargo, el
+        grado de deterioro es muy distinto entre ellos:
+    </p>
+
+    <ul>
+        <li>
+            <strong>GD</strong>: la media mejora aparentemente (de $4.89$ a
+            $2.29$), pero esto es un artefacto del dominio: en 3D, el punto
+            inicial aleatorio puede caer más cerca del mínimo con mayor
+            probabilidad. La tasa de éxito sigue siendo 0 % en ambos casos.
+        </li>
+        <li>
+            <strong>PSO</strong>: la media empeora 9 órdenes de magnitud
+            (de $10^{-20}$ a $10^{-11}$), pero mantiene una tasa de éxito
+            del 100 %.
+        </li>
+        <li>
+            <strong>DE</strong>: la media empeora un orden de magnitud
+            (de $10^{-14}$ a $10^{-13}$), mantiene el 100 % de éxito y
+            solo incrementa su costo en un 73 %.
+        </li>
+        <li>
+            <strong>EA</strong>: la media empeora 1.6 órdenes de magnitud
+            (de $4.44 \times 10^{-2}$ a $8.23 \times 10^{-1}$) y su tasa
+            de éxito cae del 57 % al 3 %.
+        </li>
+    </ul>
+
+    <p>
+        DE es el método más robusto frente al aumento de dimensión: mantiene
+        una calidad excelente con un incremento moderado en el costo. PSO
+        pierde precisión pero conserva robustez (100 % de éxito en ambas
+        dimensiones). EA pierde ambas cosas: calidad y robustez.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.6. Comparación visual: GD vs PSO</h3>
+
+    <p>
+        Las Figuras 2 y 3, presentadas en la Sección 5, ilustran de forma
+        visual la diferencia entre ambos métodos. En la Figura 2 (GD), el
+        punto amarillo avanza por el valle pero nunca alcanza la estrella
+        roja del óptimo. El panel de la derecha muestra que el gradiente
+        se mantiene alto pero el paso es minúsculo. En la Figura 3 (PSO),
+        las partículas comienzan dispersas por todo el dominio y, a medida
+        que avanza la animación, se concentran progresivamente sobre el
+        óptimo. El panel de diversidad confirma que la población colapsa
+        hacia el mínimo.
+    </p>
+
+    <p>
+        Esta comparación visual <strong>resume la conclusión principal
+        del trabajo</strong>: en una función con un valle estrecho y mal
+        condicionado, la información local del gradiente no es suficiente
+        para guiar al óptimo, mientras que la exploración global de las
+        metaheurísticas permite encontrarlo.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">6.7. Síntesis</h3>
+
+    <p>
+        La comparación entre métodos basados en gradiente y metaheurísticas
+        poblacionales sobre Rosenbrock arroja una conclusión clara:
+        <strong>la información del gradiente no es suficiente para resolver
+        problemas con valles estrechos y mal condicionados</strong>. Las
+        metaheurísticas, que no usan gradiente, logran resultados
+        cualitativamente superiores porque exploran el espacio de búsqueda
+        de forma global antes de concentrarse en las regiones más
+        prometedoras.
+    </p>
+
+    <p>
+        Entre las tres metaheurísticas, <strong>DE se destaca como el mejor
+        balance entre calidad y costo</strong>. PSO ofrece la mayor precisión
+        pero a un costo considerablemente mayor, y EA es adecuado para baja
+        dimensión pero se degrada rápidamente en 3D.
+    </p>
+</section>
+        <!-- Sección 7: Conclusiones -->
+<section id="conclusiones" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">7. Conclusiones</h2>
+
+    <p>
+        Este trabajo comparó cuatro métodos de optimización sobre la función
+        de Rosenbrock en dos y tres dimensiones: descenso por gradiente (GD),
+        optimización por enjambre de partículas (PSO), evolución diferencial
+        (DE) y un algoritmo evolutivo (EA). Los resultados, obtenidos de 30
+        corridas independientes por configuración, permiten extraer las
+        siguientes conclusiones.
+    </p>
+
+    <p>
+        <strong>1. El descenso por gradiente no es adecuado para Rosenbrock.</strong>
+        A pesar de tener un único mínimo global, la geometría de la función
+        —con un valle muy estrecho, curvo y mal condicionado— hace que el
+        gradiente no sea suficiente para guiar al método hacia el óptimo.
+        En 60 corridas totales (30 en 2D y 30 en 3D), la tasa de éxito fue
+        de 0 % en ambas dimensiones, y ninguna corrida cumplió el criterio
+        de convergencia antes del límite de iteraciones. La mejor solución
+        obtenida ($f = 0.497$ en 2D) está tres órdenes de magnitud por
+        encima del umbral de éxito.
+    </p>
+
+    <p>
+        <strong>2. Las metaheurísticas poblacionales son claramente superiores
+        en este problema.</strong> Los tres métodos poblacionales —PSO, DE y
+        EA— alcanzaron sus mejores soluciones en el orden de $10^{-11}$ o
+        inferiores en 2D. PSO y DE alcanzaron una tasa de éxito del 100 % en
+        ambas dimensiones, mientras que EA cayó al 3 % en 3D. La razón
+        principal es que estas técnicas no dependen del gradiente: exploran
+        el espacio de búsqueda de forma global y evitan quedar atrapadas en
+        el valle estrecho de Rosenbrock.
+    </p>
+
+    <p>
+        <strong>3. DE es el mejor balance calidad/costo.</strong> Utilizando
+        la equivalencia de evaluaciones de la Sección 4, DE fue el método
+        más económico en ambas dimensiones: 5092 evaluaciones equivalentes
+        en 2D y 8815 en 3D, con medias de $2.03 \times 10^{-14}$ y
+        $2.09 \times 10^{-13}$ respectivamente. Es decir, logra resultados
+        excelentes con el menor costo computacional de todos los métodos
+        evaluados.
+    </p>
+
+    <p>
+        <strong>4. PSO es el más preciso pero también el más costoso.</strong>
+        Alcanzó las medias más bajas en ambas dimensiones
+        ($2.22 \times 10^{-20}$ en 2D y $4.37 \times 10^{-11}$ en 3D), pero
+        a cambio de un costo equivalente 4.3 veces mayor que DE en 2D y 9.1
+        veces mayor en 3D. Para aplicaciones donde la precisión extrema sea
+        crítica y no haya restricciones fuertes de cómputo, PSO es la mejor
+        opción.
+    </p>
+
+    <p>
+        <strong>5. EA se degrada con la dimensión.</strong> Funciona
+        razonablemente en 2D (éxito del 57 %), pero en 3D su tasa de éxito
+        cae al 3 % y su media empeora 1.6 órdenes de magnitud. La combinación
+        de operadores con elitismo limita la diversidad necesaria para
+        explorar espacios de mayor dimensión.
+    </p>
+
+    <p>
+        <strong>6. La tasa de aprendizaje del descenso por gradiente tiene
+        una ventana útil extremadamente estrecha.</strong> Valores de
+        $\alpha$ menores a 0.001 hacen que el método avance demasiado
+        lento; valores mayores a 0.0012 provocan divergencia inmediata
+        (<code>NaN</code>). Este hallazgo, documentado en la Sección 6.4,
+        refuerza la conclusión de que GD no es robusto en Rosenbrock.
+    </p>
+
+    <p>
+        En síntesis, la comparación confirma que <strong>los métodos que
+        incorporan información del gradiente no son siempre superiores a
+        las metaheurísticas</strong>. Cuando la función objetivo tiene una
+        geometría difícil —como valles estrechos, curvas mal condicionadas
+        o múltiples cuencas de atracción—, las metaheurísticas poblacionales
+        ofrecen una ventaja significativa porque no dependen de información
+        local del gradiente.
+    </p>
+
+    <p>
+        Como trabajo futuro, sería interesante aplicar los mismos métodos a
+        otras funciones de prueba (Rastrigin, Schwefel, Griewank) y analizar
+        si la superioridad de DE se mantiene. También se podría explorar el
+        efecto de hibridar métodos: por ejemplo, usar PSO para una primera
+        fase de exploración global y luego refinar con descenso por
+        gradiente en la región prometedora. Finalmente, sería valioso
+        estudiar la sensibilidad de los métodos poblacionales a sus propios
+        hiperparámetros, para determinar cuánto de su buen desempeño se debe
+        a la elección particular de parámetros y cuánto a la naturaleza del
+        algoritmo.
+    </p>
+</section>
+
+
+<!-- Sección 8: Uso de IA -->
+<section id="uso-ia" class="mb-5">
+    <h2 class="h3 fw-bold mb-3">8. Uso de inteligencia artificial</h2>
+
+    <p>
+        Durante el desarrollo de este trabajo se utilizaron herramientas de
+        inteligencia artificial generativa como apoyo en distintas etapas.
+        En esta sección se documentan los usos principales y se discute su
+        impacto en el resultado final.
+    </p>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">8.1. Usos principales</h3>
+
+    <ul>
+        <li>
+            <strong>Generación de código base:</strong> se usaron asistentes
+            de IA para generar la estructura inicial de los cuatro
+            optimizadores (GD, PSO, DE, EA) y del motor de visualización.
+            Este código fue posteriormente revisado, adaptado y corregido
+            manualmente.
+        </li>
+        <li>
+            <strong>Explicación de conceptos:</strong> se consultaron
+            explicaciones sobre la geometría de Rosenbrock, las ecuaciones
+            de actualización de PSO y DE, y el funcionamiento del cruce
+            BLX-α.
+        </li>
+        <li>
+            <strong>Redacción y estilo:</strong> se usaron sugerencias de IA
+            para estructurar el informe y pulir la redacción técnica.
+        </li>
+        <li>
+            <strong>Depuración de errores:</strong> ante errores de ejecución,
+            se usaron asistentes para identificar causas probables y
+            proponer correcciones.
+        </li>
+    </ul>
+
+    <h3 class="h5 fw-semibold mt-4 mb-2">8.2. Impacto en el resultado</h3>
+
+    <p>
+        El uso de IA aceleró significativamente la implementación inicial
+        del código y permitió resolver dudas conceptuales de forma rápida.
+        Sin embargo, <strong>no reemplazó el trabajo de validación</strong>:
+        varios fragmentos generados por IA contenían errores sutiles que
+        fueron detectados mediante pruebas empíricas, comparación con
+        fuentes primarias y verificación matemática. Estos casos se
+        documentan en la Sección 9.
+    </p>
+
+    <p>
+        En términos generales, el uso de IA fue <strong>productivo pero
+        requirió supervisión constante</strong>. La principal lección
+        aprendida es que las herramientas de IA son útiles como punto de
+        partida, pero no sustituyen el entendimiento profundo del problema.
+    </p>
+</section>
+
+
+
+
+     
+
+    <!-- ===== PIE ===== -->
+   <footer class="border-top py-4 mt-5">
+    <div class="container-fluid px-4 px-lg-5 small text-secondary">
+        Proyecto académico · Redes neuronales y algoritmos bioinspirados
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
