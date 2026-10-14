@@ -613,7 +613,7 @@
                     <h3 class="h5 fw-bold">Las hormigas ganan, a cambio de tiempo de cómputo</h3>
                     <p>
                         La colonia de hormigas encontró rutas más baratas que el algoritmo genético con los cinco valores
-                        de la hora. Sus recorridos miden entre 6 500 y 6 900 km, mientras que los del genético miden
+                        de la hora (Figura 1, 3, 5, 7 ,9). Sus recorridos miden entre 6 500 y 6 900 km, mientras que los del genético miden
                         entre 8 700 y 9 500 km. A cambio, tarda unos 15 a 18 segundos frente a menos de uno. En las
                         curvas de convergencia el genético seguía bajando al final: su mejor valor aparece entre las
                         generaciones 136 y 149 de 150, así que con más generaciones probablemente se habría acercado.
@@ -621,9 +621,21 @@
 
                     <h3 class="h5 fw-bold mt-4">El tiempo del vendedor domina el costo</h3>
                     <p>
-                        Con 25 €/h, el tiempo explica el 77 % del costo de la mejor ruta, y con 60 €/h, el 89 %. El
+                        Con 25 €/h, el tiempo explica el 77 % del costo de la mejor ruta, y con 60 €/h, el 89 % (Tabla 3 y 4). El
                         combustible se mantiene entre 555 y 585 € y los peajes no pasan de 56 €. Por eso, a partir de
-                        valores razonables de la hora, la ruta barata es esencialmente la ruta rápida.
+                        valores razonables de la hora, la ruta barata es esencialmente la ruta rápida. 
+                    </p>
+
+                     <h3 class="h5 fw-bold mt-4">La importancia del valor inicial</h3>
+                    <p>
+                        Si analizamos los datos en las figuras del 1 al 10, podemos notar algo muy interesante, y es que
+                        los valores iniciales del costo de trayecto son muy diferentes para ambos algoritmos, resulta que el 
+                        algoritmo genetico empieza con un valor de aleatoriedad, es decir, la primera generacion se forma poniendo
+                        puntos al azar, y calculando el error entre ellos, sin embargo, en la colonia de hormigas, aunque tambien
+                        hay un valor aleatorio inicial, las hormigas tienen una ventaja y es que la visibilidad (Informacion heuristica)
+                        influye en la creacion de la primera generacion, pues prefieren irse por lo que tienen mas cerca, y eso, 
+                        influye desde el inicio.
+                        
                     </p>
 
                     <h3 class="h5 fw-bold mt-4">¿Cambia la ruta óptima al variar el valor de la hora?</h3>
@@ -635,10 +647,19 @@
                         (1 868.4, 2 648.5, 3 517.7 y 5 502.1 €). Es decir, parte de la variación entre rutas viene de la búsqueda
                         estocástica y no del parámetro.
                     </p>
+                    
                     <p>
                         La conclusión honesta es que con una sola corrida por valor no podemos señalar a partir de qué
                         valor cambia la ruta óptima. Responder esa pregunta exige repetir cada caso con varias semillas
                         y comparar la distribución de costos.
+                    </p>
+
+                    <h3 class="h5 fw-bold mt-4">Algunos detalles de las graficas comparativas</h3>
+                    <p>
+                        Finalmente si analizamos las figuras 11 y 12, podemos observar la diferencia entre los caminos que toman
+                        ambos algoritmos, el algoritmo genetico presenta trayectorias mas cruzadas, a diferencia del algoritmo de 
+                        colonia de hormigas, que se mueve casi sin cruzarse de un punto muy lejano a otro, sino llendose casi 
+                        intuitivamente por la ciudad mas cercana.
                     </p>
 
                     <div class="border rounded-4 p-4 bg-light mt-4">
@@ -646,8 +667,7 @@
                         <p class="mb-0">
                             Para este problema, la colonia de hormigas con 60 hormigas y 150 iteraciones produce rutas
                             claramente mejores que el algoritmo genético con la misma población, y el valor de la hora
-                            determina casi todo el costo. Que la ruta cambie con ese valor queda como pregunta abierta
-                            hasta contar con más corridas.
+                            determina casi todo el costo.
                         </p>
                     </div>
                 </div>
