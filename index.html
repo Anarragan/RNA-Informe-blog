@@ -34,18 +34,7 @@
 
     <main class="container py-5">
 
-        <section class="mb-5">
-            <h2 class="h3 fw-bold">Trabajos del curso</h2>
-
-            <p class="text-secondary">
-                En este espacio se presentan los problemas estudiados,
-                los métodos implementados y los resultados obtenidos
-                durante los experimentos.
-            </p>
-        </section>
-
-        <!-- Integrantes -->
-        <section class="mb-5 border rounded-4 p-4">
+        <section class="mb-5 border rounded-4 p-4" id="integrantes">
             <h2 class="h5 fw-bold mb-3">Integrantes del grupo</h2>
             <div class="row g-2">
                 <div class="col-sm-6 col-md-4">
@@ -79,113 +68,36 @@
             </div>
         </section>
 
-        <!-- Parte 1 -->
-        <section class="mb-5">
-            <div class="mb-3">
-                <p class="text-uppercase small text-secondary fw-bold mb-1">Parte 1</p>
-                <h2 class="h4 fw-bold">Optimización numérica</h2>
-                <p class="text-secondary small mb-0">
-                    Comparación de algoritmos de búsqueda global sobre funciones de prueba clásicas.
-                </p>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <article class="card border rounded-4 p-4 h-100">
+                    <p class="text-uppercase small text-secondary fw-bold mb-2">Trabajo académico</p>
+                    <h2 class="h3 fw-bold">Trabajo 1</h2>
+                    <p class="text-secondary">
+                        Optimización numérica y combinatoria mediante algoritmos
+                        bioinspirados, con experimentos sobre Schwefel, Rosenbrock
+                        y el problema del viajante.
+                    </p>
+                    <a href="blog-1/index.html" class="btn btn-dark mt-auto align-self-start">
+                        Ver Trabajo 1
+                    </a>
+                </article>
             </div>
 
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-4 h-100">
-                        <p class="small text-secondary mb-2">FUNCIÓN DE PRUEBA 1</p>
-                        <h3 class="h4 fw-bold">Función de Schwefel</h3>
-                        <p class="text-secondary">
-                            Comparación de cuatro algoritmos de optimización
-                            en dos y tres dimensiones, desde sus estrategias
-                            de búsqueda hasta los resultados experimentales.
-                        </p>
-                        <a href="blog/pages/schwefel.html" class="btn btn-dark mt-2">
-                            Explorar el trabajo
-                        </a>
-                    </article>
-                </div>
-
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-4 h-100">
-                        <p class="small text-secondary mb-2">FUNCIÓN DE PRUEBA 2</p>
-                        <h3 class="h4 fw-bold">Función de Rosenbrock</h3>
-                        <p class="text-secondary">
-                            Análisis del problema, aplicación de los métodos
-                            de optimización y comparación de los resultados.
-                        </p>
-                        <a href="blog/pages/rosenbrock.html" class="btn btn-outline-dark mt-2">
-                        
-                            Explorar el trabajo
-                        </a>
-                    </article>
-                </div>
+            <div class="col-md-6">
+                <article class="card border rounded-4 p-4 h-100">
+                    <p class="text-uppercase small text-secondary fw-bold mb-2">Trabajo académico</p>
+                    <h2 class="h3 fw-bold">Trabajo 2</h2>
+                    <p class="text-secondary">
+                        Espacio reservado para el contenido, las secciones y los
+                        resultados del segundo trabajo del curso.
+                    </p>
+                    <a href="blog-2/index.html" class="btn btn-outline-dark mt-auto align-self-start">
+                        Ver Trabajo 2
+                    </a>
+                </article>
             </div>
-        </section>
-
-        <!-- Parte 2 -->
-        <section class="mb-5">
-            <div class="mb-3">
-                <p class="text-uppercase small text-secondary fw-bold mb-1">Parte 2</p>
-                <h2 class="h4 fw-bold">Optimización combinatoria</h2>
-                <p class="text-secondary small mb-0">
-                    Comparación de metaheurísticas sobre el problema del viajante.
-                </p>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-4 h-100">
-                        <p class="small text-secondary mb-2">PROBLEMA DEL VIAJANTE</p>
-                        <h3 class="h4 fw-bold">El vendedor en España</h3>
-                        <p class="text-secondary">
-                            Recorrido por las 47 capitales peninsulares con colonias
-                            de hormigas y algoritmos genéticos, estudiando cómo cambia
-                            la solución según el valor de la hora del vendedor.
-                        </p>
-                        <a href="blog/pages/viajante.html" class="btn btn-dark mt-2">
-                            Explorar el trabajo
-                        </a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Videos -->
-        <section class="mb-5" id="videos">
-            <h2 class="h4 fw-bold">Videos</h2>
-            <p class="text-secondary small">
-                Sustentación en video de cada integrante.
-            </p>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-3 h-100">
-                        <h3 class="h6 fw-bold mb-3">Video ANA</h3>
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/8JSDc4k_XTU"
-                                    title="Video Ana"
-                                    class="rounded-3"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
-                        <a href="https://youtu.be/8JSDc4k_XTU" class="small mt-2 d-inline-block"
-                           target="_blank" rel="noopener">Ver en YouTube</a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Repositorio -->
-        <section class="mb-5" id="repositorio">
-            <h2 class="h4 fw-bold">Repositorio</h2>
-            <p class="text-secondary mb-2">
-                Código fuente y experimentos:
-            </p>
-            <a href="https://github.com/Anarragan/RNA-Trabajo1-Optimizacion-Metaheuristica-Combinatoria/tree/develop"
-               class="btn btn-dark" target="_blank" rel="noopener">
-                Ver repositorio en GitHub
-            </a>
-        </section>
+        </div>
 
     </main>
 
