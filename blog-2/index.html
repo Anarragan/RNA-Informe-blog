@@ -4,13 +4,237 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trabajo 2 | Redes neuronales y algoritmos bioinspirados</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- KaTeX para fórmulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+        });">
+    </script>
+
+    <!-- Estilos compartidos del sitio -->
+    <link rel="stylesheet" href="../assets/css/site.css">
 </head>
 
 <body>
+    <header class="site-header py-5">
+        <div class="container py-4">
+            <p class="text-uppercase small text-secondary mb-2">Blog académico · 2026</p>
+            <h1 class="display-4 fw-bold">Trabajo 2</h1>
+            <p class="lead text-secondary mt-3 mb-0">
+                Redes neuronales para datos tabulares: modelo de probabilidad de incumplimiento
+                en la originación de crédito.
+            </p>
+            <div class="links">
+                <a href="#">Repositorio Git</a>
+                <a href="#">Aplicación web</a>
+                <a href="#">Video promocional</a>
+            </div>
+        </div>
+    </header>
+
     <main class="container py-5">
         <p><a href="../index.html" class="btn btn-outline-dark">Volver al inicio</a></p>
-        <h1 class="display-5 fw-bold">Trabajo 2</h1>
+
+        <div class="row g-4">
+            <aside class="col-lg-3">
+                <nav class="toc" aria-label="Contenido">
+                    <strong>Contenido</strong>
+                    <ol>
+                        <li><a href="#resumen">Resumen</a></li>
+                        <li><a href="#intro">Introducción y caso de uso</a></li>
+                        <li><a href="#datos">Datos</a></li>
+                        <li><a href="#eda">Análisis descriptivo e hipótesis</a></li>
+                        <li><a href="#preproc">Preprocesamiento y partición</a></li>
+                        <li><a href="#fundamentos">Fundamentos matemáticos</a></li>
+                        <li><a href="#metodologia">Metodología y experimentos</a></li>
+                        <li><a href="#resultados">Resultados</a></li>
+                        <li><a href="#scorecard">Scorecard</a></li>
+                        <li><a href="#discusion">Discusión y limitaciones</a></li>
+                        <li><a href="#ia">Uso de IA</a></li>
+                        <li><a href="#alucinacion">Cacería de la alucinación</a></li>
+                        <li><a href="#conclusiones">Conclusiones</a></li>
+                        <li><a href="#referencias">Referencias</a></li>
+                    </ol>
+                </nav>
+            </aside>
+
+            <article class="col-lg-9 doc">
+
+                <section id="resumen">
+                    <h2>Resumen</h2>
+                    <p>En este trabajo se aborda el problema de analizar qué tanto riesgo representa un cliente para una entidad bancaria para el préstamo de un crédito, se usaron 268.530 registros de créditos en los años 2007 al 2015 y se implementaron métodos como regresión logística y redes neuronales, usando como métrica principal AUC, (falta resultados clave, aportes y verificar la métrica).</p>
+                </section>
+
+                <section id="intro">
+                    <h2>1. Introducción y caso de uso</h2>
+                    <p>El riesgo crediticio es la probabilidad de pérdida por el impago del prestatario, esto interesa conocerlo pues en la gestión del riesgo crediticio esta es la práctica de mitigar las pérdidas. Este proceso ha sido un reto para las instituciones financieras durante mucho tiempo y es importante conocerlo pues asi los bancos tienen forma de organizar y proyectar sus portafolios. El desarrollo de este modelo, su diseño y funcionalidad responden al caso de uso detallado en la Tabla 1. el cual indica el perfil del usuario al que está dirigido el modelo.</p>
+                    <table>
+                        <caption>Tabla 1. Definición del caso de uso. Fuente: elaboración propia.</caption>
+                        <tr><th>Elemento</th><th>Descripción</th></tr>
+                        <tr><td>Usuario</td><td>Área de riesgos y motor automático de decisión</td></tr>
+                        <tr><td>Decisión</td><td>Aprobar o rechazar la solicitud y evaluar su nivel de riesgo</td></tr>
+                        <tr><td>Momento</td><td>Originación, antes del desembolso</td></tr>
+                        <tr><td>Información disponible</td><td>Solo formulario del cliente y reporte de buró</td></tr>
+                        <tr><td>Garantía sin fuga</td><td>Se excluyen variables posteriores al desembolso y calificaciones internas</td></tr>
+                    </table>
+                    <h3>Objetivos y preguntas</h3>
+                    <p>[Objetivo general y 2–3 preguntas de investigación.]</p>
+                </section>
+
+                <section id="datos">
+                    <h2>2. Datos</h2>
+                    <h3>2.1 Fuente y descarga</h3>
+                    <p>[Fuente (LendingClub), fecha de descarga 20/10/2026, licencia, enlace verificable. Citar (Autor, año).]</p>
+                    <h3>2.2 Variable objetivo</h3>
+                    <p>[Mapeo de loan_status a 0/1, estados excluidos (Current, Grace Period, etc.) y por qué. Tasa de malos = 0,219.]</p>
+                    <table>
+                        <caption>Tabla 2. Mapeo de loan_status a la variable objetivo. Fuente: elaboración propia.</caption>
+                        <tr><th>loan_status</th><th>Objetivo</th></tr>
+                        <tr><td>Fully Paid / Does not meet the credit policy. Status:Fully Paid</td><td>0</td></tr>
+                        <tr><td>Charged Off / Default / Late (31-120 days) / Does not meet… Charged Off</td><td>1</td></tr>
+                    </table>
+                    <h3>2.3 Variables</h3>
+                    <p>[Tabla de las 13 predictoras + 6 transformadas: nombre, tipo, descripción, momento en que se conoce.]</p>
+                    <h3>2.4 Valores faltantes</h3>
+                    <p>[Tabla con % de faltantes (emp_length 3,99 %, etc.) y estrategia de imputación solo con datos de entrenamiento.]</p>
+                </section>
+
+                <section id="eda">
+                    <h2>3. Análisis descriptivo e hipótesis</h2>
+                    <p>[Distribución del objetivo en el tiempo, por variable, correlaciones.]</p>
+                    <div class="table-responsive">
+                        <table>
+                            <caption>Tabla 3. Hipótesis de riesgo, signo esperado y resultado observado. Fuente: elaboración propia.</caption>
+                            <tr><th>#</th><th>Hipótesis</th><th>Variable</th><th>Signo esperado</th><th>Evidencia</th></tr>
+                            <tr><td>H1</td><td>Más deuda, más riesgo</td><td>dti</td><td>+</td><td>[completar]</td></tr>
+                            <tr><td>H2</td><td>Más ingreso, menos riesgo</td><td>annual_inc</td><td>−</td><td>[completar]</td></tr>
+                            <tr><td>H3</td><td>Morosidad previa, más riesgo</td><td>delinq_2yrs</td><td>+</td><td>[completar]</td></tr>
+                            <tr><td>H4</td><td>Historial largo, menos riesgo</td><td>earliest_cr_line</td><td>−</td><td>[completar]</td></tr>
+                            <tr><td>H5</td><td>El propósito cambia el riesgo</td><td>purpose</td><td>varía</td><td>[completar]</td></tr>
+                            <tr><td>H6</td><td>Alquilar, más riesgo que casa propia</td><td>home_ownership</td><td>RENT &gt; MORTGAGE</td><td>[completar]</td></tr>
+                        </table>
+                    </div>
+                    <figure>
+                        <img src="fig1.png" alt="Descripción de la figura">
+                        <figcaption>Figura 1. Tasa de incumplimiento por año de originación. Fuente: elaboración propia con datos de [fuente].</figcaption>
+                    </figure>
+                    <p>[Como se observa en la Figura 1... y en la Tabla 3...]</p>
+                </section>
+
+                <section id="preproc">
+                    <h2>4. Preprocesamiento y partición temporal</h2>
+                    <p>[Transformaciones (term, emp_length, earliest_cr_line, indicadores de nulos), imputación, escalado, codificación categórica.]</p>
+                    <h3>Partición causal en el tiempo</h3>
+                    <p>[Entrenamiento / validación / prueba por issue_d. Justificar por qué no es aleatoria.]</p>
+                    <div class="callout">
+                        <strong>Sesgo de censura y deriva.</strong> [Los créditos aún en «Current» se excluyen; en los años recientes los malos aún no se han materializado, por lo que el riesgo se subestima en 2012–2015. Explicar el efecto sobre validación y prueba.]
+                    </div>
+                </section>
+
+                <section id="fundamentos">
+                    <h2>5. Fundamentos matemáticos</h2>
+                    <h3>5.1 Neurona artificial y perceptrón multicapa</h3>
+                    <div class="math">$$a = \phi(\mathbf{w}^\top \mathbf{x} + b)$$
+                    $$\mathbf{h}^{(l)} = \phi^{(l)}\!\left(W^{(l)}\mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}\right),\quad \mathbf{h}^{(0)}=\mathbf{x}$$</div>
+                    <h3>5.2 Funciones de activación utilizadas</h3>
+                    <div class="math">$$\sigma(z)=\frac{1}{1+e^{-z}},\quad \sigma'(z)=\sigma(z)(1-\sigma(z))$$
+                    $$\mathrm{ReLU}(z)=\max(0,z)$$</div>
+                    <h3>5.3 Función de pérdida desde máxima verosimilitud</h3>
+                    <div class="math">$$y_i\mid\mathbf{x}_i\sim\text{Bernoulli}(p_i),\quad p_i=\sigma(f_\theta(\mathbf{x}_i))$$
+                    $$\mathcal{L}(\theta)=\prod_i p_i^{y_i}(1-p_i)^{1-y_i}$$
+                    $$J(\theta)=-\frac1N\sum_i \left[y_i\ln p_i+(1-y_i)\ln(1-p_i)\right]$$</div>
+                    <p>[Si usan ponderación de clases o pérdida distinta, derivarla aquí.]</p>
+                    <h3>5.4 Retropropagación</h3>
+                    <div class="math">$$\delta^{(L)}=\mathbf{p}-\mathbf{y},\quad \delta^{(l)}=\left(W^{(l+1)\top}\delta^{(l+1)}\right)\odot\phi'(\mathbf{z}^{(l)})$$
+                    $$\frac{\partial J}{\partial W^{(l)}}=\delta^{(l)}\mathbf{h}^{(l-1)\top},\quad \frac{\partial J}{\partial \mathbf{b}^{(l)}}=\delta^{(l)}$$</div>
+                    <h3>5.5 Optimizador</h3>
+                    <p>[Ecuaciones del optimizador elegido, por ejemplo Adam: m, v, corrección de sesgo y actualización de θ.]</p>
+                    <h3>5.6 Regularización</h3>
+                    <p>[Cada técnica usada: L2, dropout, early stopping... con su formulación.]</p>
+                    <h3>5.7 Métricas de evaluación</h3>
+                    <p>[AUC, KS, Gini = 2·AUC − 1, log-loss, Brier, calibración. Definir cada una.]</p>
+                    <h3>5.8 Derivación de la scorecard</h3>
+                    <p>[Ver sección 8: log-odds a puntos con Factor y Offset.]</p>
+                </section>
+
+                <section id="metodologia">
+                    <h2>6. Metodología y experimentos</h2>
+                    <h3>6.1 Línea base: regresión logística</h3>
+                    <h3>6.2 Red neuronal: arquitectura, hiperparámetros, búsqueda y justificación</h3>
+                    <h3>6.3 Protocolo de evaluación</h3>
+                    <p>[Qué se compara, con qué datos, semillas, criterios de selección.]</p>
+                </section>
+
+                <section id="resultados">
+                    <h2>7. Resultados</h2>
+                    <table>
+                        <caption>Tabla 4. Métricas en validación y prueba por modelo. Fuente: elaboración propia.</caption>
+                        <tr><th>Modelo</th><th>AUC</th><th>KS</th><th>Gini</th><th>Brier</th></tr>
+                        <tr><td>Regresión logística</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+                        <tr><td>Red neuronal</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+                    </table>
+                    <p>[Como se observa en la Tabla 4... curvas ROC (Figura 2), calibración (Figura 3).]</p>
+                </section>
+
+                <section id="scorecard">
+                    <h2>8. Scorecard</h2>
+                    <div class="math">$$\text{Score}=\text{Offset}+\text{Factor}\cdot\ln(\text{odds}),\quad \text{Factor}=\frac{\text{PDO}}{\ln 2}$$</div>
+                    <p>[Parámetros: score base, odds base, PDO. Tabla de puntos por característica y punto de corte.]</p>
+                </section>
+
+                <section id="discusion">
+                    <h2>9. Discusión y limitaciones</h2>
+                    <p>[Interpretación, hipótesis confirmadas/refutadas, deriva temporal, censura, equidad, explicabilidad, riesgos de despliegue.]</p>
+                </section>
+
+                <section id="ia">
+                    <h2>10. Uso de IA</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <caption>Tabla 5. Principales prompts utilizados. Fuente: elaboración propia.</caption>
+                            <tr><th>#</th><th>Prompt</th><th>Herramienta</th><th>Qué se obtuvo</th><th>Qué se corrigió</th></tr>
+                            <tr><td>1</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+                        </table>
+                    </div>
+                    <p>[Discusión del impacto en el resultado final: tiempo ahorrado, errores detectados, verificación.]</p>
+                </section>
+
+                <section id="alucinacion">
+                    <h2>11. Cacería de la alucinación</h2>
+                    <p>[Caso(s) donde la IA afirmó algo falso: prompt, respuesta errónea, cómo se detectó, evidencia de la verdad, lección.]</p>
+                </section>
+
+                <section id="conclusiones">
+                    <h2>12. Conclusiones y trabajo futuro</h2>
+                    <p>[Respuesta a las preguntas planteadas en la introducción.]</p>
+                </section>
+
+                <section id="referencias">
+                    <h2>Referencias</h2>
+                    <ol class="refs">
+                        <li>[Referencias APA 7, verificadas, todas citadas en el texto.]</li>
+                    </ol>
+                </section>
+
+            </article>
+        </div>
     </main>
+
+    <footer class="site-footer py-4">
+        <div class="container small">
+            Proyecto académico · Redes neuronales y algoritmos bioinspirados
+        </div>
+    </footer>
 </body>
 </html>

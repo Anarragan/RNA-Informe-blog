@@ -1,0 +1,247 @@
+/* Estilos compartidos del sitio (portada, Trabajo 1 y Trabajo 2).
+   Se carga después de Bootstrap. Los selectores `header.bg-dark` y
+   `footer.border-top` permiten que las páginas de blog-1 hereden el
+   diseño sin modificar su HTML. */
+
+:root {
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #3b4a6b;
+    --accent-dark: #27324d;
+    --hero-from: #1f2a44;
+    --hero-to: #3b4a6b;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Encabezado */
+.site-header,
+header.bg-dark {
+    background: linear-gradient(135deg, var(--hero-from), var(--hero-to)) !important;
+    color: #fff;
+}
+.site-header .text-secondary,
+header.bg-dark .text-secondary {
+    color: rgba(255, 255, 255, .72) !important;
+}
+
+/* Pie */
+.site-footer,
+footer.border-top {
+    border-top: 1px solid var(--line) !important;
+    background: var(--surface);
+    color: var(--muted);
+}
+
+/* Botones: un primario y un secundario */
+.btn-dark {
+    --bs-btn-bg: var(--accent);
+    --bs-btn-border-color: var(--accent);
+    --bs-btn-hover-bg: var(--accent-dark);
+    --bs-btn-hover-border-color: var(--accent-dark);
+    --bs-btn-active-bg: var(--accent-dark);
+    --bs-btn-active-border-color: var(--accent-dark);
+}
+.btn-outline-dark {
+    --bs-btn-color: var(--accent);
+    --bs-btn-border-color: var(--accent);
+    --bs-btn-hover-bg: var(--accent);
+    --bs-btn-hover-border-color: var(--accent);
+    --bs-btn-active-bg: var(--accent);
+    --bs-btn-active-border-color: var(--accent);
+}
+
+/* Tarjetas */
+.site-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.site-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(31, 41, 55, .08);
+}
+.site-card.is-static:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Etiqueta superior */
+.tag {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.tag-soft {
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    background: #eef1f6;
+    color: var(--muted);
+}
+
+/* Integrantes */
+.avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+/* Enlaces de proyecto dentro del encabezado */
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: 1.5rem;
+}
+.links a {
+    padding: .35rem .9rem;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: 999px;
+    color: #fff;
+    font-size: .875rem;
+    text-decoration: none;
+    transition: background .2s ease;
+}
+.links a:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+/* Documento largo (informe del Trabajo 2) */
+.doc section {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 1rem;
+}
+.doc h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding-bottom: .4rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--line);
+}
+.doc h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 .5rem;
+    color: var(--accent);
+}
+.doc p {
+    line-height: 1.7;
+}
+.doc table {
+    width: 100%;
+    margin: 1.25rem 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: .9rem;
+}
+.doc caption {
+    caption-side: top;
+    padding: 0 0 .5rem;
+    color: var(--muted);
+    font-size: .85rem;
+}
+.doc th {
+    background: #eef1f6;
+    color: var(--accent-dark);
+    text-align: left;
+}
+.doc th,
+.doc td {
+    padding: .55rem .8rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+.doc tr:last-child td {
+    border-bottom: 0;
+}
+.doc figure {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+.doc figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+}
+.doc figcaption {
+    margin-top: .5rem;
+    color: var(--muted);
+    font-size: .85rem;
+}
+.callout {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    background: #eef1f6;
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+}
+.math {
+    margin: 1rem 0;
+    padding: .5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+}
+.refs {
+    padding-left: 1.25rem;
+    line-height: 1.7;
+}
+
+/* Índice lateral */
+.toc {
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-size: .9rem;
+}
+.toc ol {
+    margin: .75rem 0 0;
+    padding-left: 1.25rem;
+}
+.toc li {
+    margin-bottom: .35rem;
+}
+.toc a {
+    color: var(--ink);
+    text-decoration: none;
+}
+.toc a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+@media (min-width: 992px) {
+    .toc {
+        position: sticky;
+        top: 1rem;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+    }
+}
