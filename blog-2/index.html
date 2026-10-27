@@ -72,75 +72,195 @@
             <article class="col-lg-9 doc">
 
                 <section id="resumen">
-                    <h2>Resumen</h2>
-                    <p>En este trabajo se aborda el problema de analizar qué tanto riesgo representa un cliente para una entidad bancaria para el préstamo de un crédito, se usaron 268.530 registros de créditos en los años 2007 al 2015 y se implementaron métodos como regresión logística y redes neuronales, usando como métrica principal AUC, (falta resultados clave, aportes y verificar la métrica).</p>
-                </section>
-
-                <section id="intro">
-                    <h2>1. Introducción y caso de uso</h2>
-                    <p>El riesgo crediticio es la probabilidad de pérdida por el impago del prestatario, esto interesa conocerlo pues en la gestión del riesgo crediticio esta es la práctica de mitigar las pérdidas. Este proceso ha sido un reto para las instituciones financieras durante mucho tiempo y es importante conocerlo pues asi los bancos tienen forma de organizar y proyectar sus portafolios. El desarrollo de este modelo, su diseño y funcionalidad responden al caso de uso detallado en la Tabla 1. el cual indica el perfil del usuario al que está dirigido el modelo.</p>
-                    <table>
-                        <caption>Tabla 1. Definición del caso de uso. Fuente: elaboración propia.</caption>
-                        <tr><th>Elemento</th><th>Descripción</th></tr>
-                        <tr><td>Usuario</td><td>Área de riesgos y motor automático de decisión</td></tr>
-                        <tr><td>Decisión</td><td>Aprobar o rechazar la solicitud y evaluar su nivel de riesgo</td></tr>
-                        <tr><td>Momento</td><td>Originación, antes del desembolso</td></tr>
-                        <tr><td>Información disponible</td><td>Solo formulario del cliente y reporte de buró</td></tr>
-                        <tr><td>Garantía sin fuga</td><td>Se excluyen variables posteriores al desembolso y calificaciones internas</td></tr>
-                    </table>
-                    <h3>Objetivos y preguntas</h3>
-                    <p>[Objetivo general y 2–3 preguntas de investigación.]</p>
-                </section>
-
-                <section id="datos">
-                    <h2>2. Datos</h2>
-                    <h3>2.1 Fuente y descarga</h3>
-                    <p>[Fuente (LendingClub), fecha de descarga 20/10/2026, licencia, enlace verificable. Citar (Autor, año).]</p>
-                    <h3>2.2 Variable objetivo</h3>
-                    <p>[Mapeo de loan_status a 0/1, estados excluidos (Current, Grace Period, etc.) y por qué. Tasa de malos = 0,219.]</p>
-                    <table>
-                        <caption>Tabla 2. Mapeo de loan_status a la variable objetivo. Fuente: elaboración propia.</caption>
-                        <tr><th>loan_status</th><th>Objetivo</th></tr>
-                        <tr><td>Fully Paid / Does not meet the credit policy. Status:Fully Paid</td><td>0</td></tr>
-                        <tr><td>Charged Off / Default / Late (31-120 days) / Does not meet… Charged Off</td><td>1</td></tr>
-                    </table>
-                    <h3>2.3 Variables</h3>
-                    <p>[Tabla de las 13 predictoras + 6 transformadas: nombre, tipo, descripción, momento en que se conoce.]</p>
-                    <h3>2.4 Valores faltantes</h3>
-                    <p>[Tabla con % de faltantes (emp_length 3,99 %, etc.) y estrategia de imputación solo con datos de entrenamiento.]</p>
-                </section>
+  <h2>Resumen</h2>
+  <p>Este trabajo estima la probabilidad de incumplimiento de créditos de consumo en el momento de la originación, 
+  usando 268.530 créditos de LendingClub emitidos entre 2007 y 2015 (tasa de incumplimiento: 21,9 %). 
+  Se comparan una regresión logística, usada como modelo base, y redes neuronales, bajo una partición temporal que evita 
+  fuga de información. El desempeño se evalúa principalmente con el área bajo la curva ROC (AUC-ROC), que no depende de la 
+  prevalencia de la clase positiva, y se complementa con KS y calibración. Además, se deriva una scorecard a partir del 
+  modelo. [Completar: El modelo X alcanzó un AUC de Y,YY en la ventana de prueba, frente a Z,ZZ de la regresión logística; 
+  la diferencia (W puntos) / no fue relevante, lo que indica que ...]</p>
+</section>
+ 
+<section id="intro">
+  <h2>1. Introducción y caso de uso</h2>
+  <p>El riesgo de crédito es la posibilidad de que un prestatario incumpla sus obligaciones y genere pérdidas al prestamista. 
+  Estimar esa probabilidad al momento de la solicitud permite decidir si se aprueba el crédito, a qué precio y con qué 
+  límite (Siddiqi, 2006). La regresión logística es el estándar de la industria por su interpretabilidad, y en estudios 
+  comparativos sobre datos de scoring ha mostrado un desempeño muy competitivo frente a modelos más complejos, entre ellos 
+  las redes neuronales (Baesens et al., 2003). Lessmann et al. (2015) actualizaron esa comparación como referencia para 
+  trabajos posteriores. Por otro lado, en datos tabulares de tamaño medio los modelos basados en árboles pueden superar a 
+  las redes profundas (Grinsztajn et al., 2022), por lo que conviene contrastar la red con un modelo base sólido 
+  en lugar de asumir su superioridad.</p>
+  <p>El modelo se concibe como apoyo a la decisión en la originación, según lo definido en la Tabla 1.</p>
+  <table>
+    <caption>Tabla 1. Definición del caso de uso. Fuente: elaboración propia.</caption>
+    <tr><th>Elemento</th><th>Descripción</th></tr>
+    <tr><td>Usuario</td><td>Área de riesgos y motor automático de decisión</td></tr>
+    <tr><td>Decisión</td><td>Aprobar o rechazar la solicitud y evaluar su nivel de riesgo</td></tr>
+    <tr><td>Momento</td><td>Originación, antes del desembolso</td></tr>
+    <tr><td>Información disponible</td><td>Solo formulario del cliente y reporte de buró</td></tr>
+    <tr><td>Garantía sin fuga</td><td>Se excluyen variables posteriores al desembolso y calificaciones internas</td></tr>
+  </table>
+  <h3>Objetivos y preguntas</h3>
+  <p><strong>Objetivo general:</strong> construir y comparar una regresión logística y una red neuronal que estimen la 
+  probabilidad de incumplimiento en la originación, evaluadas con una partición temporal y traducidas a una scorecard.</p>
+  <ol>
+    <li>¿Supera la red neuronal a la regresión logística en AUC y KS sobre datos posteriores al periodo de entrenamiento?</li>
+    <li>¿Cuánto se degrada el desempeño por la deriva temporal entre entrenamiento y prueba?</li>
+    <li>¿Se confirman las hipótesis H1 a H6 sobre los factores de riesgo (Tabla 5)?</li>
+  </ol>
+</section>
+ 
+<section id="datos">
+  <h2>2. Datos</h2>
+ 
+  <h3>2.1 Fuente y descarga</h3>
+  <p>Se usó el conjunto público de préstamos de LendingClub, una plataforma estadounidense de crédito entre personas, 
+  disponible en Kaggle (Wendykan, n.d.). Los datos se descargaron el 20 de octubre de 2026 y cubren créditos emitidos 
+  entre junio de 2007 y diciembre de 2015.</p>
+ 
+  <h3>2.2 Variable objetivo y prevención de fuga</h3>
+  <p>La variable objetivo es binaria y se construyó a partir de <code>loan_status</code> (Tabla 2). Solo se conservaron 
+  créditos con desenlace observado; los demás estados, como los créditos vigentes (<em>Current</em>), se excluyeron 
+  porque aún no se sabe si terminarán en incumplimiento. Quedaron 268.530 registros modelables, con una tasa de 
+  incumplimiento de 21,9 %.</p>
+  <table>
+    <caption>Tabla 2. Construcción de la variable objetivo a partir de loan_status. Fuente: elaboración propia con datos de LendingClub.</caption>
+    <tr><th>Valor de loan_status</th><th>Objetivo</th></tr>
+    <tr><td>Fully Paid; Does not meet the credit policy. Status:Fully Paid</td><td>0 (cumplido)</td></tr>
+    <tr><td>Charged Off; Default; Late (31-120 days); Does not meet the credit policy. Status:Charged Off</td><td>1 (incumplido)</td></tr>
+  </table>
+  <p>Para evitar fuga de información, se eliminaron las variables registradas después del desembolso y las 
+  calificaciones internas de la plataforma (por ejemplo, [grade, sub_grade, int_rate: ajusta a lo que excluiste]), 
+  así como las columnas con más de 97 % de valores nulos.</p>
+ 
+  <h3>2.3 Variables</h3>
+  <p>El conjunto final tiene 20 columnas: la variable objetivo, 13 predictoras usadas sin cambios, 5 transformadas y 
+  <code>issue_d</code>, que no es predictora y solo define la partición temporal (Tabla 3).</p>
+  <table>
+    <caption>Tabla 3. Variables del modelo. Fuente: elaboración propia con datos de LendingClub.</caption>
+    <tr><th>Variable</th><th>Tipo</th><th>Descripción / transformación</th></tr>
+    <tr><td>loan_amnt</td><td>Predictora</td><td>Monto solicitado</td></tr>
+    <tr><td>purpose</td><td>Predictora</td><td>Propósito del préstamo</td></tr>
+    <tr><td>home_ownership</td><td>Predictora</td><td>Tenencia de la vivienda</td></tr>
+    <tr><td>annual_inc</td><td>Predictora</td><td>Ingreso anual declarado</td></tr>
+    <tr><td>verification_status</td><td>Predictora</td><td>Verificación del ingreso</td></tr>
+    <tr><td>dti</td><td>Predictora</td><td>Relación deuda-ingreso</td></tr>
+    <tr><td>delinq_2yrs</td><td>Predictora</td><td>Moras de 30+ días en los últimos 2 años</td></tr>
+    <tr><td>inq_last_6mths</td><td>Predictora</td><td>Consultas de crédito en los últimos 6 meses</td></tr>
+    <tr><td>open_acc</td><td>Predictora</td><td>Cuentas de crédito abiertas</td></tr>
+    <tr><td>pub_rec</td><td>Predictora</td><td>Registros públicos negativos</td></tr>
+    <tr><td>revol_bal</td><td>Predictora</td><td>Saldo rotativo total</td></tr>
+    <tr><td>revol_util</td><td>Predictora</td><td>Porcentaje de uso del crédito rotativo</td></tr>
+    <tr><td>total_acc</td><td>Predictora</td><td>Total de cuentas de crédito</td></tr>
+    <tr><td>term</td><td>Transformada</td><td>Texto "36/60 months" a indicador de plazo de 60 meses</td></tr>
+    <tr><td>emp_length</td><td>Transformada</td><td>Texto ("10+ years") a años de antigüedad laboral</td></tr>
+    <tr><td>earliest_cr_line</td><td>Transformada</td><td>Fecha de la primera línea de crédito a antigüedad del historial (años)</td></tr>
+    <tr><td>mths_since_last_delinq</td><td>Transformada</td><td>Nulo = nunca tuvo mora; se convierte en indicador</td></tr>
+    <tr><td>mths_since_last_record</td><td>Transformada</td><td>Nulo = sin registro público; se convierte en indicador</td></tr>
+    <tr><td>issue_d</td><td>Auxiliar</td><td>Fecha de emisión; solo para la partición temporal</td></tr>
+  </table>
+ 
+  <h3>2.4 Valores faltantes</h3>
+  <p>La proporción de faltantes reales es baja: la antigüedad laboral concentra la mayoría (Tabla 4). Los nulos de 
+  <code>mths_since_last_delinq</code> y <code>mths_since_last_record</code> no son faltantes reales, porque indican ausencia 
+  del evento, y por eso se codificaron como indicadores. Los faltantes reales se imputaron con la mediana en variables 
+  continuas y con la moda en las discretas, y los estadísticos se calcularon solo con el conjunto de entrenamiento y luego 
+  se aplicaron a validación y prueba, para no filtrar información.</p>
+  <table>
+    <caption>Tabla 4. Valores faltantes reales antes de la imputación. Fuente: elaboración propia con datos de LendingClub.</caption>
+    <tr><th>Variable</th><th>Faltantes</th><th>%</th></tr>
+    <tr><td>emp_length (años)</td><td>10.721</td><td>3,99</td></tr>
+    <tr><td>revol_util</td><td>249</td><td>0,09</td></tr>
+    <tr><td>pub_rec, delinq_2yrs, inq_last_6mths, total_acc, open_acc, antigüedad del historial</td><td>29 c/u</td><td>0,01</td></tr>
+    <tr><td>annual_inc</td><td>4</td><td>&lt; 0,01</td></tr>
+  </table>
+</section>
 
                 <section id="eda">
-                    <h2>3. Análisis descriptivo e hipótesis</h2>
-                    <p>[Distribución del objetivo en el tiempo, por variable, correlaciones.]</p>
-                    <div class="table-responsive">
-                        <table>
-                            <caption>Tabla 3. Hipótesis de riesgo, signo esperado y resultado observado. Fuente: elaboración propia.</caption>
-                            <tr><th>#</th><th>Hipótesis</th><th>Variable</th><th>Signo esperado</th><th>Evidencia</th></tr>
-                            <tr><td>H1</td><td>Más deuda, más riesgo</td><td>dti</td><td>+</td><td>[completar]</td></tr>
-                            <tr><td>H2</td><td>Más ingreso, menos riesgo</td><td>annual_inc</td><td>−</td><td>[completar]</td></tr>
-                            <tr><td>H3</td><td>Morosidad previa, más riesgo</td><td>delinq_2yrs</td><td>+</td><td>[completar]</td></tr>
-                            <tr><td>H4</td><td>Historial largo, menos riesgo</td><td>earliest_cr_line</td><td>−</td><td>[completar]</td></tr>
-                            <tr><td>H5</td><td>El propósito cambia el riesgo</td><td>purpose</td><td>varía</td><td>[completar]</td></tr>
-                            <tr><td>H6</td><td>Alquilar, más riesgo que casa propia</td><td>home_ownership</td><td>RENT &gt; MORTGAGE</td><td>[completar]</td></tr>
-                        </table>
-                    </div>
-                    <figure>
-                        <img src="fig1.png" alt="Descripción de la figura">
-                        <figcaption>Figura 1. Tasa de incumplimiento por año de originación. Fuente: elaboración propia con datos de [fuente].</figcaption>
-                    </figure>
-                    <p>[Como se observa en la Figura 1... y en la Tabla 3...]</p>
-                </section>
+    <h2>3. Análisis exploratorio e hipótesis</h2>
+    <p>
+        A partir de la teoría financiera, se formularon seis hipótesis sobre los factores que incrementan el riesgo crediticio (Tabla 3). Estas hipótesis se evalúan preliminarmente en esta sección y se contrastan de forma definitiva en las conclusiones del trabajo.
+    </p>
+    
+    <div class="table-responsive">
+        <table>
+            <caption>Tabla 3. Hipótesis de riesgo financiero. Fuente: elaboración propia.</caption>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Hipótesis</th>
+                    <th>Variable</th>
+                    <th>Efecto esperado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>H1</td>
+                    <td>Mayor endeudamiento incrementa el riesgo</td>
+                    <td><code>dti</code></td>
+                    <td>+ Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H2</td>
+                    <td>Mayores ingresos reducen el riesgo</td>
+                    <td><code>annual_inc</code></td>
+                    <td>− Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H3</td>
+                    <td>Morosidad previa incrementa el riesgo futuro</td>
+                    <td><code>delinq_2yrs</code></td>
+                    <td>+ Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H4</td>
+                    <td>Historial crediticio más antiguo reduce el riesgo</td>
+                    <td><code>antiguedad_hist_anios</code></td>
+                    <td>− Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H5</td>
+                    <td>El propósito del crédito altera el perfil de riesgo</td>
+                    <td><code>purpose</code></td>
+                    <td>Variable</td>
+                </tr>
+                <tr>
+                    <td>H6</td>
+                    <td>Arrendatarios presentan mayor riesgo que propietarios</td>
+                    <td><code>home_ownership</code></td>
+                    <td>RENT &gt; MORTGAGE &gt; OWN</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <figure>
+        <img src="fig1.png" alt="Tasa de incumplimiento por año de originación">
+        <figcaption>Figura 1. Tasa de incumplimiento por año de originación (2007–2015). Fuente: elaboración propia con datos de LendingClub.</figcaption>
+    </figure>
+
+    <p>
+        La Figura 1 muestra la evolución temporal del riesgo según las políticas de originación de LendingClub. A continuación, se detallan las distribuciones y correlaciones clave con la variable objetivo (<code>loan_status</code>).
+    </p>
+</section>
 
                 <section id="preproc">
-                    <h2>4. Preprocesamiento y partición temporal</h2>
-                    <p>[Transformaciones (term, emp_length, earliest_cr_line, indicadores de nulos), imputación, escalado, codificación categórica.]</p>
-                    <h3>Partición causal en el tiempo</h3>
-                    <p>[Entrenamiento / validación / prueba por issue_d. Justificar por qué no es aleatoria.]</p>
-                    <div class="callout">
-                        <strong>Sesgo de censura y deriva.</strong> [Los créditos aún en «Current» se excluyen; en los años recientes los malos aún no se han materializado, por lo que el riesgo se subestima en 2012–2015. Explicar el efecto sobre validación y prueba.]
-                    </div>
-                </section>
+    <h2>4. Preprocesamiento y partición temporal</h2>
+    <p>
+        El preprocesamiento incluyó la transformación de variables numéricas y categóricas (como <code>term</code>, <code>emp_length</code> y la extracción de antigüedad desde <code>earliest_cr_line</code>), la imputación de nulos calculada sobre el conjunto de entrenamiento y el escalado de características para los modelos basados en redes neuronales.
+    </p>
+
+    <h3>Partición causal en el tiempo</h3>
+    <p>
+        A diferencia de una división aleatoria tradicional, los datos se particionaron de forma estrictamente cronológica utilizando la fecha de emisión del crédito (<code>issue_d</code>). Esta partición causal simula el escenario real de producción, donde el modelo debe predecir el comportamiento futuro basándose únicamente en el historial pasado, evitando así el <strong>sesgo de anticipación (*look-ahead bias*)</strong>.
+    </p>
+
+    <div class="callout">
+        <strong>Sesgo de censura y deriva temporal:</strong> Los créditos otorgados en periodos recientes (2012–2015) presentan un fenómeno de censura por la derecha (*right-censoring*): muchos préstamos no han madurado lo suficiente para que la morosidad se materialice o han sido excluidos al estar en estado "Current". Esto genera un sesgo que subestima temporalmente la tasa de impago en los conjuntos de validación y prueba (más recientes), afectando la calibración del modelo y exigiendo métricas robustas como el AUC-ROC para evaluar el ordenamiento del riesgo más que la probabilidad absoluta.
+    </div>
+</section>
 
                 <section id="fundamentos">
                     <h2>5. Fundamentos matemáticos</h2>
@@ -221,11 +341,15 @@
                 </section>
 
                 <section id="referencias">
-                    <h2>Referencias</h2>
-                    <ol class="refs">
-                        <li>[Referencias APA 7, verificadas, todas citadas en el texto.]</li>
-                    </ol>
-                </section>
+  <h2>Referencias (parciales)</h2>
+  <ol class="refs">
+    <li>Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635. [añade el DOI tras verificarlo]</li>
+    <li>Grinsztajn, L., Oyallon, E., &amp; Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? <em>Advances in Neural Information Processing Systems, 35</em>. https://arxiv.org/abs/2207.08815</li>
+    <li>Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. https://doi.org/10.1016/j.ejor.2015.05.030</li>
+    <li>Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
+    <li>Wendykan. (n.d.). <em>Lending Club loan data</em> [Conjunto de datos]. Kaggle. https://www.kaggle.com/datasets/wendykan/lending-club-loan-data</li>
+  </ol>
+</section>
 
             </article>
         </div>
