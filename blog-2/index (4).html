@@ -309,111 +309,23 @@
 
                 <section id="scorecard">
                     <h2>8. Scorecard</h2>
-                    <p>La scorecard representa la red neuronal final: un perceptrón multicapa con capas ocultas de 128 y 64 neuronas, activación ReLU, <em>dropout</em> de 0,4 y optimizador Adam con tasa de aprendizaje de 0,01 (se conservó la semilla 13, la de mayor AUC en validación). Sigue la convención habitual en la banca: <strong>a más puntos, menor riesgo</strong> (Siddiqi, 2006).</p>
-
-                    <h3>8.1 Parámetros y transformación de probabilidad a puntaje</h3>
-                    <p>Sea \(p\) la probabilidad de incumplimiento y \(\text{odds}=(1-p)/p\) las odds de cumplir (buenos por cada malo). Se busca un puntaje lineal en el logaritmo de las odds:</p>
-                    <div class="math">$$\text{Score}=A+B\,\ln(\text{odds})$$</div>
-                    <p>Se imponen dos condiciones: con las odds de referencia \(\text{odds}_0\) el puntaje es el puntaje base \(S_0\), y al duplicar las odds el puntaje sube PDO puntos. Al restar ambas ecuaciones queda \(B\ln 2=\text{PDO}\), y de la primera se despeja \(A\):</p>
-                    <div class="math">$$B=\text{Factor}=\frac{\text{PDO}}{\ln 2},\qquad A=\text{Offset}=S_0-\text{Factor}\cdot\ln(\text{odds}_0)$$</div>
-                    <p>La red entrega un logit \(z\), con \(p=\sigma(z)\). Como \(\ln\!\big((1-p)/p\big)=-z\), el puntaje se obtiene directamente del logit:</p>
-                    <div class="math">$$\text{Score}=\text{Offset}-\text{Factor}\cdot z(\mathbf{x})$$</div>
-                    <p>Un aumento del logit (más riesgo) resta puntos, por el signo negativo del Factor. Los parámetros elegidos se resumen en la Tabla 6.</p>
-                    <table>
-                        <caption>Tabla 6. Parámetros de la scorecard. Fuente: elaboración propia.</caption>
-                        <tr><th>Parámetro</th><th>Valor</th><th>Comentario</th></tr>
-                        <tr><td>Puntaje base \(S_0\)</td><td>600</td><td>Convención</td></tr>
-                        <tr><td>Odds de referencia \(\text{odds}_0\)</td><td>5:1 (\(p=16{,}7\,\%\))</td><td>Cercana a la tasa de incumplimiento del entrenamiento (16,3 %)</td></tr>
-                        <tr><td>PDO</td><td>20</td><td>Cada 20 puntos duplican las odds de cumplir</td></tr>
-                        <tr><td>Factor</td><td>28,85</td><td>\(\text{PDO}/\ln 2\)</td></tr>
-                        <tr><td>Offset</td><td>553,56</td><td>\(600-28{,}85\cdot\ln 5\)</td></tr>
-                    </table>
-                    <p>Se verificó numéricamente que las odds de 5:1 equivalen a 600 puntos y las de 10:1 a 620.</p>
-
-                    <h3>8.2 De la red a los puntos por variable</h3>
-                    <p>La conversión anterior es exacta: es una transformación lineal decreciente del logit, así que no cambia el orden de los clientes y el AUC, el Gini y el KS del puntaje coinciden con los de la red (en prueba, 0,6688; 0,3376 y 0,2469). El reto es repartir esos puntos entre las variables. En una regresión logística cada variable aporta siempre lo mismo (\(-\text{Factor}\cdot\beta_j\) por unidad), pero una red neuronal no es una suma de términos: el efecto de una variable depende de los valores de las demás. Por eso se usaron gradientes integrados (Sundararajan et al., 2017), que acumulan la derivada del logit a lo largo de la línea recta que va de un cliente de referencia \(\mathbf{x}'\) al cliente \(\mathbf{x}\):</p>
-                    <div class="math">$$\text{IG}_j(\mathbf{x})=(x_j-x'_j)\int_0^1\frac{\partial z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)}{\partial x_j}\,d\alpha,\qquad \sum_{j}\text{IG}_j(\mathbf{x})=z(\mathbf{x})-z(\mathbf{x}')$$</div>
-                    <p>Al multiplicar por \(-\text{Factor}\), el puntaje de cada cliente queda como una suma de puntos por variable frente al cliente de referencia:</p>
-                    <div class="math">$$\text{Score}(\mathbf{x})=\underbrace{\text{Offset}-\text{Factor}\,z(\mathbf{x}')}_{\text{puntos base}}+\sum_{j}\Big(-\text{Factor}\cdot\text{IG}_j(\mathbf{x})\Big)$$</div>
-                    <p>El cliente de referencia es el cliente promedio del entrenamiento: las variables continuas valen 0 (están estandarizadas) y los indicadores toman su proporción en el entrenamiento (por ejemplo, 17 % de créditos a 60 meses, 5,5 % con registro público negativo y 47 % de arrendatarios). Su puntaje, los puntos base, es de 587,4; no coincide con el puntaje medio de los clientes (602,1 en entrenamiento) porque la red no es lineal y el puntaje del cliente promedio no es el promedio de los puntajes. La integral se aproximó con 50 pasos (regla del punto medio). [Completar: diferencia máxima, en puntos, entre la suma de puntos por variable más los puntos base y el puntaje de la red en prueba; la imprime <code>python main.py scorecard</code>.]</p>
-
-                    <h3>8.3 Bandas de puntaje</h3>
-                    <p>Se definieron diez bandas con los deciles del puntaje en entrenamiento (cortes en 575,2; 585,5; 591,8; 596,7; 601,1; 605,6; 610,8; 617,4 y 627,9). La banda 1 reúne a los clientes con menos puntos, es decir, a los más riesgosos. La tasa de incumplimiento observada baja de forma continua al subir el puntaje en las tres particiones y, en prueba, va de 43,0 % en la banda 1 a 6,7 % en la banda 10 (Tabla 7).</p>
-                    <table>
-                        <caption>Tabla 7. Bandas de puntaje en la partición de prueba. Fuente: elaboración propia.</caption>
-                        <tr><th>Banda</th><th>Puntaje (desde – hasta)</th><th>Clientes</th><th>Tasa de incumplimiento observada</th><th>Probabilidad media predicha</th></tr>
-                        <tr><td>1</td><td>554,5 – 575,2</td><td>18.430</td><td>43,0 %</td><td>36,8 %</td></tr>
-                        <tr><td>2</td><td>575,2 – 585,5</td><td>12.441</td><td>34,2 %</td><td>28,3 %</td></tr>
-                        <tr><td>3</td><td>585,5 – 591,8</td><td>9.786</td><td>32,1 %</td><td>22,8 %</td></tr>
-                        <tr><td>4</td><td>591,8 – 596,7</td><td>10.011</td><td>27,5 %</td><td>19,6 %</td></tr>
-                        <tr><td>5</td><td>596,7 – 601,1</td><td>9.955</td><td>25,7 %</td><td>17,2 %</td></tr>
-                        <tr><td>6</td><td>601,1 – 605,6</td><td>9.706</td><td>21,1 %</td><td>15,1 %</td></tr>
-                        <tr><td>7</td><td>605,6 – 610,8</td><td>9.942</td><td>18,0 %</td><td>13,1 %</td></tr>
-                        <tr><td>8</td><td>610,8 – 617,4</td><td>9.450</td><td>14,7 %</td><td>11,0 %</td></tr>
-                        <tr><td>9</td><td>617,4 – 627,9</td><td>8.696</td><td>11,2 %</td><td>8,6 %</td></tr>
-                        <tr><td>10</td><td>627,9 – 705,0</td><td>6.572</td><td>6,7 %</td><td>5,1 %</td></tr>
-                    </table>
-                    <p>En todas las bandas la probabilidad media predicha queda por debajo de la tasa observada. Es coherente con la deriva temporal: la tasa de incumplimiento pasa de 16,3 % en entrenamiento a 26,0 % en prueba, y la red, ajustada con el periodo anterior, subestima el riesgo del periodo posterior. El orden de los clientes se conserva, pero el nivel absoluto de las probabilidades no.</p>
-                    <figure>
-                        <img src="fig4.png" alt="Distribución del puntaje en prueba y tasa de incumplimiento por banda de puntaje">
-                        <figcaption>Figura 4. Puntaje de la red en prueba, para buenos y malos pagadores (izquierda), y tasa de incumplimiento observada por banda de puntaje en cada partición (derecha). Fuente: elaboración propia.</figcaption>
-                    </figure>
-                    <p>[Completar: punto de corte. Definir el puntaje mínimo de aprobación según la política de riesgo (por ejemplo, la banda desde la cual la tasa de incumplimiento observada es aceptable) y justificarlo.]</p>
-
-                    <h3>8.4 Variables de riesgo: qué hace más riesgosa a una persona</h3>
-                    <p><strong>¿Por qué es justificable usar la scorecard para decir qué variables pesan más o menos?</strong> Por tres razones:</p>
-                    <ol>
-                        <li>Los puntos son una transformación lineal del logit con una escala fija: una diferencia de 20 puntos significa siempre lo mismo (duplicar las odds), sin importar la variable que la produzca. Como las continuas están estandarizadas, un punto de una variable es comparable con un punto de otra.</li>
-                        <li>La descomposición por gradientes integrados es aditiva y completa: los puntos de las variables más los puntos base reconstruyen el puntaje del cliente. El método satisface los axiomas de sensibilidad e invarianza de implementación, de los que se deriva esa propiedad (Sundararajan et al., 2017).</li>
-                        <li>Los resultados se pueden contrastar con la regresión logística: en nueve de las diez variables de mayor impacto, la dirección que halla la red coincide con el signo del coeficiente de la regresión. La excepción es <code>pub_rec</code>.</li>
-                    </ol>
-                    <p><strong>¿Por qué no basta con derivar el logit respecto de cada variable?</strong> Porque el gradiente es una medida local: dice cuánto cambia la salida ante un cambio mínimo en un punto concreto, y en una red con ReLU puede valer cero o cambiar bruscamente cuando se encienden o se apagan neuronas. No resume cuánto aportó la variable entre el cliente de referencia y el cliente real. Los gradientes integrados promedian esa derivada a lo largo de todo el camino y la multiplican por el cambio total de la variable.</p>
-                    <p>La Tabla 8 reúne, para los clientes de la partición de prueba, dos medidas por variable. El <em>impacto</em> es el promedio del valor absoluto de sus puntos: indica cuántos puntos mueve la variable, en promedio, sin importar el sentido. La <em>dirección</em> es la correlación entre el valor de la variable y los puntos que aporta: si es negativa, los valores más altos (o tener la característica, en indicadores y categorías) restan puntos, es decir, aumentan el riesgo; si es positiva, suman puntos. La dirección indica el sentido, no la magnitud del efecto. Además, el impacto de una característica poco frecuente es bajo aunque su efecto individual sea grande, porque la mayoría de los clientes queda cerca del valor de referencia.</p>
-                    <table>
-                        <caption>Tabla 8. Impacto medio (puntos) y dirección de las variables en la partición de prueba, ordenadas por impacto. Fuente: elaboración propia.</caption>
-                        <tr><th>Puesto</th><th>Variable</th><th>Impacto (puntos)</th><th>Dirección</th></tr>
-                        <tr><td>1</td><td><code>term_60m</code></td><td>8,21</td><td>−0,98</td></tr>
-                        <tr><td>2</td><td><code>annual_inc</code></td><td>6,26</td><td>+0,96</td></tr>
-                        <tr><td>3</td><td><code>revol_util</code></td><td>5,60</td><td>−0,94</td></tr>
-                        <tr><td>4</td><td><code>open_acc</code></td><td>4,22</td><td>−0,93</td></tr>
-                        <tr><td>5</td><td><code>loan_amnt</code></td><td>4,20</td><td>−0,94</td></tr>
-                        <tr><td>6</td><td><code>inq_last_6mths</code></td><td>3,29</td><td>−0,95</td></tr>
-                        <tr><td>7</td><td><code>total_acc</code></td><td>2,80</td><td>+0,93</td></tr>
-                        <tr><td>8</td><td><code>revol_bal</code></td><td>2,66</td><td>+0,93</td></tr>
-                        <tr><td>9</td><td><code>pub_rec</code></td><td>2,50</td><td>+0,78</td></tr>
-                        <tr><td>10</td><td><code>ind_registro_publico</code></td><td>1,63</td><td>−0,98</td></tr>
-                        <tr><td>11</td><td><code>purpose_credit_card</code></td><td>1,53</td><td>+0,95</td></tr>
-                        <tr><td>12</td><td><code>emp_length_anios</code></td><td>1,35</td><td>−0,51</td></tr>
-                        <tr><td>13</td><td><code>dti</code></td><td>1,14</td><td>−0,84</td></tr>
-                        <tr><td>14</td><td><code>ind_mora_previa</code></td><td>1,08</td><td>+0,34</td></tr>
-                        <tr><td>15</td><td><code>delinq_2yrs</code></td><td>1,07</td><td>−0,49</td></tr>
-                        <tr><td>16</td><td><code>home_ownership_RENT</code></td><td>0,99</td><td>−0,71</td></tr>
-                        <tr><td>17</td><td><code>purpose_small_business</code></td><td>0,85</td><td>−0,95</td></tr>
-                        <tr><td>18</td><td><code>antiguedad_hist_anios</code></td><td>0,82</td><td>+0,11</td></tr>
-                        <tr><td>23</td><td><code>home_ownership_OWN</code></td><td>0,33</td><td>−0,63</td></tr>
-                        <tr><td>24</td><td><code>purpose_major_purchase</code></td><td>0,26</td><td>+0,97</td></tr>
-                    </table>
-                    <p>[Figura 5: gráfico de barras horizontales ordenadas con el impacto de cada variable, coloreadas según su dirección; reemplaza al gráfico 3D propuesto, porque las columnas en tres dimensiones dificultan comparar valores.]</p>
-                    <p><strong>Qué variables pesan más.</strong> Las tres variables que más puntos mueven son el plazo del crédito a 60 meses (<code>term_60m</code>, 8,2 puntos en promedio), el ingreso anual (<code>annual_inc</code>, 6,3) y el uso del crédito rotativo (<code>revol_util</code>, 5,6), seguidas por <code>open_acc</code>, <code>loan_amnt</code> e <code>inq_last_6mths</code>. Los créditos a 60 meses restan puntos de manera sistemática (dirección −0,98), es decir, un plazo largo se asocia con más riesgo; y a mayor ingreso anual, más puntos (+0,96), es decir, menos riesgo. El uso del crédito rotativo, el número de cuentas abiertas, el monto del crédito y las consultas recientes de crédito también restan puntos cuando aumentan. El registro público negativo (<code>ind_registro_publico</code>) está en el puesto 10 y resta puntos de forma muy consistente (−0,98).</p>
-                    <p><strong>Limitaciones.</strong> Los puntos describen asociaciones aprendidas por el modelo, no relaciones causales. Se analizó una sola red (semilla 13); otras semillas podrían repartir los puntos de forma algo distinta. Los puntos por variable dependen del cliente de referencia elegido, y la suma de gradientes integrados aproxima el puntaje con un pequeño error numérico. La dirección es una correlación y no mide cuánto cambia el puntaje. Algunos resultados son contraintuitivos o débiles: <code>pub_rec</code> tiene dirección positiva (+0,78), contraria a la que se espera de un registro público negativo y a la de la regresión logística, y <code>ind_mora_previa</code> tiene una dirección positiva débil (+0,34); ambos se interpretan con cautela.</p>
+                    <div class="math">$$\text{Score}=\text{Offset}+\text{Factor}\cdot\ln(\text{odds}),\quad \text{Factor}=\frac{\text{PDO}}{\ln 2}$$</div>
+                    <p>En el mundo bancario, el estándar es que entre mas puntos tenga una persona, es menos probable que incumpla. Asi mismo funciona nuestra clasificación.</p>
+                    
+                    <p> La scorecard toma el logit que sale de la ultima capa de la red neuronal, y relaciona el puntaje con la formula de score = offset - factor (logit(x)), y por medio de esta conversión: logit(x) = pendiente global promedio podemos ver cuanto aporta cada variable 
+                    </p>
+                    
+                    <p> Podemos ver que: Si la variable j tuvo un peso muy positivo , mas negativo será el puntaje (signo del -factor), es decir, habran menos puntos, y por lo tanto mas probabilidad de incumplimiento habrá.</p> 
+                    
+                    <h3>Entonces, ¿Por medio de la scorecard realmente puedo decir cuanto pesa realmente una variable?</h3>
+                    
+                    <p>Como todas las variables continuas fueron estandarizadas ($\sigma = 1$) en preprocesamiento.py y el $\text{Factor} \approx 28.85$ es una constante fija para todas las variables, la cantidad de puntos que mueve una variable es directamente proporcional al peso que le dio la red neuronal. </p> 
+                    
                 </section>
 
                 <section id="discusion">
                     <h2>9. Discusión y limitaciones</h2>
-                    <h3>9.1 Contraste de las hipótesis H1 a H6</h3>
-                    <p>La Tabla 9 contrasta cada hipótesis de la Sección 3 con el análisis descriptivo y con los resultados de la scorecard de la red (Tabla 8). El criterio fue el sentido esperado y el peso de la variable en el modelo.</p>
-                    <table>
-                        <caption>Tabla 9. Contraste de las hipótesis con la scorecard de la red neuronal. Fuente: elaboración propia.</caption>
-                        <tr><th>#</th><th>Efecto esperado</th><th>Análisis descriptivo</th><th>Scorecard de la red</th><th>Veredicto</th></tr>
-                        <tr><td>H1 (<code>dti</code>)</td><td>Más endeudamiento, más riesgo</td><td>AUC univariada 0,549</td><td>Puesto 13; dirección −0,84</td><td>Confirmada, con peso pequeño</td></tr>
-                        <tr><td>H2 (<code>annual_inc</code>)</td><td>Más ingreso, menos riesgo</td><td>AUC univariada 0,451</td><td>Puesto 2; dirección +0,96</td><td>Confirmada; es la segunda variable más influyente</td></tr>
-                        <tr><td>H3 (<code>delinq_2yrs</code>)</td><td>Más moras previas, más riesgo</td><td>AUC univariada 0,507 (no confirmada)</td><td>Puesto 15; dirección −0,49</td><td>No confirmada: el sentido es el esperado, pero el peso es bajo</td></tr>
-                        <tr><td>H4 (<code>antiguedad_hist_anios</code>)</td><td>Historial más antiguo, menos riesgo</td><td>AUC univariada 0,487</td><td>Puesto 18; dirección +0,11</td><td>Confirmada en el sentido, con efecto casi nulo</td></tr>
-                        <tr><td>H5 (<code>purpose</code>)</td><td>El propósito cambia el riesgo</td><td>\(\chi^2\), \(p=8{,}7\times10^{-144}\)</td><td>Negocio propio: dirección −0,95 (puesto 17); tarjeta de crédito: +0,95 (puesto 11); compra mayor: +0,97 (puesto 24)</td><td>Confirmada: unos propósitos restan puntos y otros suman</td></tr>
-                        <tr><td>H6 (<code>home_ownership</code>)</td><td>RENT &gt; MORTGAGE &gt; OWN</td><td>\(\chi^2\), \(p=5{,}3\times10^{-10}\)</td><td>RENT: dirección −0,71 (puesto 16); OWN: −0,63 (puesto 23); MORTGAGE es la categoría omitida</td><td>Parcialmente confirmada: arrendar resta puntos, pero la vivienda propia también, así que no se confirma que sea la opción menos riesgosa</td></tr>
-                    </table>
-                    <p>Dos lecturas adicionales. Primero, esperábamos que haber tenido alguna mora (<code>ind_mora_previa</code>) fuera un factor determinante, pero quedó en el puesto 14 de 34 variables, con 1,08 puntos de impacto y una dirección positiva y débil (+0,34): en la red no se comporta como un factor de riesgo. En cambio, el registro público negativo (<code>ind_registro_publico</code>) está en el puesto 10 y resta puntos de forma muy consistente (−0,98), lo que sugiere que el historial negativo importa más cuando proviene de registros públicos que de moras. Segundo, en H6 esperábamos que ser propietario fuera favorable, porque no se paga arriendo, pero la vivienda propia ocupa el puesto 23, con 0,33 puntos de impacto, y su dirección también es negativa.</p>
-                    <p>[Completar: deriva temporal, censura, equidad, explicabilidad y riesgos de despliegue.]</p>
+                    <p>[Interpretación, hipótesis confirmadas/refutadas, deriva temporal, censura, equidad, explicabilidad, riesgos de despliegue.]</p>
                 </section>
 
                 <section id="ia">
@@ -445,7 +357,6 @@
     <li>Grinsztajn, L., Oyallon, E., &amp; Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? <em>Advances in Neural Information Processing Systems, 35</em>. https://arxiv.org/abs/2207.08815</li>
     <li>Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. https://doi.org/10.1016/j.ejor.2015.05.030</li>
     <li>Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
-    <li>Sundararajan, M., Taly, A., &amp; Yan, Q. (2017). Axiomatic attribution for deep networks. <em>Proceedings of the 34th International Conference on Machine Learning, 70</em>, 3319–3328. https://arxiv.org/abs/1703.01365</li>
     <li>Wendykan. (n.d.). <em>Lending Club loan data</em> [Conjunto de datos]. Kaggle. https://www.kaggle.com/datasets/wendykan/lending-club-loan-data</li>
   </ol>
 </section>
