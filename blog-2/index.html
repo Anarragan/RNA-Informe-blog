@@ -59,7 +59,7 @@
                         <li><a href="#fundamentos">Fundamentos matemáticos</a></li>
                         <li><a href="#metodologia">Metodología y experimentos</a></li>
                         <li><a href="#resultados">Resultados</a></li>
-                        <li><a href="#scorecard">Scorecard</a></li>
+                        <li><a href="#scorecard y variables de riesgo">Scorecard y variables de riesgo</a></li>
                         <li><a href="#discusion">Discusión y limitaciones</a></li>
                         <li><a href="#ia">Uso de IA</a></li>
                         <li><a href="#alucinacion">Cacería de la alucinación</a></li>
@@ -307,10 +307,101 @@
                     <p>[Como se observa en la Tabla 4... curvas ROC (Figura 2), calibración (Figura 3).]</p>
                 </section>
 
-                <section id="scorecard">
-                    <h2>8. Scorecard</h2>
+                <section id="scorecard y variables de riesgo">
+                    <h2>8. Scorecard y variables de riesgo</h2>
                     <div class="math">$$\text{Score}=\text{Offset}+\text{Factor}\cdot\ln(\text{odds}),\quad \text{Factor}=\frac{\text{PDO}}{\ln 2}$$</div>
-                    <p>[Parámetros: score base, odds base, PDO. Tabla de puntos por característica y punto de corte.]</p>
+                    <p>En el mundo bancario, el estándar es que entre más puntos tenga una persona, es menos probable que incumpla. Así mismo funciona nuestra clasificación.</p>
+
+                    <div class="callout">
+                        <strong>Parámetros de la scorecard:</strong> Los parámetros iniciales fueron: Base 600, odds 5:1, PDO 20.
+                    </div>
+                    <div class="math">$$\text{Factor}=\frac{20}{\ln 2}\approx 28{,}85,\qquad \text{Offset}=600-\text{Factor}\cdot\ln 5\approx 553{,}56$$</div>
+
+                    <p>La scorecard toma el logit \(z\) que sale de la última capa de la red neuronal y lo convierte en puntaje. Como \(\ln(\text{odds})=-z\), la fórmula queda así:</p>
+                    <div class="math">$$\text{Score}=\text{Offset}-\text{Factor}\cdot z(\mathbf{x})$$</div>
+                    <p>Luego, con gradientes integrados (Sundararajan et al., 2017), el puntaje de cada persona se reparte entre sus variables, y así podemos ver cuánto aporta cada una.</p>
+                    <p>Si el aumento de una variable sube el logit (más riesgo), el puntaje baja por el signo de \(-\text{Factor}\): habrá menos puntos y, por lo tanto, más probabilidad de incumplimiento.</p>
+
+                    <h3>Entonces, ¿por medio de la scorecard realmente puedo decir cuánto pesa una variable?</h3>
+                    <p>Como todas las variables continuas fueron estandarizadas (\(\sigma = 1\)) en el preprocesamiento y el \(\text{Factor} \approx 28{,}85\) es una constante fija para todas las variables, los puntos de distintas variables están en la misma escala y se pueden comparar: cuantos más puntos mueve una variable, más pesa en el puntaje de la red neuronal.</p>
+
+                    <h3>Puntos por variable</h3>
+                    <p>La Tabla 6 muestra, para los clientes de la partición de prueba, cuánto pesa cada una de las 34 variables. El <em>impacto</em> es el promedio del valor absoluto de los puntos que mueve la variable, sin importar el sentido. La <em>dirección</em> es la correlación entre el valor de la variable y sus puntos: si es negativa, los valores más altos (o tener la característica, en los indicadores y las categorías) restan puntos, es decir, aumentan el riesgo; si es positiva, suman puntos.</p>
+                    <div class="table-responsive">
+                        <table>
+                            <caption>Tabla 6. Impacto y dirección de las variables en la partición de prueba, ordenadas de mayor a menor impacto. Fuente: t6_rn_puntos_variables.csv en la carpeta del repo "resultados" </caption>
+                            <thead>
+                                <tr><th>Puesto</th><th>Variable</th><th>Impacto (puntos)</th><th>Dirección</th><th>Lectura</th></tr>
+                            </thead>
+                            <tbody>
+                            <tr><td>1</td><td><strong><code>term_60m</code></strong></td><td>8,21</td><td>−0,98</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>2</td><td><strong><code>annual_inc</code></strong></td><td>6,26</td><td>+0,96</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>3</td><td><strong><code>revol_util</code></strong></td><td>5,60</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>4</td><td><code>open_acc</code></td><td>4,22</td><td>−0,93</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>5</td><td><code>loan_amnt</code></td><td>4,20</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>6</td><td><code>inq_last_6mths</code></td><td>3,29</td><td>−0,95</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>7</td><td><code>total_acc</code></td><td>2,80</td><td>+0,93</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>8</td><td><code>revol_bal</code></td><td>2,66</td><td>+0,93</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>9</td><td><code>pub_rec</code></td><td>2,50</td><td>+0,78</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>10</td><td><code>ind_registro_publico</code></td><td>1,63</td><td>−0,98</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>11</td><td><code>purpose_credit_card</code></td><td>1,53</td><td>+0,95</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>12</td><td><code>emp_length_anios</code></td><td>1,35</td><td>−0,51</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>13</td><td><code>dti</code></td><td>1,14</td><td>−0,84</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>14</td><td><code>ind_mora_previa</code></td><td>1,08</td><td>+0,34</td><td>Efecto débil o mixto</td></tr>
+                            <tr><td>15</td><td><code>delinq_2yrs</code></td><td>1,07</td><td>−0,49</td><td>Efecto débil o mixto</td></tr>
+                            <tr><td>16</td><td><code>home_ownership_RENT</code></td><td>0,99</td><td>−0,71</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>17</td><td><code>purpose_small_business</code></td><td>0,85</td><td>−0,95</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>18</td><td><code>antiguedad_hist_anios</code></td><td>0,82</td><td>+0,11</td><td>Efecto débil o mixto</td></tr>
+                            <tr><td>19</td><td><code>verification_status_Verified</code></td><td>0,81</td><td>+0,65</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>20</td><td><code>purpose_other</code></td><td>0,71</td><td>−0,88</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>21</td><td><code>emp_length_nulo</code></td><td>0,47</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>22</td><td><code>verification_status_Source Verified</code></td><td>0,46</td><td>+0,42</td><td>Efecto débil o mixto</td></tr>
+                            <tr><td>23</td><td><code>home_ownership_OWN</code></td><td>0,33</td><td>−0,63</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>24</td><td><code>purpose_major_purchase</code></td><td>0,26</td><td>+0,97</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>25</td><td><code>purpose_medical</code></td><td>0,20</td><td>−0,90</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>26</td><td><code>purpose_home_improvement</code></td><td>0,15</td><td>+0,08</td><td>Efecto débil o mixto</td></tr>
+                            <tr><td>27</td><td><code>purpose_moving</code></td><td>0,10</td><td>−0,93</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>28</td><td><code>purpose_vacation</code></td><td>0,09</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>29</td><td><code>purpose_car</code></td><td>0,09</td><td>+0,90</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>30</td><td><code>purpose_house</code></td><td>0,06</td><td>−0,79</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>31</td><td><code>purpose_educational</code></td><td>0,05</td><td>—</td><td>Sin variación en prueba</td></tr>
+                            <tr><td>32</td><td><code>purpose_wedding</code></td><td>0,03</td><td>+0,74</td><td>Suma puntos (menos riesgo)</td></tr>
+                            <tr><td>33</td><td><code>purpose_renewable_energy</code></td><td>0,03</td><td>−0,96</td><td>Resta puntos (más riesgo)</td></tr>
+                            <tr><td>34</td><td><code>home_ownership_OTRO</code></td><td>0,02</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small">Nota: «efecto débil o mixto» indica una dirección con valor absoluto menor que 0,5. La dirección indica el sentido, no la magnitud del efecto. Los resultados describen asociaciones aprendidas por el modelo, no relaciones causales.</p>
+
+                    <div class="callout">
+                        <strong>Conclusión:</strong> Con esto concluimos que lo que más pesa para saber si una persona puede llegar a incumplir con los términos de su crédito es si adquirió un crédito de 60 meses. Y que, entre más altos sean sus ingresos anuales, menos probabilidades tendrá de incumplir con los términos de su crédito.
+                    </div>
+
+                    <h3>Justificación de la interpretabilidad</h3>
+                    
+                    <p><strong> ¿Por qué, para medir una variable, no basta con derivar el logit \(z(\mathbf{x})\) parcialmente respecto de esa variable \(j\)? </strong></p> 
+                    
+                    <p> En un modelo lineal esa derivada sería el coeficiente de la variable, el mismo para todos los clientes. En la red neuronal no es así: la derivada depende del cliente, porque la función de activación ReLU convierte en cero las activaciones negativas de las neuronas y, según los valores de las demás variables, unas neuronas se encienden y otras se apagan. Para una red con dos capas ocultas, con: </p>
+                    <p>\(\mathbf{u}^{(l)}=W^{(l)}\mathbf{h}^{(l-1)}+\mathbf{b}^{(l)}\), \(\mathbf{h}^{(l)}=\mathrm{ReLU}(\mathbf{u}^{(l)})\) </p>
+                    <p> y </p>
+                    <p> \(z=\mathbf{w}^\top\mathbf{h}^{(2)}+b\), la derivada es: </p>
+                    
+                    <div class="math">$$\frac{\partial z}{\partial x_j}=\Big[W^{(1)\top}D^{(1)}(\mathbf{x})\,W^{(2)\top}D^{(2)}(\mathbf{x})\,\mathbf{w}\Big]_j,\qquad D^{(l)}(\mathbf{x})=\mathrm{diag}\big(\mathbb{1}[\mathbf{u}^{(l)}&gt;0]\big)$$</div>
+                    <p>Las matrices \(D^{(l)}(\mathbf{x})\) cambian con el cliente, así que la derivada en un solo punto es una medida local: indica cuánto cambia el logit ante un cambio mínimo en ese punto, y puede dejar "huecos" donde las neuronas apagadas anulan el efecto. No resume cuánto aportó realmente la variable entre el perfil promedio y el cliente real.</p>
+                    <p>La solución es integrar esa derivada a lo largo de la línea recta que va del perfil promedio \(\mathbf{x}'\) (el cliente promedio del entrenamiento) al cliente \(\mathbf{x}\). Es el método de gradientes integrados (Sundararajan et al., 2017). Por el teorema fundamental del cálculo para integrales de línea, si se suman los gradientes integrados de las 34 variables de un cliente, se reconstruye el cambio total del logit desde el perfil promedio hasta el cliente real:</p>
+                    
+                    <div class="math">$$\int_0^1 \nabla z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)\cdot(\mathbf{x}-\mathbf{x}')\,d\alpha=z(\mathbf{x})-z(\mathbf{x}')$$
+                    $$\text{IG}_j(\mathbf{x})=(x_j-x'_j)\int_0^1\frac{\partial z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)}{\partial x_j}\,d\alpha,\qquad \sum_{j=1}^{34}\text{IG}_j(\mathbf{x})=z(\mathbf{x})-z(\mathbf{x}')$$</div>
+                    <p>Como el puntaje es: </p>
+                    <p>\(\text{Offset}-\text{Factor}\cdot z\), cada variable aporta \(-\text{Factor}\cdot\text{IG}_j\) puntos frente al perfil promedio:
+                    </p>
+                    
+                    <div class="math">$$\text{Score}(\mathbf{x})=\underbrace{\text{Offset}-\text{Factor}\,z(\mathbf{x}')}_{\text{puntos base}}+\sum_{j=1}^{34}\Big(-\text{Factor}\cdot\text{IG}_j(\mathbf{x})\Big)$$</div>
+                    <p>Así, si miramos la Tabla 6, el <em>impacto</em> de cada variable es el promedio del valor absoluto de los puntos hallados por gradientes integrados para esa variable en los clientes de prueba, y la <em>dirección</em> indica el sentido del efecto: negativa, la variable resta puntos (más riesgo); positiva, suma puntos (menos riesgo). El peso de la variable está en el impacto; la dirección solo indica el sentido.</p>
+                    <p>En el código, la función <code>puntos_por_variable</code> de <code>scorecard_red_neuronal.py</code> aproxima la integral con la regla del punto medio. Toma \(50\) pasos \(\alpha_k=(k-0{,}5)/50\), con \(k=1,\dots,50\), entre \(0\) y \(1\); le pide a PyTorch (<code>torch.autograd.grad</code>) la derivada exacta de la red en cada uno de esos 50 puntos del camino, promedia las 50 pendientes y multiplica el promedio por \((x_j-x'_j)\) y por \(-\text{Factor}\):</p>
+                    <div class="math">$$\text{puntos}_j(\mathbf{x})=-\text{Factor}\cdot(x_j-x'_j)\cdot\frac{1}{50}\sum_{k=1}^{50}\frac{\partial z}{\partial x_j}\Big(\mathbf{x}'+\alpha_k(\mathbf{x}-\mathbf{x}')\Big)$$</div>
+                    
+                    <p>Como la integral se aproxima con 50 pasos, la suma de los puntos por variable más los puntos base reproduce el puntaje de la red con un pequeño error numérico.</p>
                 </section>
 
                 <section id="discusion">
@@ -348,6 +439,7 @@
     <li>Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. https://doi.org/10.1016/j.ejor.2015.05.030</li>
     <li>Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
     <li>Wendykan. (n.d.). <em>Lending Club loan data</em> [Conjunto de datos]. Kaggle. https://www.kaggle.com/datasets/wendykan/lending-club-loan-data</li>
+    <li>Sundararajan, M., Taly, A., &amp; Yan, Q. (2017). Axiomatic attribution for deep networks. <em>Proceedings of the 34th International Conference on Machine Learning, 70</em>, 3319–3328. https://arxiv.org/abs/1703.01365</li>
   </ol>
 </section>
 
