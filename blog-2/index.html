@@ -378,6 +378,8 @@
                     </div>
 
                     <h3>Justificación de la interpretabilidad</h3>
+                    <p>
+                    </p>
                     
                     <p><strong> ¿Por qué, para medir una variable, no basta con derivar el logit \(z(\mathbf{x})\) parcialmente respecto de esa variable \(j\)? </strong></p> 
                     
@@ -406,7 +408,80 @@
 
                 <section id="discusion">
                     <h2>9. Discusión y limitaciones</h2>
+                    <p>
+                    </p>
                     <p>[Interpretación, hipótesis confirmadas/refutadas, deriva temporal, censura, equidad, explicabilidad, riesgos de despliegue.]</p>
+                    
+                    <p> Podemos ver que la red neuronal no es tan efectiva para datos tabulares debido a que (). Esto se explica por (), ya que (). </p> 
+                    <h3>Analisis de las hipotesis </h3>
+                    <p> Traigamos a colación nuevamente la tabla 3 </p>
+
+                    <div class="table-responsive">
+        <table>
+            <caption>Tabla 3. Hipótesis de riesgo financiero. Fuente: elaboración propia.</caption>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Hipótesis</th>
+                    <th>Variable</th>
+                    <th>Efecto esperado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>H1</td>
+                    <td>Mayor endeudamiento incrementa el riesgo</td>
+                    <td><code>dti</code></td>
+                    <td>+ Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H2</td>
+                    <td>Mayores ingresos reducen el riesgo</td>
+                    <td><code>annual_inc</code></td>
+                    <td>− Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H3</td>
+                    <td>Morosidad previa incrementa el riesgo futuro</td>
+                    <td><code>delinq_2yrs</code></td>
+                    <td>+ Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H4</td>
+                    <td>Historial crediticio más antiguo reduce el riesgo</td>
+                    <td><code>antiguedad_hist_anios</code></td>
+                    <td>− Riesgo</td>
+                </tr>
+                <tr>
+                    <td>H5</td>
+                    <td>El propósito del crédito altera el perfil de riesgo</td>
+                    <td><code>purpose</code></td>
+                    <td>Variable</td>
+                </tr>
+                <tr>
+                    <td>H6</td>
+                    <td>Arrendatarios presentan mayor riesgo que propietarios</td>
+                    <td><code>home_ownership</code></td>
+                    <td>RENT &gt; MORTGAGE &gt; OWN</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+                    
+                    <h4>    Con respecto a H1:</h4>
+                            <p> Vemos que es cierto que si un cliente esta mas endeudado tiene mas probabilidades de ser incumplido, sin embargo no es ni de lejos, la variable que mas afecte negativamente el puntaje de un cliente.  </p>  
+                    <h4>    Con respecto a H2:</h4>    
+                            <p> Nuestra prediccion fue totalmente acertada, los ingresos anuales de un cliente son, la variable que mas afecta positivamente el puntaje de un cliente.  </p>  
+                    <h4>    Con respecto a H3:</h4> 
+                            <p> Es cierto, afecta negativamente pero su efecto es muy debil, incluso mas debil que la cantidad de endeudamiento dti. </p>
+                    <h4>    Con respecto a H4:</h4> 
+                            <p> Si, la antiguedad del cliente es una variable que afecta positivamente, pero no entra si quiera entre las 5 variables que mas afectan positivamente. </p>
+                    <h4>    Con respecto a H5:</h4> 
+                            <p> Teniamos razon, el proposito del riesgo si afecta variablemente el puntaje de un cliente, como vemos en la tabla 6. </p>
+                    <h4>    Con respecto a H6:</h4> 
+                            <p> Nuestros resultados en esta hipotesis son los mas curiosos, resulta que esperabamos que el hecho de tener una casa propia aumentara el puntaje de un cliente, sin embargo, segun nuestros datos lo reduce. Aunque tener casa y no tener casa propia ambas afectan negativamente, teniamos razon al pensar que pagar arriendo afecta mas negativamente. </p> </p>
+                   
+                    
                 </section>
 
                 <section id="ia">
