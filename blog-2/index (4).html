@@ -378,17 +378,24 @@
                     </div>
 
                     <h3>Justificación de la interpretabilidad</h3>
-                    <p><strong>¿Por qué, para medir una variable, no basta con derivar el logit \(z(\mathbf{x})\) parcialmente respecto de esa variable \(j\)?</strong> En un modelo lineal esa derivada sería el coeficiente de la variable, el mismo para todos los clientes. En la red neuronal no es así: la derivada depende del cliente, porque la función de activación ReLU convierte en cero las activaciones negativas de las neuronas y, según los valores de las demás variables, unas neuronas se encienden y otras se apagan. Para una red con dos capas ocultas, con \(\mathbf{u}^{(l)}=W^{(l)}\mathbf{h}^{(l-1)}+\mathbf{b}^{(l)}\), \(\mathbf{h}^{(l)}=\mathrm{ReLU}(\mathbf{u}^{(l)})\) y \(z=\mathbf{w}^\top\mathbf{h}^{(2)}+b\), la derivada es:</p>
+                    
+                    <p><strong> ¿Por qué, para medir una variable, no basta con derivar el logit \(z(\mathbf{x})\) parcialmente respecto de esa variable \(j\)? </strong></p> 
+                    
+                    <p> En un modelo lineal esa derivada sería el coeficiente de la variable, el mismo para todos los clientes. En la red neuronal no es así: la derivada depende del cliente, porque la función de activación ReLU convierte en cero las activaciones negativas de las neuronas y, según los valores de las demás variables, unas neuronas se encienden y otras se apagan. Para una red con dos capas ocultas, con \(\mathbf{u}^{(l)}=W^{(l)}\mathbf{h}^{(l-1)}+\mathbf{b}^{(l)}\), \(\mathbf{h}^{(l)}=\mathrm{ReLU}(\mathbf{u}^{(l)})\) y \(z=\mathbf{w}^\top\mathbf{h}^{(2)}+b\), la derivada es: </p>
                     <div class="math">$$\frac{\partial z}{\partial x_j}=\Big[W^{(1)\top}D^{(1)}(\mathbf{x})\,W^{(2)\top}D^{(2)}(\mathbf{x})\,\mathbf{w}\Big]_j,\qquad D^{(l)}(\mathbf{x})=\mathrm{diag}\big(\mathbb{1}[\mathbf{u}^{(l)}&gt;0]\big)$$</div>
                     <p>Las matrices \(D^{(l)}(\mathbf{x})\) cambian con el cliente, así que la derivada en un solo punto es una medida local: indica cuánto cambia el logit ante un cambio mínimo en ese punto, y puede dejar "huecos" donde las neuronas apagadas anulan el efecto. No resume cuánto aportó realmente la variable entre el perfil promedio y el cliente real.</p>
                     <p>La solución es integrar esa derivada a lo largo de la línea recta que va del perfil promedio \(\mathbf{x}'\) (el cliente promedio del entrenamiento) al cliente \(\mathbf{x}\). Es el método de gradientes integrados (Sundararajan et al., 2017). Por el teorema fundamental del cálculo para integrales de línea, si se suman los gradientes integrados de las 34 variables de un cliente, se reconstruye el cambio total del logit desde el perfil promedio hasta el cliente real:</p>
+                    
                     <div class="math">$$\int_0^1 \nabla z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)\cdot(\mathbf{x}-\mathbf{x}')\,d\alpha=z(\mathbf{x})-z(\mathbf{x}')$$
                     $$\text{IG}_j(\mathbf{x})=(x_j-x'_j)\int_0^1\frac{\partial z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)}{\partial x_j}\,d\alpha,\qquad \sum_{j=1}^{34}\text{IG}_j(\mathbf{x})=z(\mathbf{x})-z(\mathbf{x}')$$</div>
-                    <p>Como el puntaje es \(\text{Offset}-\text{Factor}\cdot z\), cada variable aporta \(-\text{Factor}\cdot\text{IG}_j\) puntos frente al perfil promedio:</p>
+                    <p>Como el puntaje es \(\text{Offset}-\text{Factor}\cdot z\), cada variable aporta \(-\text{Factor}\cdot\text{IG}_j\) puntos frente al perfil promedio:
+                    </p>
+                    
                     <div class="math">$$\text{Score}(\mathbf{x})=\underbrace{\text{Offset}-\text{Factor}\,z(\mathbf{x}')}_{\text{puntos base}}+\sum_{j=1}^{34}\Big(-\text{Factor}\cdot\text{IG}_j(\mathbf{x})\Big)$$</div>
                     <p>Así, si miramos la Tabla 6, el <em>impacto</em> de cada variable es el promedio del valor absoluto de los puntos hallados por gradientes integrados para esa variable en los clientes de prueba, y la <em>dirección</em> indica el sentido del efecto: negativa, la variable resta puntos (más riesgo); positiva, suma puntos (menos riesgo). El peso de la variable está en el impacto; la dirección solo indica el sentido.</p>
                     <p>En el código, la función <code>puntos_por_variable</code> de <code>scorecard_red_neuronal.py</code> aproxima la integral con la regla del punto medio. Toma \(50\) pasos \(\alpha_k=(k-0{,}5)/50\), con \(k=1,\dots,50\), entre \(0\) y \(1\); le pide a PyTorch (<code>torch.autograd.grad</code>) la derivada exacta de la red en cada uno de esos 50 puntos del camino, promedia las 50 pendientes y multiplica el promedio por \((x_j-x'_j)\) y por \(-\text{Factor}\):</p>
                     <div class="math">$$\text{puntos}_j(\mathbf{x})=-\text{Factor}\cdot(x_j-x'_j)\cdot\frac{1}{50}\sum_{k=1}^{50}\frac{\partial z}{\partial x_j}\Big(\mathbf{x}'+\alpha_k(\mathbf{x}-\mathbf{x}')\Big)$$</div>
+                    
                     <p>Como la integral se aproxima con 50 pasos, la suma de los puntos por variable más los puntos base reproduce el puntaje de la red con un pequeño error numérico.</p>
                 </section>
 
