@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111d35">
+<meta name="description" content="Informe académico sobre estimación del riesgo de incumplimiento crediticio con regresión logística, redes neuronales y una scorecard interpretable.">
+<meta property="og:type" content="article"><meta property="og:title" content="Riesgo de crédito | Redes neuronales para datos tabulares"><meta property="og:description" content="Comparación temporal de modelos de probabilidad de incumplimiento y construcción de una scorecard interpretable.">
+<title>Riesgo de crédito | Redes neuronales para datos tabulares</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{color-scheme:light;--ink:#17233b;--soft:#526078;--muted:#758198;--paper:#f5f7fb;--surface:#fff;--line:#e2e8f0;--navy:#111d35;--teal:#087e83;--teal-soft:#e2f4f2;--blue:#3f6fbd;--amber:#a45e12;--amber-soft:#fff4e3;--red:#b54a48;--red-soft:#fff0ef;--green:#28745e;--green-soft:#e8f5ef;--shadow:0 16px 42px rgba(20,36,64,.08);--content:1240px;--sidebar:258px}
+*,*:before,*:after{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:92px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.72 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:var(--teal);text-decoration-thickness:1px;text-underline-offset:3px}a:hover{color:#045b60}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #69c7c4;outline-offset:3px;border-radius:5px}svg{max-width:100%}.skip-link{position:absolute;left:12px;top:-60px;z-index:1000;background:#fff;color:var(--navy);padding:10px 14px;border-radius:8px}.skip-link:focus{top:12px}.reading-progress{position:fixed;inset:0 0 auto;height:3px;z-index:1001}.reading-progress span{display:block;height:100%;width:0;background:#42c1b8;transition:width .12s linear}
+.hero{position:relative;overflow:hidden;isolation:isolate;color:#f5f8ff;background:radial-gradient(circle at 78% 20%,rgba(59,190,177,.22),transparent 28%),radial-gradient(circle at 95% 90%,rgba(80,128,209,.24),transparent 35%),linear-gradient(128deg,#101a30 0%,#172945 60%,#163c4c 100%)}.hero:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(90deg,black,transparent 90%)}.hero-inner{width:min(var(--content),calc(100% - 48px));margin:0 auto;padding:68px 0 56px}.topline{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:62px}.brand{display:inline-flex;align-items:center;gap:11px;color:#fff;text-decoration:none;font-weight:760;letter-spacing:-.02em}.brand-mark{display:grid;place-items:center;width:37px;height:37px;border:1px solid rgba(255,255,255,.27);border-radius:11px;background:rgba(255,255,255,.08)}.brand-mark svg{width:21px;height:21px}.top-links{display:flex;align-items:center;flex-wrap:wrap;gap:22px}.top-links a{color:#d5e4ef;font-size:.88rem;text-decoration:none}.top-links a:hover{color:#fff;text-decoration:underline}.eyebrow{display:flex;align-items:center;gap:10px;color:#83d7ce;text-transform:uppercase;letter-spacing:.15em;font-size:.72rem;font-weight:800}.eyebrow:before{content:"";width:24px;height:1px;background:currentColor}h1,h2,h3,h4{line-height:1.2;letter-spacing:-.035em}.hero h1{max-width:890px;margin:18px 0;font-size:clamp(2.7rem,6vw,5.15rem);font-weight:790}.hero h1 span{color:#7dd7cc}.hero-lead{max-width:790px;margin:0;color:#d2deea;font-size:clamp(1.05rem,1.6vw,1.23rem);line-height:1.65}.hero-meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 12px;color:#e4edf4;background:rgba(255,255,255,.07);font-size:.78rem}.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:31px}.button{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:44px;border:1px solid transparent;border-radius:10px;padding:10px 16px;text-decoration:none;font-size:.9rem;font-weight:750;transition:transform .16s ease,background .16s ease}.button:hover{transform:translateY(-1px)}.button-primary{background:#80d9ce;color:#10243b}.button-primary:hover{color:#10243b;background:#a1e7df}.button-ghost{color:#f2f6fb;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)}.button-ghost:hover{color:#fff;background:rgba(255,255,255,.12)}.hero-footnote{margin-top:18px;color:#a9bbcc;font-size:.78rem}
+.metric-strip{width:min(var(--content),calc(100% - 48px));margin:-25px auto 0;position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric-card{min-width:0;padding:20px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}.metric-value{display:block;font-size:clamp(1.55rem,3vw,2.15rem);line-height:1.15;letter-spacing:-.05em;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}.metric-label{display:block;margin-top:7px;color:var(--muted);font-size:.77rem}
+.layout{width:min(var(--content),calc(100% - 48px));margin:52px auto 92px;display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);gap:48px;align-items:start}.sidebar{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow:auto;padding:19px 17px 20px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.88)}.sidebar-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--muted)}.toc{margin:0;padding:0;list-style:none;counter-reset:toc}.toc li{counter-increment:toc;margin:2px 0}.toc a{display:flex;align-items:baseline;gap:10px;padding:7px 8px;border-radius:8px;color:#536179;text-decoration:none;font-size:.82rem;line-height:1.4}.toc a:before{content:counter(toc,decimal-leading-zero);flex:0 0 23px;color:#98a5b7;font-size:.65rem;font-weight:800}.toc a:hover{background:#f0f4f8;color:var(--ink)}.toc a[aria-current=location]{color:#075f64;background:var(--teal-soft);font-weight:750}.toc a[aria-current=location]:before{color:var(--teal)}.sidebar-note{margin:18px 4px 0;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.72rem;line-height:1.5}.content{min-width:0}.mobile-toc{display:none;margin-bottom:22px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.mobile-toc summary{cursor:pointer;padding:13px 16px;font-weight:750;color:var(--navy)}.mobile-toc .toc{padding:0 12px 12px}
+.section{scroll-margin-top:28px;padding:0 0 49px;margin-bottom:45px;border-bottom:1px solid var(--line)}.section:last-child{border-bottom:0}.section-kicker{display:flex;align-items:center;gap:10px;margin:0 0 10px;color:var(--teal);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:850}.section-kicker:before{content:"";width:20px;height:1px;background:currentColor}.section h2{margin:0 0 21px;color:var(--navy);font-size:clamp(1.85rem,3vw,2.45rem);font-weight:780}.section h3{margin:30px 0 12px;color:#223450;font-size:1.25rem;font-weight:760}.section h4{margin:21px 0 8px;color:#293c58;font-size:1.02rem;font-weight:760}p{margin:0 0 16px;color:#47556c}p strong{color:#233550}.lead-paragraph{font-size:1.08rem;line-height:1.8;color:#33435d}.muted{color:var(--muted)}.small{font-size:.84rem}.tiny{font-size:.74rem}code{background:#edf1f6;color:#324761;padding:.12em .38em;border-radius:5px;font-size:.88em}.inline-links{display:flex;flex-wrap:wrap;gap:12px 18px;margin-top:17px;font-size:.84rem;font-weight:700}.link-arrow:after{content:" ↗";font-size:.9em}
+.callout{margin:22px 0;padding:19px 21px;border:1px solid #cce7e4;border-left:4px solid var(--teal);border-radius:12px;background:#f0faf8}.callout p:last-child{margin-bottom:0}.callout strong{color:#075f64}.callout.warning{border-color:#f0dfc2;border-left-color:#c78630;background:#fff9ef}.callout.warning strong{color:#875016}.callout.neutral{border-color:var(--line);border-left-color:#7386a1;background:var(--surface)}.callout.danger{border-color:#f0d0ce;border-left-color:var(--red);background:var(--red-soft)}.callout.danger strong{color:#8f3937}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:21px 0}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:21px 0}.info-card{min-width:0;border:1px solid var(--line);border-radius:13px;padding:18px;background:var(--surface)}.info-card h3,.info-card h4{margin:0 0 7px;font-size:.95rem;letter-spacing:-.01em}.info-card p{margin:0;font-size:.86rem}.info-card .number{display:block;margin-bottom:8px;color:var(--teal);font-size:.73rem;font-weight:850;letter-spacing:.11em}
+.table-wrap{width:100%;overflow-x:auto;margin:19px 0 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}table{width:100%;border-collapse:collapse;font-size:.85rem;line-height:1.55}caption{caption-side:bottom;padding:11px 14px;color:var(--muted);text-align:left;font-size:.74rem}th,td{padding:12px 14px;border-bottom:1px solid #e9eef3;text-align:left;vertical-align:top}thead th{background:#f2f5f8;color:#33445f;font-size:.73rem;letter-spacing:.055em;text-transform:uppercase;font-weight:800}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fafbfd}td.numeric,th.numeric{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.table-note{margin:8px 0 0;color:var(--muted);font-size:.75rem}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:.71rem;line-height:1.5;font-weight:780;white-space:nowrap}.pill.good{background:var(--green-soft);color:var(--green)}.pill.mixed{background:var(--amber-soft);color:var(--amber)}.pill.low{background:#eaf0fb;color:#3f5d91}.pill.bad{background:var(--red-soft);color:var(--red)}
+.formula-box{margin:18px 0;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe;overflow-x:auto}.formula-label{margin-bottom:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;font-weight:800}.math{overflow-x:auto;color:#243b58;text-align:center;padding:5px 0}.formula-box .katex-display{margin:.65em 0}.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:step;margin:22px 0}.step{counter-increment:step;padding:17px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.step:before{content:"0" counter(step);display:block;margin-bottom:9px;color:var(--teal);font-size:.76rem;font-weight:900;letter-spacing:.1em}.step strong{display:block;margin-bottom:5px;color:var(--navy)}.step p{margin:0;font-size:.82rem}
+.split-bars{display:grid;gap:14px;margin:21px 0}.split-row{display:grid;grid-template-columns:118px minmax(0,1fr) 62px;gap:12px;align-items:center}.split-name{color:#33445f;font-size:.82rem;font-weight:750}.bar-track{height:12px;overflow:hidden;border-radius:99px;background:#e8edf3}.bar-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#3479a6,#42aaa3)}.split-value{color:var(--navy);font-size:.83rem;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}.chart-card{margin:21px 0;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.chart-head h3{margin:0 0 4px;font-size:1rem}.chart-head p{margin:0;color:var(--muted);font-size:.76rem}.chart-tag{flex:0 0 auto;border-radius:7px;padding:5px 8px;color:#43607b;background:#edf3f7;font-size:.68rem;font-weight:800}.bar-chart{display:grid;gap:12px}.bar-chart-row{display:grid;grid-template-columns:minmax(125px,170px) minmax(0,1fr) 58px;gap:10px;align-items:center}.bar-chart-label{color:#43536a;font-size:.78rem}.bar-chart-track{height:13px;background:#eef2f6;border-radius:4px;overflow:hidden}.bar-chart-fill{height:100%;border-radius:4px;background:#367b9f}.bar-chart-fill.alt{background:#2c9c90}.bar-chart-val{color:var(--navy);text-align:right;font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}.chart-foot{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:.74rem}.dual-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dual-charts .chart-card{margin:0}
+.hypothesis-list{display:grid;gap:10px;margin:20px 0}.hypothesis{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:13px;align-items:start;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.hypothesis-code{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;color:var(--teal);background:var(--teal-soft);font-size:.8rem;font-weight:850}.hypothesis h4{margin:0 0 4px;font-size:.9rem;letter-spacing:-.01em}.hypothesis p{margin:0;font-size:.8rem}.hypothesis .pill{margin-top:2px}.architecture{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:22px 0;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#f4f8fb,#f4faf9)}.arch-node{min-width:85px;padding:12px 13px;border:1px solid #ccdde4;border-radius:10px;background:#fff;text-align:center;box-shadow:0 5px 15px rgba(25,55,75,.04)}.arch-node b{display:block;color:#1b3b56;font-size:1.1rem}.arch-node span{display:block;color:var(--muted);font-size:.68rem}.arch-arrow{color:#70a6a8;font-size:1.25rem;font-weight:800}
+.score-equation{padding:22px;border-radius:14px;color:#edf8f7;background:linear-gradient(120deg,#152844,#16444b)}.score-equation p{color:#c9dcdf}.score-equation .math,.score-equation .katex{color:#fff}.score-highlight{color:#8de0d3!important;font-weight:800}.feature-list{display:grid;gap:11px;margin:21px 0}.feature-row{display:grid;grid-template-columns:170px minmax(0,1fr) 54px;gap:12px;align-items:center}.feature-name{color:#3d4f67;font-size:.78rem}.feature-track{height:11px;border-radius:3px;overflow:hidden;background:#edf1f5}.feature-fill{height:100%;background:linear-gradient(90deg,#4e83ad,#34a197)}.feature-value{text-align:right;color:#243852;font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+details{border:1px solid var(--line);border-radius:11px;background:var(--surface)}details+details{margin-top:9px}details summary{cursor:pointer;padding:13px 16px;color:#31445f;font-size:.88rem;font-weight:750}details .details-body{padding:0 16px 15px}details .details-body p:last-child{margin-bottom:0}.reference-list{padding-left:21px}.reference-list li{margin-bottom:13px;padding-left:4px;color:#536078;font-size:.84rem;overflow-wrap:anywhere}.reference-list em{color:#394c66}.site-footer{padding:34px 24px;color:#b9c7d6;background:var(--navy)}.footer-inner{width:min(var(--content),100%);margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:18px}.footer-title{color:#fff;font-weight:750}.footer-note{color:#9caec1;font-size:.75rem}.back-top{display:inline-flex;align-items:center;gap:7px;color:#9de2d8;text-decoration:none;font-size:.82rem;font-weight:750;white-space:nowrap}
+@media(max-width:1020px){:root{--sidebar:220px}.layout{gap:28px}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.dual-charts{grid-template-columns:1fr}}
+@media(max-width:780px){.hero-inner,.metric-strip,.layout{width:min(100% - 32px,var(--content))}.hero-inner{padding:33px 0 54px}.topline{align-items:flex-start;margin-bottom:48px}.top-links{gap:10px 15px;justify-content:flex-end}.top-links a{font-size:.77rem}.metric-strip{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:-20px;gap:9px}.metric-card{padding:15px}.layout{display:block;margin-top:34px}.sidebar{display:none}.mobile-toc{display:block}.section{padding-bottom:36px;margin-bottom:34px}.steps{grid-template-columns:1fr}}
+@media(max-width:540px){.hero-inner,.metric-strip,.layout{width:calc(100% - 28px)}.topline{display:block;margin-bottom:42px}.top-links{justify-content:flex-start;margin-top:17px}.hero h1{font-size:2.55rem}.hero-actions .button{width:100%}.grid-2,.grid-3{grid-template-columns:1fr}.split-row{grid-template-columns:92px minmax(0,1fr) 54px;gap:8px}.bar-chart-row{grid-template-columns:105px minmax(0,1fr) 50px;gap:7px}.feature-row{grid-template-columns:116px minmax(0,1fr) 44px;gap:7px}.hypothesis{grid-template-columns:38px minmax(0,1fr)}.hypothesis .pill{grid-column:2;justify-self:start}.chart-card{padding:15px}.footer-inner{display:block}.back-top{margin-top:15px}}
+@media print{@page{margin:16mm}body{background:#fff;color:#111;font-size:10pt}.reading-progress,.top-links,.hero-actions,.sidebar,.mobile-toc,.back-top{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #19364a}.hero-inner{width:100%;padding:15px 0 25px}.hero h1,.hero-lead,.brand,.hero-footnote{color:#111}.hero h1 span,.eyebrow{color:#087e83}.hero-meta .chip{color:#333;border-color:#ccc;background:#fff}.metric-strip{width:100%;margin:15px 0;grid-template-columns:repeat(4,1fr)}.metric-card,.info-card,.chart-card,.callout,.formula-box{box-shadow:none;break-inside:avoid}.layout{width:100%;display:block;margin:25px 0}.section{break-inside:auto}table,.hypothesis,.step{break-inside:avoid}.site-footer{color:#333;background:#fff;border-top:1px solid #aaa;padding:15px 0}.footer-title,.footer-note{color:#333}a{color:#174f6b;text-decoration:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+<div class="reading-progress" aria-hidden="true"><span id="progress-bar"></span></div>
+<header class="hero" id="inicio">
+  <div class="hero-inner">
+    <div class="topline">
+      <a class="brand" href="#inicio" aria-label="Inicio del informe">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="m7 11 10-5M7 13l10 5M19 7v10"/></svg></span>
+        <span>Laboratorio de modelos predictivos</span>
+      </a>
+      <nav class="top-links" aria-label="Enlaces del proyecto">
+        <a href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares" target="_blank" rel="noopener noreferrer">Repositorio</a>
+        <a href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares/blob/main/app.py" target="_blank" rel="noopener noreferrer">Código de la app</a>
+        <a href="../index.html">Inicio del sitio</a>
+      </nav>
+    </div>
+    <p class="eyebrow">Trabajo académico · 2026</p>
+    <h1>Riesgo de crédito,<br><span>visto desde los datos.</span></h1>
+    <p class="hero-lead">Comparación de una regresión logística y una red neuronal para estimar la probabilidad de incumplimiento de créditos de consumo en el momento de la originación, con evaluación temporal y una scorecard interpretable.</p>
+    <div class="hero-meta" aria-label="Características del estudio">
+      <span class="chip">LendingClub · 2007–2015</span><span class="chip">Clasificación binaria</span><span class="chip">Evaluación temporal</span><span class="chip">Python · scikit-learn · PyTorch</span>
+    </div>
+    <div class="hero-actions"><a class="button button-primary" href="#resultados">Explorar resultados <span aria-hidden="true">↓</span></a><a class="button button-ghost" href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares" target="_blank" rel="noopener noreferrer">Ver código fuente <span aria-hidden="true">↗</span></a></div>
+    <p class="hero-footnote">Informe técnico de un proyecto académico. No constituye asesoría financiera ni una decisión real de crédito.</p>
+  </div>
+</header>
+
+<section class="metric-strip" aria-label="Resumen cuantitativo del estudio">
+  <div class="metric-card"><span class="metric-value">268.530</span><span class="metric-label">créditos con desenlace observado</span></div>
+  <div class="metric-card"><span class="metric-value">21,9 %</span><span class="metric-label">incumplimiento en el conjunto modelable</span></div>
+  <div class="metric-card"><span class="metric-value">34</span><span class="metric-label">características tras el preprocesamiento</span></div>
+  <div class="metric-card"><span class="metric-value">0,669</span><span class="metric-label">AUC de la red en la ejecución reportada</span></div>
+</section>
+
+<main class="layout" id="contenido">
+  <aside class="sidebar" aria-label="Navegación del informe">
+    <p class="sidebar-title">En este informe <span aria-hidden="true">⌄</span></p>
+    <ol class="toc" id="toc-desktop">
+      <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Caso de uso</a></li><li><a href="#datos">Datos y variables</a></li><li><a href="#eda">Análisis e hipótesis</a></li><li><a href="#preprocesamiento">Preprocesamiento</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#scorecard">Scorecard e interpretación</a></li><li><a href="#discusion">Discusión y limitaciones</a></li><li><a href="#ia">Uso de IA</a></li><li><a href="#alucinacion">Cacería de la alucinación</a></li><li><a href="#conclusiones">Conclusiones</a></li><li><a href="#referencias">Referencias</a></li>
+    </ol>
+    <p class="sidebar-note">Los resultados distinguen la evaluación de una ejecución del modelo y el promedio de 30 inicializaciones de la red neuronal.</p>
+  </aside>
+
+  <div class="content">
+    <details class="mobile-toc">
+      <summary>Contenido del informe</summary>
+      <ol class="toc" id="toc-mobile">
+        <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Caso de uso</a></li><li><a href="#datos">Datos y variables</a></li><li><a href="#eda">Análisis e hipótesis</a></li><li><a href="#preprocesamiento">Preprocesamiento</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#scorecard">Scorecard e interpretación</a></li><li><a href="#discusion">Discusión y limitaciones</a></li><li><a href="#ia">Uso de IA</a></li><li><a href="#alucinacion">Cacería de la alucinación</a></li><li><a href="#conclusiones">Conclusiones</a></li><li><a href="#referencias">Referencias</a></li>
+      </ol>
+    </details>
+
+    <section class="section" id="resumen">
+      <p class="section-kicker">00 · Síntesis</p><h2>Resumen ejecutivo</h2>
+      <p class="lead-paragraph">El objetivo es estimar la probabilidad de que un crédito termine en incumplimiento utilizando únicamente información que estaría disponible al momento de solicitarlo. Para ello se comparan dos enfoques: una regresión logística como referencia interpretable y un perceptrón multicapa (MLP) entrenado con PyTorch.</p>
+      <p>El estudio utiliza 268.530 créditos de LendingClub emitidos entre junio de 2007 y diciembre de 2015. La variable objetivo se construye a partir del estado final del préstamo: cumplimiento (0) o incumplimiento (1). Se excluyen los créditos cuyo desenlace no está observado y las variables que incorporan información posterior al desembolso o decisiones internas de la plataforma.</p>
+      <div class="grid-3">
+        <article class="info-card"><span class="number">PREGUNTA 01</span><h3>¿Aprende más la red?</h3><p>La ventaja de AUC en una ejecución individual es pequeña; al promediar 30 semillas, la red no supera a la regresión logística.</p></article>
+        <article class="info-card"><span class="number">PREGUNTA 02</span><h3>¿Importa el tiempo?</h3><p>Sí. La tasa de incumplimiento observada aumenta del 16,30 % en entrenamiento al 26,00 % en prueba.</p></article>
+        <article class="info-card"><span class="number">PREGUNTA 03</span><h3>¿Se puede explicar?</h3><p>La scorecard convierte el logit en puntos y distribuye la contribución mediante Gradientes Integrados.</p></article>
+      </div>
+      <div class="callout"><strong>Hallazgo central.</strong><p>La mayor complejidad de una red neuronal no garantiza una mejora robusta en datos tabulares. La comparación entre una sola ejecución y el promedio de varias semillas muestra por qué es importante reportar tanto el desempeño como la variabilidad del entrenamiento.</p></div>
+    </section>
+
+    <section class="section" id="introduccion">
+      <p class="section-kicker">01 · Contexto</p><h2>Introducción y caso de uso</h2>
+      <p>El riesgo de crédito es la posibilidad de que un prestatario no cumpla las obligaciones pactadas y ocasione pérdidas al prestamista. En la originación, estimar la probabilidad de incumplimiento permite apoyar decisiones de aprobación, fijación de condiciones y asignación de límites. La estimación debe utilizar información conocida antes del desembolso; de lo contrario, el modelo podría aprovechar señales que no existirían cuando se toma la decisión.</p>
+      <p>La regresión logística constituye una línea base razonable por su sencillez y facilidad de interpretación. Las redes neuronales pueden representar relaciones no lineales e interacciones, pero esa flexibilidad debe demostrar una mejora en datos no utilizados durante el entrenamiento. En datos tabulares, comparar modelos complejos con una referencia sólida es más informativo que asumir que una arquitectura más profunda será superior.</p>
+      <div class="table-wrap"><table><caption>Tabla 1. Definición operativa del caso de uso. Fuente: elaboración propia.</caption><thead><tr><th>Elemento</th><th>Definición</th></tr></thead><tbody>
+        <tr><td>Usuario previsto</td><td>Área de riesgos de crédito o motor de apoyo a la decisión.</td></tr><tr><td>Decisión apoyada</td><td>Evaluar el riesgo de una solicitud y aportar información para aprobar, rechazar o establecer condiciones.</td></tr><tr><td>Momento de predicción</td><td>Originación: antes de desembolsar el crédito.</td></tr><tr><td>Información disponible</td><td>Características declaradas en la solicitud y antecedentes del reporte de crédito.</td></tr><tr><td>Variable objetivo</td><td>Indicador binario de incumplimiento derivado de <code>loan_status</code>.</td></tr><tr><td>Prevención de fuga</td><td>Excluir pagos, recuperaciones, calificaciones internas y demás datos posteriores a la originación.</td></tr>
+      </tbody></table></div>
+      <h3>Objetivo y preguntas de investigación</h3>
+      <p><strong>Objetivo general:</strong> construir y comparar modelos de regresión logística y redes neuronales para estimar la probabilidad de incumplimiento en la originación, evaluarlos con una partición cronológica y transformar la salida de la red en una scorecard interpretable.</p>
+      <ol><li>¿La red neuronal mejora el AUC, el KS y la calibración respecto a la regresión logística en periodos posteriores?</li><li>¿Cómo cambia el desempeño cuando se evalúa en créditos emitidos después del periodo de entrenamiento?</li><li>¿Qué factores se asocian con aumentos o reducciones del puntaje y en qué medida coinciden con las hipótesis financieras?</li></ol>
+    </section>
+
+    <section class="section" id="datos">
+      <p class="section-kicker">02 · Fuente y construcción</p><h2>Datos y variables</h2>
+      <h3>Fuente y cobertura</h3>
+      <p>Se utilizó el conjunto público <em>Lending Club Loan Data</em>, difundido en Kaggle, con registros de préstamos emitidos entre junio de 2007 y diciembre de 2015. Tras seleccionar estados con desenlace observado y preparar las variables, el conjunto modelable contiene 268.530 créditos.</p>
+      <div class="grid-2"><article class="info-card"><span class="number">POBLACIÓN MODELABLE</span><h3>268.530 registros</h3><p>Préstamos con estado terminal conocido, después de excluir los registros sin desenlace observado.</p></article><article class="info-card"><span class="number">CLASE POSITIVA</span><h3>21,9 % de incumplimiento</h3><p>La clase positiva representa los créditos que terminaron en incumplimiento según la definición adoptada.</p></article></div>
+      <h3>Construcción de la variable objetivo</h3>
+      <p>La etiqueta binaria se obtiene de <code>loan_status</code>. La clasificación agrupa los estados de cumplimiento como cero y los estados de incumplimiento como uno.</p>
+      <div class="grid-2"><article class="info-card"><span class="pill good">Clase 0 · Cumplido</span><h3 style="margin-top:10px">Fully Paid</h3><p>Incluye también <code>Does not meet the credit policy. Status:Fully Paid</code>.</p></article><article class="info-card"><span class="pill bad">Clase 1 · Incumplido</span><h3 style="margin-top:10px">Charged Off / Default</h3><p>Incluye <code>Charged Off</code>, <code>Default</code>, <code>Late (31-120 days)</code> y su estado equivalente de la política de crédito.</p></article></div>
+      <div class="callout warning"><strong>Precaución con los estados no terminales.</strong><p>Los registros <code>Current</code> no se etiquetan como buenos ni malos porque su resultado final no se conoce en el conjunto utilizado. Esta decisión evita asignar una etiqueta especulativa, pero también puede introducir sesgo de selección: los créditos con desenlace observado podrían no representar exactamente a todos los créditos originados.</p></div>
+      <h3>Prevención de fuga de información</h3>
+      <p>Se retiraron atributos que no estarían disponibles al originar un crédito o que reflejan decisiones posteriores de LendingClub. Entre ellos se encuentran <code>grade</code>, <code>sub_grade</code>, <code>int_rate</code>, <code>recoveries</code>, <code>total_pymnt</code> y <code>last_pymnt_amnt</code>. También se descartaron columnas con más de 97 % de valores nulos, de acuerdo con el criterio descrito en el informe.</p>
+      <div class="callout danger"><strong>Por qué importa.</strong><p>Un modelo puede alcanzar métricas artificialmente altas si recibe información generada después de la decisión que pretende apoyar. La evaluación sería entonces poco representativa de un escenario real de originación.</p></div>
+      <h3>Variables de entrada</h3>
+      <p>La matriz final que consumen los modelos contiene <strong>34 características</strong>. Las variables categóricas se expanden mediante codificación one-hot; por eso el número de columnas del modelo es mayor que el de campos originales. La implementación actual del preprocesador define las siguientes familias:</p>
+      <div class="table-wrap"><table><caption>Tabla 2. Variables y transformaciones principales. Fuente: preprocesador del repositorio.</caption><thead><tr><th>Familia</th><th>Variables representativas</th><th>Tratamiento</th></tr></thead><tbody>
+        <tr><td>Montos y razones</td><td><code>loan_amnt</code>, <code>annual_inc</code>, <code>dti</code>, <code>revol_bal</code>, <code>revol_util</code></td><td>Transformación logarítmica para ingreso y saldo rotativo; imputación, recorte por percentiles y estandarización.</td></tr><tr><td>Conteos</td><td><code>delinq_2yrs</code>, <code>inq_last_6mths</code>, <code>open_acc</code>, <code>pub_rec</code>, <code>total_acc</code></td><td>Imputación con mediana, recorte por percentiles y estandarización.</td></tr><tr><td>Indicadores</td><td><code>term_60m</code>, <code>ind_mora_previa</code>, <code>ind_registro_publico</code></td><td>Variables binarias conservadas como 0/1.</td></tr><tr><td>Antigüedad</td><td><code>emp_length_anios</code>, <code>antiguedad_hist_anios</code></td><td>Variables numéricas; se conserva un indicador para la antigüedad laboral no reportada.</td></tr><tr><td>Categóricas</td><td><code>purpose</code>, <code>home_ownership</code>, <code>verification_status</code></td><td>Codificación one-hot con categoría de referencia omitida.</td></tr>
+      </tbody></table></div>
+      <p class="small muted">La categoría de referencia del propósito es <code>debt_consolidation</code>; para vivienda, <code>MORTGAGE</code>; y para verificación, <code>Not Verified</code>. Una categoría no vista durante el entrenamiento queda codificada como la referencia.</p>
+      <h3>Valores faltantes</h3>
+      <p>El preprocesador calcula las medianas, los percentiles de recorte y los parámetros de estandarización exclusivamente con el conjunto de entrenamiento. Después aplica esos mismos parámetros a validación y prueba. La antigüedad laboral faltante se marca con un indicador antes de imputar; el resto de continuas y conteos se imputa con la mediana. Esta separación evita que la información de los conjuntos futuros influya en el ajuste del preprocesamiento.</p>
+    </section>
+
+    <section class="section" id="eda">
+      <p class="section-kicker">03 · Exploración</p><h2>Análisis descriptivo e hipótesis</h2>
+      <p>Antes de ajustar los modelos se formularon seis hipótesis guiadas por intuiciones de riesgo crediticio. La tasa observada de incumplimiento por partición permite ver que la composición del riesgo cambia entre periodos; las atribuciones de la scorecard aportan una segunda lectura, pero no deben confundirse con efectos causales.</p>
+      <div class="chart-card"><div class="chart-head"><div><h3>Incumplimiento observado por periodo</h3><p>Proporción de créditos clasificados como incumplidos en cada partición.</p></div><span class="chart-tag">Tasa observada</span></div>
+        <div class="split-bars" role="img" aria-label="La tasa de incumplimiento aumenta de 16,30 por ciento en entrenamiento a 22,95 por ciento en validación y 26,00 por ciento en prueba.">
+          <div class="split-row"><span class="split-name">Entrenamiento</span><div class="bar-track"><div class="bar-fill" style="width:54.33%"></div></div><span class="split-value">16,30 %</span></div><div class="split-row"><span class="split-name">Validación</span><div class="bar-track"><div class="bar-fill" style="width:76.50%"></div></div><span class="split-value">22,95 %</span></div><div class="split-row"><span class="split-name">Prueba</span><div class="bar-track"><div class="bar-fill" style="width:86.65%"></div></div><span class="split-value">26,00 %</span></div>
+        </div><p class="chart-foot">Escala visual máxima: 30 %. La figura resume las tasas calculadas para entrenamiento (2007–2012), validación (2013) y prueba (2014–2015).</p>
+      </div>
+      <h3>Hipótesis de riesgo</h3>
+      <div class="table-wrap"><table><caption>Tabla 3. Hipótesis planteadas antes de interpretar el modelo. Fuente: elaboración propia.</caption><thead><tr><th>Hipótesis</th><th>Factor</th><th>Dirección esperada</th></tr></thead><tbody>
+        <tr><td>H1</td><td>Relación deuda-ingreso (<code>dti</code>)</td><td>Mayor DTI → mayor riesgo.</td></tr><tr><td>H2</td><td>Ingreso anual (<code>annual_inc</code>)</td><td>Mayor ingreso → menor riesgo.</td></tr><tr><td>H3</td><td>Morosidad previa (<code>delinq_2yrs</code> e indicador asociado)</td><td>Más moras → mayor riesgo futuro.</td></tr><tr><td>H4</td><td>Antigüedad del historial crediticio</td><td>Historial más largo → menor riesgo.</td></tr><tr><td>H5</td><td>Propósito del crédito (<code>purpose</code>)</td><td>El perfil de riesgo difiere según el uso.</td></tr><tr><td>H6</td><td>Tenencia de vivienda (<code>home_ownership</code>)</td><td>Se esperaba RENT &gt; MORTGAGE &gt; OWN en riesgo.</td></tr>
+      </tbody></table></div>
+      <p>La lectura cuantitativa de estas hipótesis se amplía en la sección de scorecard a partir de los resultados de Gradientes Integrados. Es importante distinguir entre una dirección de atribución observada en el conjunto de prueba y una relación causal: el modelo aprende asociaciones condicionadas por las demás variables incluidas.</p>
+    </section>
+
+    <section class="section" id="preprocesamiento">
+      <p class="section-kicker">04 · Preparación de datos</p><h2>Preprocesamiento y partición temporal</h2>
+      <p>La preparación se ejecuta mediante un único preprocesador compartido por la regresión logística, la red neuronal y la scorecard. De esta manera, los modelos reciben las mismas columnas, generadas con los mismos criterios y sin ajustar estadísticas sobre datos posteriores.</p>
+      <div class="steps"><article class="step"><strong>Transformar e imputar</strong><p>Aplicar <code>log(1+x)</code> a ingreso y saldo rotativo; completar valores numéricos faltantes con medianas aprendidas en entrenamiento.</p></article><article class="step"><strong>Limitar y escalar</strong><p>Recortar las variables numéricas en los percentiles 1 y 99 y estandarizar con media y desviación del entrenamiento.</p></article><article class="step"><strong>Codificar categorías</strong><p>Crear indicadores one-hot y conservar los campos binarios ya construidos.</p></article></div>
+      <h3>Partición cronológica</h3>
+      <p>La variable <code>issue_d</code> determina los cortes. En lugar de mezclar aleatoriamente créditos de diferentes años, el procedimiento simula un despliegue: aprender del pasado, seleccionar con un periodo posterior y medir finalmente en un periodo aún más reciente.</p>
+      <div class="table-wrap"><table><caption>Tabla 4. Partición temporal reportada en el repositorio. Fuente: <code>t5_particiones.csv</code>.</caption><thead><tr><th>Conjunto</th><th>Periodo</th><th class="numeric">Registros</th><th class="numeric">Tasa de incumplimiento</th></tr></thead><tbody>
+        <tr><td><strong>Entrenamiento</strong></td><td>Jun. 2007 – dic. 2012</td><td class="numeric">90.347</td><td class="numeric">16,30 %</td></tr><tr><td><strong>Validación</strong></td><td>Ene. – dic. 2013</td><td class="numeric">73.194</td><td class="numeric">22,95 %</td></tr><tr><td><strong>Prueba</strong></td><td>Ene. 2014 – dic. 2015</td><td class="numeric">104.989</td><td class="numeric">26,00 %</td></tr><tr><td><strong>Total</strong></td><td>Jun. 2007 – dic. 2015</td><td class="numeric">268.530</td><td class="numeric">—</td></tr>
+      </tbody></table></div>
+      <div class="callout warning"><strong>Deriva temporal y observabilidad.</strong><p>La prevalencia de incumplimiento aumenta entre particiones. Puede reflejar cambios en la población, condiciones de originación y condiciones económicas, además del efecto de excluir préstamos sin desenlace observado. Por ello, una misma puntuación o probabilidad puede no conservar su interpretación temporal sin monitoreo y recalibración.</p></div>
+    </section>
+
+    <section class="section" id="fundamentos">
+      <p class="section-kicker">05 · Marco matemático</p><h2>Fundamentos matemáticos</h2>
+      <h3>5.1 Regresión logística</h3>
+      <p>La regresión logística transforma una combinación lineal de las características en una probabilidad entre cero y uno. El modelo estima el logit de la clase positiva, que en este trabajo representa el incumplimiento:</p>
+      <div class="formula-box"><div class="formula-label">Función lineal y función logística</div><div class="math">\[z(\mathbf{x})=\beta_0+\sum_{j=1}^{34}\beta_jx_j\]</div><div class="math">\[p_{\text{malo}}(\mathbf{x})=\sigma(z)=\frac{1}{1+e^{-z}}\]</div><div class="math">\[\operatorname{logit}(p)=\ln\!\left(\frac{p}{1-p}\right)=z(\mathbf{x})\]</div></div>
+      <p>La regularización Ridge penaliza coeficientes de gran magnitud. En la implementación se seleccionó <code>C = 0,00129</code> mediante una búsqueda de diez configuraciones; en la parametrización de scikit-learn, un valor menor de <code>C</code> implica una regularización más fuerte.</p>
+      <h3>5.2 Perceptrón multicapa (MLP)</h3>
+      <p>La red transforma las entradas mediante una secuencia de capas densas y funciones de activación. La configuración seleccionada en la búsqueda del repositorio contiene dos capas ocultas, con 128 y 64 neuronas, respectivamente; utiliza ReLU y Dropout del 40 %.</p>
+      <div class="architecture" role="img" aria-label="Arquitectura de red neuronal: 34 entradas, capa densa de 128 neuronas, capa densa de 64 neuronas y una salida logit."><div class="arch-node"><b>34</b><span>entradas</span></div><span class="arch-arrow" aria-hidden="true">→</span><div class="arch-node"><b>128</b><span>ReLU · Dropout 0,4</span></div><span class="arch-arrow" aria-hidden="true">→</span><div class="arch-node"><b>64</b><span>ReLU · Dropout 0,4</span></div><span class="arch-arrow" aria-hidden="true">→</span><div class="arch-node"><b>1</b><span>logit de incumplimiento</span></div></div>
+      <div class="formula-box"><div class="formula-label">Propagación hacia adelante</div><div class="math">\[\mathbf{h}^{(l)}=\phi\!\left(W^{(l)}\mathbf{h}^{(l-1)}+\mathbf{b}^{(l)}\right),\qquad \mathbf{h}^{(0)}=\mathbf{x}\]</div><div class="math">\[\phi(z)=\operatorname{ReLU}(z)=\max(0,z)\]</div><div class="math">\[z(\mathbf{x})=W^{(L)}\mathbf{h}^{(L-1)}+b^{(L)},\qquad p_{\text{malo}}=\sigma(z)\]</div></div>
+      <p>La red devuelve un <em>logit</em> sin aplicar sigmoide en la capa final. La probabilidad se obtiene posteriormente mediante la función logística. Esta separación permite utilizar una función de pérdida numéricamente estable.</p>
+      <h3>5.3 Máxima verosimilitud y entropía cruzada</h3>
+      <p>Para cada crédito, la etiqueta se modela como una variable Bernoulli con probabilidad de incumplimiento \(p_i\). La función objetivo es la entropía cruzada binaria, equivalente al negativo del logaritmo de la verosimilitud:</p>
+      <div class="formula-box"><div class="math">\[y_i\mid\mathbf{x}_i\sim\operatorname{Bernoulli}(p_i),\qquad p_i=\sigma(z_i)\]</div><div class="math">\[\mathcal{L}=\prod_{i=1}^{N}p_i^{y_i}(1-p_i)^{1-y_i}\]</div><div class="math">\[J=-\frac{1}{N}\sum_{i=1}^{N}\left[y_i\ln p_i+(1-y_i)\ln(1-p_i)\right]\]</div></div>
+      <p>En PyTorch se emplea <code>BCEWithLogitsLoss</code>, que combina internamente la operación de sigmoide con la entropía cruzada para mejorar la estabilidad numérica.</p>
+      <h3>5.4 Retropropagación</h3>
+      <p>La retropropagación aplica la regla de la cadena para obtener el gradiente de la pérdida respecto a cada peso y sesgo. Para una salida logística y entropía cruzada binaria, el error de salida se expresa como la diferencia entre la probabilidad predicha y la etiqueta:</p>
+      <div class="formula-box"><div class="math">\[\delta^{(L)}=\mathbf{p}-\mathbf{y}\]</div><div class="math">\[\delta^{(l)}=\left(W^{(l+1)\top}\delta^{(l+1)}\right)\odot\phi'\!\left(\mathbf{z}^{(l)}\right)\]</div><div class="math">\[\frac{\partial J}{\partial W^{(l)}}=\delta^{(l)}\mathbf{h}^{(l-1)\top},\qquad \frac{\partial J}{\partial\mathbf{b}^{(l)}}=\delta^{(l)}\]</div></div>
+      <h3>5.5 Regularización y optimización</h3>
+      <p>En la red, Dropout desactiva aleatoriamente una fracción de las activaciones durante el entrenamiento. La búsqueda de hiperparámetros considera distintos tamaños de capas, activaciones, tasas de aprendizaje, optimizadores, tasas de Dropout y penalizaciones L2. La configuración seleccionada utiliza Adam, tasa de aprendizaje 0,01 y <code>weight_decay = 0</code>; por tanto, en esa configuración concreta no se aplica penalización L2 mediante el optimizador.</p>
+    </section>
+
+    <section class="section" id="metodologia">
+      <p class="section-kicker">06 · Diseño experimental</p><h2>Metodología y experimentos</h2>
+      <h3>6.1 Regresión logística como línea base</h3>
+      <p>Se evaluaron diez valores de regularización y se seleccionó <code>C = 0,00129</code>. El modelo resultante contiene 35 parámetros: 34 coeficientes y un intercepto. El tiempo de búsqueda registrado fue de aproximadamente 2,02 segundos y el ajuste final tomó aproximadamente 0,12 segundos en la máquina utilizada para los experimentos.</p>
+      <h3>6.2 Búsqueda de la red neuronal</h3>
+      <p>La búsqueda aleatoria evaluó diez combinaciones de arquitectura e hiperparámetros, seleccionando la menor pérdida de validación. La configuración ganadora registrada en <code>t4_busqueda.csv</code> fue:</p>
+      <div class="table-wrap"><table><caption>Tabla 5. Configuración seleccionada de la red neuronal. Fuente: <code>t4_busqueda.csv</code>.</caption><thead><tr><th>Hiperparámetro</th><th>Valor seleccionado</th></tr></thead><tbody>
+        <tr><td>Capas ocultas</td><td>[128, 64]</td></tr><tr><td>Activación</td><td>ReLU</td></tr><tr><td>Dropout</td><td>0,40</td></tr><tr><td>Optimizador</td><td>Adam</td></tr><tr><td>Tasa de aprendizaje</td><td>0,01</td></tr><tr><td>Penalización L2</td><td>0</td></tr><tr><td>Parámetros entrenables</td><td>12.801</td></tr><tr><td>Pérdida de validación en la búsqueda</td><td>0,51066</td></tr>
+      </tbody></table></div>
+      <h3>6.3 Entrenamiento y control del sobreajuste</h3>
+      <p>El entrenamiento utiliza mini-lotes de 1.024 observaciones y parada temprana con paciencia de cinco épocas. Se guarda la configuración con mejor pérdida de validación. Posteriormente se repite el entrenamiento con 30 semillas para medir cuánto varía el resultado por la inicialización de los pesos y el orden de los mini-lotes.</p>
+      <div class="grid-3"><article class="info-card"><span class="number">BÚSQUEDA</span><h3>10 configuraciones</h3><p>Selección por pérdida de validación.</p></article><article class="info-card"><span class="number">ROBUSTEZ</span><h3>30 semillas</h3><p>Variabilidad de la red con la misma arquitectura seleccionada.</p></article><article class="info-card"><span class="number">VALIDACIÓN</span><h3>Parada temprana</h3><p>Paciencia de 5 épocas y mini-lotes de 1.024 filas.</p></article></div>
+      <h3>6.4 Protocolo de evaluación</h3>
+      <p>Los dos modelos se comparan sobre las mismas particiones y el mismo preprocesamiento. La validación se usa en la selección y la parada temprana; el periodo 2014–2015 se reserva como conjunto de prueba para estimar el comportamiento en créditos emitidos después del periodo de entrenamiento.</p>
+    </section>
+
+    <section class="section" id="resultados">
+      <p class="section-kicker">07 · Evidencia cuantitativa</p><h2>Resultados</h2>
+      <p>El repositorio contiene dos vistas complementarias. La tabla de métricas de evaluación muestra el desempeño de los modelos guardados en una ejecución concreta. El archivo de comparación resume la distribución del desempeño de la red al repetir el entrenamiento con 30 semillas. Se presentan por separado para no confundir una realización particular con el promedio de varias inicializaciones.</p>
+      <h3>7.1 Evaluación de una ejecución</h3>
+      <div class="table-wrap"><table><caption>Tabla 6. Métricas en el conjunto de prueba para los modelos guardados. Fuente: <code>t5_metricas.csv</code>.</caption><thead><tr><th>Modelo</th><th class="numeric">AUC</th><th class="numeric">KS</th><th class="numeric">Gini</th><th class="numeric">Brier</th></tr></thead><tbody>
+        <tr><td><strong>Regresión logística</strong></td><td class="numeric">0,6654</td><td class="numeric">0,2395</td><td class="numeric">0,3308</td><td class="numeric">0,1862</td></tr><tr><td><strong>Red neuronal</strong></td><td class="numeric">0,6688</td><td class="numeric">0,2469</td><td class="numeric">0,3376</td><td class="numeric">0,1835</td></tr>
+      </tbody></table></div>
+      <div class="dual-charts">
+        <div class="chart-card"><div class="chart-head"><div><h3>AUC-ROC en prueba</h3><p>Mayor capacidad de ordenar los casos de mayor riesgo.</p></div><span class="chart-tag">Mayor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="AUC de regresión logística 0,6654 y de red neuronal 0,6688."><div class="bar-chart-row"><span class="bar-chart-label">Logística</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:66.54%"></div></div><span class="bar-chart-val">0,6654</span></div><div class="bar-chart-row"><span class="bar-chart-label">Red neuronal</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:66.88%"></div></div><span class="bar-chart-val">0,6688</span></div></div>
+          <p class="chart-foot">La diferencia de esta ejecución es de aproximadamente 0,0034 puntos de AUC.</p>
+        </div>
+        <div class="chart-card"><div class="chart-head"><div><h3>Brier en prueba</h3><p>Promedio del error cuadrático de las probabilidades.</p></div><span class="chart-tag">Menor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="Brier de regresión logística 0,1862 y de red neuronal 0,1835."><div class="bar-chart-row"><span class="bar-chart-label">Logística</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:93.08%"></div></div><span class="bar-chart-val">0,1862</span></div><div class="bar-chart-row"><span class="bar-chart-label">Red neuronal</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:91.77%"></div></div><span class="bar-chart-val">0,1835</span></div></div>
+          <p class="chart-foot">Se utiliza una escala visual de 0 a 0,20; el valor menor indica menor error cuadrático medio.</p>
+        </div>
+      </div>
+      <h3>7.2 Robustez: promedio de 30 semillas</h3>
+      <div class="table-wrap"><table><caption>Tabla 7. AUC de prueba al repetir el entrenamiento de la red. La regresión logística tiene una sola estimación en el archivo comparativo. Fuente: <code>comparacion.csv</code>.</caption><thead><tr><th>Modelo / resumen</th><th class="numeric">AUC medio</th><th class="numeric">Desv. estándar</th><th class="numeric">Mejor</th><th class="numeric">Peor</th></tr></thead><tbody>
+        <tr><td>Regresión logística</td><td class="numeric">0,6654</td><td class="numeric">—</td><td class="numeric">0,6654</td><td class="numeric">0,6654</td></tr><tr><td>Red neuronal · 30 semillas</td><td class="numeric">0,6627</td><td class="numeric">0,0053</td><td class="numeric">0,6696</td><td class="numeric">0,6494</td></tr>
+      </tbody></table></div>
+      <div class="callout"><strong>Lectura correcta de la comparación.</strong><p>En la ejecución individual, la red alcanza un AUC ligeramente mayor (0,6688 frente a 0,6654). Sin embargo, el promedio de sus 30 semillas es 0,6627, inferior al valor de la regresión logística; además, la desviación estándar entre semillas es 0,0053. Por ello, no puede afirmarse que la red mejore de forma robusta a la línea base. Tampoco se debe llamar “estadísticamente significativa” a una diferencia sin un contraste estadístico específico.</p></div>
+      <h3>7.3 ¿Qué significan las métricas?</h3>
+      <div class="grid-2"><article class="info-card"><h3>AUC-ROC</h3><p>Mide la capacidad de ordenar un crédito incumplido por encima de uno cumplido. Un valor de 0,5 equivale al azar; 1 representa separación perfecta.</p></article><article class="info-card"><h3>KS</h3><p>Es la máxima distancia entre las distribuciones acumuladas de puntuaciones de las dos clases. Cuanto mayor, mejor separación.</p></article><article class="info-card"><h3>Gini</h3><p>Transformación del AUC mediante \(Gini=2\,AUC-1\). Facilita expresar la discriminación en una escala equivalente.</p></article><article class="info-card"><h3>Brier</h3><p>Error cuadrático medio entre probabilidad predicha y resultado observado. Evalúa la calidad de las probabilidades, no solo el ordenamiento.</p></article></div>
+      <h3>7.4 Señal de calibración</h3>
+      <p>En la partición de prueba, la tasa observada de incumplimiento es 25,995 %. La probabilidad media estimada es 18,640 % para la regresión logística y 20,099 % para la red neuronal. Ambos promedios quedan por debajo de la frecuencia observada, una señal de que las probabilidades no reflejan completamente el nivel medio de riesgo de ese periodo. Aunque el Brier de la red es menor en esta ejecución, sigue siendo necesario revisar la curva de calibración y considerar recalibración temporal antes de cualquier uso operacional.</p>
+    </section>
+
+    <section class="section" id="scorecard">
+      <p class="section-kicker">08 · Interpretabilidad</p><h2>Scorecard y variables de riesgo</h2>
+      <p>La red produce un logit que puede transformarse en un puntaje de crédito. La convención adoptada es que <strong>más puntos representan menor riesgo</strong>. Para explicar por qué una persona obtiene un puntaje particular, se emplean Gradientes Integrados respecto al perfil promedio del conjunto de entrenamiento.</p>
+      <div class="score-equation"><p class="small" style="margin-bottom:10px">Conversión entre probabilidad de incumplimiento y puntaje</p><div class="math">\[\text{Odds}_{\text{buenos}}=\frac{1-p_{\text{malo}}}{p_{\text{malo}}}=e^{-z}\]</div><div class="math">\[\text{Puntaje}=\text{Offset}+\text{Factor}\cdot\ln(\text{Odds}_{\text{buenos}})=\text{Offset}-\text{Factor}\cdot z\]</div><p class="score-highlight">Escala utilizada: 600 puntos con odds de referencia 5:1 y PDO = 20.</p><div class="math">\[\text{Factor}=\frac{PDO}{\ln 2}=28,854\qquad \text{Offset}=553,561\]</div></div>
+      <p class="small muted">PDO (<em>Points to Double the Odds</em>) indica cuántos puntos se necesitan para duplicar las odds de buenos frente a malos. Con esta escala, sumar 20 puntos duplica esas odds; no significa que la probabilidad de incumplimiento se reduzca exactamente a la mitad.</p>
+      <h3>8.1 Atribución mediante Gradientes Integrados</h3>
+      <p>El método compara el perfil evaluado \(\mathbf{x}\) con un perfil de referencia \(\mathbf{x}_{ref}\), que en la implementación corresponde al promedio de las características del conjunto de entrenamiento. Integra el gradiente de la salida a lo largo del camino entre ambos perfiles:</p>
+      <div class="formula-box"><div class="math">\[IG_j(\mathbf{x};\mathbf{x}_{ref})=(x_j-x_{ref,j})\int_0^1\frac{\partial z(\mathbf{x}_{ref}+\alpha(\mathbf{x}-\mathbf{x}_{ref}))}{\partial x_j}\,d\alpha\]</div><div class="math">\[\sum_{j=1}^{34}IG_j(\mathbf{x};\mathbf{x}_{ref})=z(\mathbf{x})-z(\mathbf{x}_{ref})\]</div><div class="math">\[\text{Puntaje}(\mathbf{x})=\text{Puntos base}-\text{Factor}\sum_j IG_j(\mathbf{x};\mathbf{x}_{ref})\]</div></div>
+      <p>La implementación aproxima la integral con 50 pasos y utiliza el signo negativo al convertir contribuciones del logit en puntos. Así, la suma de las contribuciones por variable, más el puntaje base del perfil de referencia, reconstruye el puntaje del modelo hasta el error numérico de la aproximación.</p>
+      <h3>8.2 Variables con mayor movimiento del puntaje</h3>
+      <p>La tabla siguiente ordena las variables por el promedio del valor absoluto de los puntos atribuidos en la prueba. La columna de dirección resume la correlación entre el valor de la característica y los puntos que recibe: una correlación negativa indica que valores más altos suelen asociarse con una reducción del puntaje.</p>
+      <div class="chart-card"><div class="chart-head"><div><h3>Impacto medio absoluto en puntos</h3><p>Diez variables con mayor magnitud media de atribución.</p></div><span class="chart-tag">Puntos · prueba</span></div>
+        <div class="feature-list" role="img" aria-label="Importancia media absoluta: plazo 60 meses 8,21; ingreso anual 6,26; utilización rotativa 5,60; cuentas abiertas 4,22; monto solicitado 4,20; consultas recientes 3,29; cuentas totales 2,80; saldo rotativo 2,66; registros públicos 2,50; indicador de registro público 1,63.">
+          <div class="feature-row"><span class="feature-name">Plazo 60 meses</span><div class="feature-track"><div class="feature-fill" style="width:100%"></div></div><span class="feature-value">8,21</span></div>
+          <div class="feature-row"><span class="feature-name">Ingreso anual</span><div class="feature-track"><div class="feature-fill" style="width:76.25%"></div></div><span class="feature-value">6,26</span></div>
+          <div class="feature-row"><span class="feature-name">Uso rotativo</span><div class="feature-track"><div class="feature-fill" style="width:68.16%"></div></div><span class="feature-value">5,60</span></div>
+          <div class="feature-row"><span class="feature-name">Cuentas abiertas</span><div class="feature-track"><div class="feature-fill" style="width:51.39%"></div></div><span class="feature-value">4,22</span></div>
+          <div class="feature-row"><span class="feature-name">Monto solicitado</span><div class="feature-track"><div class="feature-fill" style="width:51.12%"></div></div><span class="feature-value">4,20</span></div>
+          <div class="feature-row"><span class="feature-name">Consultas recientes</span><div class="feature-track"><div class="feature-fill" style="width:40.03%"></div></div><span class="feature-value">3,29</span></div>
+          <div class="feature-row"><span class="feature-name">Cuentas totales</span><div class="feature-track"><div class="feature-fill" style="width:34.09%"></div></div><span class="feature-value">2,80</span></div>
+          <div class="feature-row"><span class="feature-name">Saldo rotativo</span><div class="feature-track"><div class="feature-fill" style="width:32.39%"></div></div><span class="feature-value">2,66</span></div>
+          <div class="feature-row"><span class="feature-name">Registros públicos</span><div class="feature-track"><div class="feature-fill" style="width:30.43%"></div></div><span class="feature-value">2,50</span></div>
+          <div class="feature-row"><span class="feature-name">Indicador registro</span><div class="feature-track"><div class="feature-fill" style="width:19.82%"></div></div><span class="feature-value">1,63</span></div>
+        </div><p class="chart-foot">Los valores son promedios absolutos de puntos por variable; no representan un efecto fijo para todos los solicitantes ni una relación causal.</p>
+      </div>
+      <div class="table-wrap"><table><caption>Tabla 8. Las diez variables de mayor impacto en la scorecard. Fuente: <code>t6_rn_puntos_variables.csv</code>.</caption><thead><tr><th>Variable</th><th class="numeric">Impacto medio absoluto</th><th class="numeric">Correlación con puntos</th><th>Lectura descriptiva</th></tr></thead><tbody>
+        <tr><td><code>term_60m</code></td><td class="numeric">8,2101</td><td class="numeric">−0,9812</td><td>El indicador de 60 meses se asocia con menos puntos.</td></tr><tr><td><code>annual_inc</code></td><td class="numeric">6,2604</td><td class="numeric">+0,9604</td><td>Mayores ingresos se asocian con más puntos.</td></tr><tr><td><code>revol_util</code></td><td class="numeric">5,5960</td><td class="numeric">−0,9408</td><td>Mayor uso del crédito rotativo se asocia con menos puntos.</td></tr><tr><td><code>open_acc</code></td><td class="numeric">4,2188</td><td class="numeric">−0,9253</td><td>En esta atribución, mayores cuentas abiertas se asocian con menos puntos.</td></tr><tr><td><code>loan_amnt</code></td><td class="numeric">4,1975</td><td class="numeric">−0,9449</td><td>Mayor monto solicitado se asocia con menos puntos.</td></tr><tr><td><code>inq_last_6mths</code></td><td class="numeric">3,2873</td><td class="numeric">−0,9461</td><td>Más consultas recientes se asocian con menos puntos.</td></tr><tr><td><code>total_acc</code></td><td class="numeric">2,7992</td><td class="numeric">+0,9314</td><td>Mayor número total de cuentas se asocia con más puntos.</td></tr><tr><td><code>revol_bal</code></td><td class="numeric">2,6601</td><td class="numeric">+0,9340</td><td>La dirección agregada de la atribución es positiva.</td></tr><tr><td><code>pub_rec</code></td><td class="numeric">2,4987</td><td class="numeric">+0,7823</td><td>La dirección agregada es positiva; requiere revisión contextual.</td></tr><tr><td><code>ind_registro_publico</code></td><td class="numeric">1,6271</td><td class="numeric">−0,9752</td><td>El indicador de registro público se asocia con menos puntos.</td></tr>
+      </tbody></table></div>
+      <h3>8.3 Contraste de las hipótesis</h3>
+      <div class="hypothesis-list">
+        <article class="hypothesis"><span class="hypothesis-code">H1</span><div><h4>Endeudamiento (DTI)</h4><p><code>dti</code> tiene impacto medio absoluto de 1,14 puntos (posición 13) y dirección −0,84. La dirección coincide con la hipótesis: mayor DTI tiende a restar puntos. Su magnitud es inferior a la de las variables más influyentes.</p></div><span class="pill good">Apoyo parcial</span></article>
+        <article class="hypothesis"><span class="hypothesis-code">H2</span><div><h4>Ingreso anual</h4><p><code>annual_inc</code> ocupa la posición 2, con 6,26 puntos de impacto medio absoluto y dirección +0,96. Es un resultado consistente con la expectativa de que ingresos mayores aporten puntos.</p></div><span class="pill good">Consistente</span></article>
+        <article class="hypothesis"><span class="hypothesis-code">H3</span><div><h4>Morosidad previa</h4><p><code>delinq_2yrs</code> presenta dirección negativa (−0,49), pero <code>ind_mora_previa</code> presenta correlación positiva (+0,34). Las dos representaciones no cuentan la misma historia; no es correcto afirmar que ambos indicadores restan puntos.</p></div><span class="pill mixed">Mixta</span></article>
+        <article class="hypothesis"><span class="hypothesis-code">H4</span><div><h4>Antigüedad del historial</h4><p><code>antiguedad_hist_anios</code> tiene impacto medio absoluto de 0,82 puntos (posición 18) y correlación positiva débil (+0,11). La dirección es compatible con la hipótesis, pero la señal es pequeña.</p></div><span class="pill mixed">Débil</span></article>
+        <article class="hypothesis"><span class="hypothesis-code">H5</span><div><h4>Propósito del préstamo</h4><p>Los indicadores de propósito presentan comportamientos distintos: <code>purpose_credit_card</code> tiene dirección positiva (+0,95) y 1,53 puntos de impacto; <code>purpose_small_business</code> tiene dirección negativa (−0,95) y 0,85 puntos. El perfil depende de la categoría y de la referencia usada.</p></div><span class="pill good">Heterogénea</span></article>
+        <article class="hypothesis"><span class="hypothesis-code">H6</span><div><h4>Tenencia de vivienda</h4><p><code>home_ownership_RENT</code> tiene dirección negativa (−0,71) y 0,99 puntos de impacto. Sin embargo, <code>home_ownership_OWN</code> también tiene dirección negativa (−0,63), aunque con impacto menor (0,33). No se observa el orden esperado de manera limpia.</p></div><span class="pill mixed">No concluyente</span></article>
+      </div>
+      <div class="callout neutral"><strong>Cómo leer las direcciones.</strong><p>La columna de dirección del archivo de resultados es la correlación entre una característica y los puntos atribuidos a esa característica. No equivale a un coeficiente causal. En indicadores categóricos, la lectura es relativa a la codificación one-hot y a la categoría de referencia; una conclusión de negocio necesita comparar perfiles y distribuciones, no interpretar una correlación aislada como regla universal.</p></div>
+    </section>
+
+    <section class="section" id="discusion">
+      <p class="section-kicker">09 · Interpretación crítica</p><h2>Discusión y limitaciones</h2>
+      <h3>¿Por qué la red no ofrece una mejora robusta?</h3>
+      <ol>
+        <li><strong>Señal tabular estructurada.</strong> Las variables financieras contienen información útil que puede ser capturada por una combinación relativamente sencilla de características transformadas.</li>
+        <li><strong>Preprocesamiento compartido.</strong> La imputación, transformación logarítmica, recorte y codificación ya organizan parte de la señal antes de que la red aprenda.</li>
+        <li><strong>Regularización y tamaño efectivo.</strong> Dropout y parada temprana reducen el sobreajuste, pero no garantizan que las capas ocultas aprendan patrones que generalicen mejor que la regresión logística.</li>
+        <li><strong>Deriva entre periodos.</strong> El crecimiento de la tasa observada de incumplimiento entre entrenamiento y prueba indica que las condiciones y la población no son constantes en el tiempo.</li>
+      </ol>
+      <h3>Limitaciones del estudio</h3>
+      <div class="grid-2">
+        <article class="info-card"><h3>Datos históricos</h3><p>La muestra corresponde a una plataforma estadounidense y a originaciones de 2007–2015. No representa automáticamente el mercado colombiano ni las condiciones actuales.</p></article>
+        <article class="info-card"><h3>Desenlaces observados</h3><p>Excluir préstamos <code>Current</code> evita etiquetar resultados desconocidos, pero la selección de créditos con desenlace terminal puede sesgar la muestra.</p></article>
+        <article class="info-card"><h3>Calibración temporal</h3><p>La probabilidad media estimada queda por debajo de la tasa observada en prueba. La calibración necesita análisis y seguimiento específico.</p></article>
+        <article class="info-card"><h3>Interpretabilidad</h3><p>Los Gradientes Integrados explican la salida del modelo con respecto a una referencia; no identifican causas ni sustituyen una evaluación de equidad.</p></article>
+        <article class="info-card"><h3>Variabilidad</h3><p>La dispersión entre semillas de la red muestra que una sola inicialización no basta para caracterizar su desempeño esperado.</p></article>
+        <article class="info-card"><h3>Validación externa</h3><p>No se reporta una evaluación independiente en otra entidad, país o periodo posterior a 2015.</p></article>
+      </div>
+      <div class="callout warning"><strong>Antes de un uso real.</strong><p>Serían necesarios datos recientes y representativos, validación externa, seguimiento de deriva, pruebas de calibración, análisis de equidad y revisión jurídica y de gobierno de modelos. El resultado académico no debe utilizarse para aprobar o negar créditos reales.</p></div>
+    </section>
+
+    <section class="section" id="ia">
+      <p class="section-kicker">10 · Herramientas</p><h2>Uso de inteligencia artificial</h2>
+      <p>La IA se utilizó como apoyo para explorar implementaciones y comprender métodos. Las sugerencias se incorporaron después de revisar su pertinencia frente a los datos, las métricas y los fundamentos del proyecto. La herramienta no sustituye la comprobación experimental ni la responsabilidad del equipo sobre el código y las conclusiones.</p>
+      <div class="table-wrap"><table><caption>Tabla 9. Ejemplos de uso documentados por el equipo. Fuente: elaboración propia.</caption><thead><tr><th>#</th><th>Consulta / tarea</th><th>Herramienta</th><th>Apoyo obtenido</th><th>Revisión realizada</th></tr></thead><tbody>
+        <tr><td>1</td><td>Programar una búsqueda aleatoria de arquitecturas y evaluar el modelo.</td><td>Gemini</td><td>Propuesta de código para búsqueda de hiperparámetros y parada temprana.</td><td>Se contrastaron las configuraciones con las pérdidas de validación y los resultados sobre las particiones.</td></tr>
+        <tr><td>2</td><td>Explicar el método de Gradientes Integrados.</td><td>Gemini</td><td>Descomposición de la salida de la red en contribuciones por variable.</td><td>Se revisó la referencia utilizada, la propiedad de completitud y la conversión de logit a puntos.</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="section" id="alucinacion">
+      <p class="section-kicker">11 · Verificación</p><h2>Cacería de la alucinación</h2>
+      <p>La suposición que se puso a prueba fue que una red neuronal debía superar ampliamente a la regresión logística por ser un modelo más complejo. Los resultados no respaldan esa idea: una ejecución de la red obtiene una pequeña ventaja de AUC, pero el promedio de 30 semillas queda por debajo de la línea base logística.</p>
+      <p>La revisión del repositorio también permitió identificar por qué los resultados de una implementación anterior no eran comparables: aquella versión conservaba variables posteriores al desembolso y utilizaba una partición aleatoria. Esas decisiones podían introducir fuga de información y producir métricas artificialmente altas. La evaluación actual utiliza información de originación y cortes cronológicos; por eso sus valores son más modestos, pero corresponden mejor al caso de uso planteado.</p>
+      <div class="callout"><strong>Aprendizaje metodológico.</strong><p>Una métrica alta no valida por sí sola un modelo. Es necesario revisar cuándo se genera cada variable, cómo se divide la muestra, qué población representa la prueba y si los resultados se mantienen al cambiar la semilla de entrenamiento.</p></div>
+    </section>
+
+    <section class="section" id="conclusiones">
+      <p class="section-kicker">12 · Cierre</p><h2>Conclusiones y trabajo futuro</h2>
+      <ol>
+        <li>La regresión logística proporciona una línea base competitiva para estos datos tabulares. La red neuronal mejora ligeramente el AUC en una ejecución concreta, pero el promedio de 30 semillas no supera a la logística; por tanto, no se demuestra una mejora robusta.</li>
+        <li>La partición temporal revela una diferencia importante en la tasa observada de incumplimiento: 16,30 % en entrenamiento, 22,95 % en validación y 26,00 % en prueba. La deriva temporal y la selección de desenlaces observados deben considerarse al interpretar las probabilidades.</li>
+        <li>La scorecard traduce la salida de la red a una escala de puntos y utiliza Gradientes Integrados para distribuir la diferencia respecto al perfil promedio de entrenamiento.</li>
+        <li>Las hipótesis sobre ingreso anual y endeudamiento reciben apoyo en la dirección de las atribuciones. Otras, como morosidad previa y vivienda, muestran resultados mixtos y requieren análisis más cuidadosos.</li>
+      </ol>
+      <h3>Trabajo futuro</h3>
+      <ul><li>Evaluar calibración y recalibrar las probabilidades en una ventana temporal reciente.</li><li>Comparar con modelos basados en árboles y métodos de ensamble bajo exactamente las mismas particiones.</li><li>Analizar estabilidad de variables, subpoblaciones y posibles diferencias de desempeño entre grupos.</li><li>Incorporar una validación externa y documentar el monitoreo necesario para un eventual despliegue.</li></ul>
+    </section>
+
+    <section class="section" id="referencias">
+      <p class="section-kicker">13 · Fuentes</p><h2>Referencias</h2>
+      <ol class="reference-list">
+        <li>Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635.</li>
+        <li>Grinsztajn, L., Oyallon, E., &amp; Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? <em>Advances in Neural Information Processing Systems, 35</em>. <a href="https://arxiv.org/abs/2207.08815" target="_blank" rel="noopener noreferrer">arXiv:2207.08815</a>.</li>
+        <li>Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. <a href="https://doi.org/10.1016/j.ejor.2015.05.030" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.ejor.2015.05.030</a>.</li>
+        <li>Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
+        <li>Wendykan. (s. f.). <em>Lending Club Loan Data</em> [Conjunto de datos]. Kaggle. <a href="https://www.kaggle.com/datasets/wendykan/lending-club-loan-data" target="_blank" rel="noopener noreferrer">Consultar conjunto de datos</a>.</li>
+        <li>Sundararajan, M., Taly, A., &amp; Yan, Q. (2017). Axiomatic attribution for deep networks. <em>Proceedings of the 34th International Conference on Machine Learning, 70</em>, 3319–3328. <a href="https://arxiv.org/abs/1703.01365" target="_blank" rel="noopener noreferrer">arXiv:1703.01365</a>.</li>
+      </ol>
+      <h3>Material técnico del proyecto</h3>
+      <div class="grid-2">
+        <article class="info-card"><h3>Repositorio y código</h3><p>Scripts de preparación, regresión logística, red neuronal, evaluación, scorecard y aplicación.</p><div class="inline-links"><a class="link-arrow" href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares" target="_blank" rel="noopener noreferrer">Repositorio GitHub</a><a class="link-arrow" href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares/blob/main/Parte_1/red_neuronal.py" target="_blank" rel="noopener noreferrer">Red neuronal</a></div></article>
+        <article class="info-card"><h3>Resultados reproducibles</h3><p>Tablas de métricas, particiones temporales, búsqueda de hiperparámetros y contribuciones de la scorecard.</p><div class="inline-links"><a class="link-arrow" href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares/tree/main/Parte_1/resultados" target="_blank" rel="noopener noreferrer">Archivos de resultados</a><a class="link-arrow" href="https://github.com/Anarragan/RNA-Trabajo2-Redes-neuronales-para-datos-tabulares/blob/main/app.py" target="_blank" rel="noopener noreferrer">Aplicación Streamlit</a></div></article>
+      </div>
+      <p class="small muted">El repositorio incluye instrucciones para ejecutar localmente la aplicación mediante <code>streamlit run app.py</code>. No se incluye un enlace público de despliegue porque el código consultado no declara una URL activa para la aplicación ni para el video promocional.</p>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="footer-inner"><div><div class="footer-title">Redes neuronales para datos tabulares</div><div class="footer-note">Proyecto académico · Riesgo de incumplimiento en la originación de crédito · 2026</div></div><a class="back-top" href="#inicio">Volver al inicio <span aria-hidden="true">↑</span></a></div></footer>
+
+<script>
+// Render matemático. Si el CDN no responde, las expresiones permanecen visibles en texto.
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false }
+      ], throwOnError: false,
+      ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    });
+  }
+});
+// Barra de lectura.
+(function () {
+  const bar = document.getElementById('progress-bar');
+  let ticking = false;
+  function updateProgress() {
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+    bar.style.width = Math.min(100, Math.max(0, progress)) + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { window.requestAnimationFrame(updateProgress); ticking = true; }
+  }, { passive: true });
+  window.addEventListener('resize', updateProgress); updateProgress();
+})();
+// Resalta en el índice la sección que se está leyendo.
+(function () {
+  const sections = Array.from(document.querySelectorAll('.content > .section'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      const currentId = '#' + entry.target.id;
+      links.forEach(function (link) {
+        if (link.getAttribute('href') === currentId) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    });
+  }, { rootMargin: '-18% 0px -68% 0px', threshold: 0 });
+  sections.forEach(function (section) { observer.observe(section); });
+  links.forEach(function (link) {
+    link.addEventListener('click', function () {
+      const mobileMenu = document.querySelector('.mobile-toc');
+      if (mobileMenu && window.matchMedia('(max-width: 780px)').matches) mobileMenu.open = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>
