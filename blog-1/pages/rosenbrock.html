@@ -387,14 +387,16 @@
 
     <p>
         Para comparar los métodos en una misma escala, se propone la siguiente
-        equivalencia, ampliamente usada en la literatura de optimización
-        (Nocedal &amp; Wright, 2006): una evaluación del gradiente analítico
-        cuesta aproximadamente lo mismo que aproximarlo por diferencias
-        centrales, lo cual requiere $2n$ evaluaciones de $f$ en dimensión $n$.
+        equivalencia: una evaluación del gradiente analítico cuenta como
+        <strong>una</strong> evaluación de $f$. La justificación es que el
+        gradiente de Rosenbrock se implementó de forma cerrada en
+        <code>problems.py</code> (<code>gradiente_rosenbrock</code>), sin
+        recurrir a diferencias finitas. Por lo tanto, calcular el gradiente
+        cuesta aproximadamente lo mismo que evaluar la función una vez.
     </p>
 
     <div class="formula">
-        $$1 \text{ eval. de } \nabla f \;\equiv\; 2n \text{ eval. de } f$$
+        $$1 \text{ eval. de } \nabla f \;\equiv\; 1 \text{ eval. de } f$$
     </div>
 
     <p>
@@ -403,52 +405,34 @@
     </p>
 
     <div class="formula">
-        $$\text{costo} = n_f + 2n \cdot n_{\nabla f}$$
+        $$\text{costo} = n_f + 1 \cdot n_{\nabla f}$$
     </div>
 
     <p>
         donde $n_f$ es el número de evaluaciones de $f$ y $n_{\nabla f}$ el
-        número de evaluaciones del gradiente.
-    </p>
-
-    <p>
-        Esta equivalencia tiene una justificación clara: si el gradiente no
-        se conoce de forma analítica, una de las formas más comunes de
-        aproximarlo es mediante <em>diferencias centrales</em>, que para cada
-        componente $i$ requiere dos evaluaciones de la función:
-    </p>
-
-    <div class="formula">
-        $$\frac{\partial f}{\partial x_i} \approx \frac{f(x + h\, e_i) - f(x - h\, e_i)}{2h}$$
-    </div>
-
-    <p>
-        Como hay $n$ componentes, calcular el gradiente completo por
-        diferencias centrales cuesta $2n$ evaluaciones de $f$. Usar este
-        factor como equivalencia permite comparar de manera consistente
-        métodos que internamente usan analíticamente el gradiente con
-        métodos que solo evalúan la función.
+        número de evaluaciones del gradiente. Como referencia, si el gradiente
+        se aproximara por <em>diferencias centrales</em>, cada evaluación
+        costaría $2n$ evaluaciones de $f$ en dimensión $n$; ese no es el caso
+        de este trabajo, porque el gradiente es analítico.
     </p>
 
     <h3 class="h5 fw-semibold mt-4 mb-2">4.3. Ejemplo de aplicación</h3>
 
     <p>
-        A modo de ejemplo, en 2D el factor de equivalencia es $2n = 4$. Si el
-        descenso por gradiente realizó 2000 iteraciones y evaluó el gradiente
-        2000 veces, su costo equivalente sería:
+        A modo de ejemplo, si el descenso por gradiente realizó 2000
+        iteraciones y evaluó el gradiente 2000 veces, su costo equivalente es:
     </p>
 
     <div class="formula">
-        $$\text{costo}_{GD} = 0 + 4 \times 2000 = 8000 \text{ evaluaciones equivalentes}$$
+        $$\text{costo}_{GD} = 0 + 1 \times 2000 = 2000 \text{ evaluaciones equivalentes}$$
     </div>
 
     <p>
-        En cambio, DE realizó 5092 evaluaciones de $f$ y ninguna del
-        gradiente, por lo que su costo equivalente es simplemente 5092.
-        Como se puede observar, aunque DE evalúa más veces la función
-        directamente, su costo equivalente es <strong>menor</strong> que el
-        de GD. En la Sección 5 se presenta la tabla completa de costos
-        equivalentes para todos los métodos y todas las dimensiones.
+        En cambio, DE realizó 5092 evaluaciones de $f$ y ninguna del gradiente,
+        por lo que su costo equivalente es 5092. Así, GD es más barato en
+        evaluaciones, pero —como se verá en la Sección 5— no alcanza el óptimo.
+        En la Sección 5 se presenta la tabla completa de costos equivalentes
+        para todos los métodos y dimensiones.
     </p>
 </section>
         
@@ -499,7 +483,7 @@
                     <td>$1.57 \times 10^{1}$</td>
                     <td>0 %</td>
                     <td>2000</td>
-                    <td>8000</td>
+                    <td>2000</td>
                 </tr>
                 <tr>
                     <td>PSO</td>
@@ -570,7 +554,7 @@
                     <td>$1.02 \times 10^{1}$</td>
                     <td>0 %</td>
                     <td>2000</td>
-                    <td>12000</td>
+                    <td>2000</td>
                 </tr>
                 <tr>
                     <td>PSO</td>
@@ -610,8 +594,7 @@
 
     <p>
         Aplicando la equivalencia propuesta en la Sección 4
-        ($1 \nabla f \equiv 2n$ evaluaciones de $f$), se obtiene la Tabla 3.
-        En 2D el factor es $2n = 4$ y en 3D es $2n = 6$.
+        ($1 \nabla f \equiv 1$ evaluación de $f$), se obtiene la Tabla 3.
     </p>
 
     <div class="table-responsive my-4">
@@ -634,8 +617,8 @@
                     <td>GD</td>
                     <td>0</td>
                     <td>2000</td>
-                    <td>$0 + 4 \times 2000 = 8000$</td>
-                    <td>$0 + 6 \times 2000 = 12000$</td>
+                    <td>$0 + 1 \times 2000 = 2000$</td>
+                    <td>$0 + 1 \times 2000 = 2000$</td>
                 </tr>
                 <tr>
                     <td>PSO</td>
@@ -725,409 +708,4 @@
     <p>
         La Figura 2 muestra visualmente lo que ocurre. El punto se desplaza
         lentamente hacia el valle, pero después de 2000 iteraciones apenas
-        ha avanzado una fracción del camino hacia el mínimo. El panel de la
-        derecha confirma que la norma del gradiente $\\|\nabla f\\|$ se
-        mantiene en valores del orden de $10^{-1}$ durante toda la
-        trayectoria: <strong>el gradiente sigue siendo grande, pero el paso
-        es demasiado pequeño para avanzar</strong>.
-    </p>
-
-    <p>
-        Este comportamiento se explica por la geometría de Rosenbrock. La
-        función posee un valle muy estrecho y curvo, cuyo fondo es casi
-        plano. El gradiente apunta hacia el fondo del valle, pero al ser
-        el valle tan angosto, cualquier tasa de aprendizaje que sea lo
-        bastante grande para avanzar rápido hace que el método se salga
-        del valle y diverja. Como se documenta en la Sección 6.4, valores
-        de $\alpha \geq 0.002$ producen divergencia (<code>NaN</code>) en
-        pocas iteraciones. Por lo tanto, el método se ve forzado a usar
-        valores de $\alpha$ muy pequeños —en este trabajo $10^{-4}$—,
-        avanzando lentamente y sin alcanzar el mínimo antes del límite de
-        iteraciones.
-    </p>
-
-    <p>
-        Además, ninguna corrida del descenso por gradiente cumplió el
-        criterio de convergencia por tolerancia
-        ($\\|\nabla f\\| < 10^{-8}$). En todos los casos el algoritmo se
-        detuvo al alcanzar las 2000 iteraciones máximas, lo que confirma
-        que el método no está cerca de un punto crítico al detenerse.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.2. Desempeño de las metaheurísticas poblacionales</h3>
-
-    <p>
-        Las tres metaheurísticas —PSO, DE y EA— superaron ampliamente al
-        descenso por gradiente en calidad. En 2D, PSO alcanzó una media de
-        $2.22 \times 10^{-20}$ y DE de $2.03 \times 10^{-14}$; incluso EA,
-        el peor de los tres, alcanzó $4.44 \times 10^{-2}$. En 3D la
-        tendencia se mantiene: PSO $4.37 \times 10^{-11}$, DE
-        $2.09 \times 10^{-13}$, y EA $8.23 \times 10^{-1}$.
-    </p>
-
-    <p>
-        <strong>PSO fue el más preciso.</strong> En 2D, su media es
-        $2.22 \times 10^{-20}$, lo cual representa 20 órdenes de magnitud
-        por debajo del umbral. Incluso su peor corrida ($4.39 \times
-        10^{-19}$) está muy por debajo del umbral. En 3D, la precisión
-        baja a $10^{-11}$ pero sigue siendo excelente. La razón de su alta
-        precisión es que las partículas, una vez que se concentran cerca
-        del mínimo, ajustan sus velocidades de forma fina y terminan
-        convergiendo con precisión casi arbitraria.
-    </p>
-
-    <p>
-        <strong>DE fue el más eficiente.</strong> En 2D utilizó 5092
-        evaluaciones equivalentes con una media de $2.03 \times 10^{-14}$,
-        mientras que PSO necesitó 21813 evaluaciones para alcanzar una
-        media de $2.22 \times 10^{-20}$. Es decir, <strong>DE fue 4.3
-        veces más económico que PSO</strong>, a cambio de una precisión
-        menor pero igualmente suficiente (14 órdenes de magnitud por
-        debajo del umbral). En 3D, la diferencia es aún más marcada:
-        DE usó 8815 evaluaciones contra 80040 de PSO, una diferencia de
-        <strong>9.1 veces</strong>.
-    </p>
-
-    <p>
-        <strong>EA fue el menos robusto.</strong> En 2D alcanzó una tasa
-        de éxito del 57 %, es decir, 13 de las 30 corridas no lograron
-        alcanzar el umbral. En 3D, la tasa de éxito cayó al 3 % (solo 1
-        de 30 corridas). Su mejor valor es competitivo
-        ($3.48 \times 10^{-11}$ en 2D), pero su <strong>alta
-        variabilidad</strong> (desviación estándar de $0.148$ en 2D y
-        $1.20$ en 3D) indica que el método es inestable. Esto sugiere
-        que la combinación de operadores (torneo, cruce BLX-α, mutación
-        gaussiana con elitismo) es adecuada para problemas de baja
-        dimensión pero se degrada rápidamente al aumentar el número de
-        variables.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.3. Análisis del costo computacional</h3>
-
-    <p>
-        Si se compara únicamente el número de evaluaciones de $f$, PSO y EA
-        son los más costosos (21813 y 61884 evaluaciones en 2D). Sin embargo,
-        al aplicar la equivalencia de la Sección 4, el descenso por gradiente
-        deja de ser "el más barato": su costo equivalente es 8000 en 2D y
-        12000 en 3D, muy por encima de DE (5092 en 2D y 8815 en 3D).
-    </p>
-
-    <p>
-        El resultado es contundente: <strong>DE logra la mejor calidad por
-        el menor costo equivalente</strong>. En 2D, DE necesita 1.57 veces
-        menos evaluaciones que GD para alcanzar una solución infinitamente
-        mejor. En 3D, la diferencia es aún más marcada: DE usa 1.36 veces
-        menos evaluaciones que GD y su media es 10 órdenes de magnitud
-        inferior.
-    </p>
-
-    <p>
-        PSO, por su parte, es el método más preciso en ambos casos (llega a
-        $10^{-20}$ en 2D), pero paga ese nivel de precisión con un costo
-        equivalente considerablemente mayor. Para aplicaciones donde la
-        precisión extrema sea crítica, PSO es la mejor opción; para
-        aplicaciones donde el presupuesto de evaluaciones sea limitado,
-        DE es preferible.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.4. Sensibilidad a la tasa de aprendizaje en GD</h3>
-
-    <p>
-        Durante el desarrollo de los experimentos se hizo un barrido sobre
-        la tasa de aprendizaje $\alpha$ del descenso por gradiente, en un
-        experimento preliminar con dominio $[-2, 2]$ y $n = 2$. Los
-        resultados, mostrados en la Tabla 4, evidencian una sensibilidad
-        extrema del método a este hiperparámetro.
-    </p>
-
-    <div class="table-responsive my-4">
-        <table class="table table-bordered tabla-resultados">
-            <caption class="figura-caption">
-                <strong>Tabla 4.</strong> Sensibilidad del descenso por
-                gradiente a la tasa de aprendizaje en Rosenbrock 2D
-                (experimento preliminar con dominio $[-2, 2]$).
-                Fuente: elaboración propia.
-            </caption>
-            <thead>
-                <tr>
-                    <th>$\alpha$</th>
-                    <th>Valor final de $f$</th>
-                    <th>Comportamiento</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>0.0005</td><td>9.15</td><td>Avance demasiado lento</td></tr>
-                <tr><td>0.0010</td><td>3.30</td><td>Avance lento</td></tr>
-                <tr><td>0.0012</td><td>NaN</td><td>Divergencia</td></tr>
-                <tr><td>0.0014</td><td>NaN</td><td>Divergencia</td></tr>
-                <tr><td>0.0020</td><td>NaN</td><td>Divergencia</td></tr>
-                <tr><td>0.0050</td><td>NaN</td><td>Divergencia</td></tr>
-                <tr><td>0.0100</td><td>NaN</td><td>Divergencia</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <p>
-        La ventana útil de $\alpha$ es extremadamente estrecha: entre
-        0.0010 y 0.0011 aproximadamente. Valores ligeramente menores
-        producen avances imperceptibles; valores ligeramente mayores
-        hacen que el método diverja y produzca <code>NaN</code> en pocas
-        iteraciones. Este comportamiento es típico de Rosenbrock y
-        confirma la dificultad intrínseca que esta función presenta
-        para los métodos de primer orden.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.5. Efecto de la dimensión</h3>
-
-    <p>
-        Al comparar los resultados en 2D y 3D se observa un deterioro
-        generalizado en el desempeño de todos los métodos. Sin embargo, el
-        grado de deterioro es muy distinto entre ellos:
-    </p>
-
-    <ul>
-        <li>
-            <strong>GD</strong>: la media mejora aparentemente (de $4.89$ a
-            $2.29$), pero esto es un artefacto del dominio: en 3D, el punto
-            inicial aleatorio puede caer más cerca del mínimo con mayor
-            probabilidad. La tasa de éxito sigue siendo 0 % en ambos casos.
-        </li>
-        <li>
-            <strong>PSO</strong>: la media empeora 9 órdenes de magnitud
-            (de $10^{-20}$ a $10^{-11}$), pero mantiene una tasa de éxito
-            del 100 %.
-        </li>
-        <li>
-            <strong>DE</strong>: la media empeora un orden de magnitud
-            (de $10^{-14}$ a $10^{-13}$), mantiene el 100 % de éxito y
-            solo incrementa su costo en un 73 %.
-        </li>
-        <li>
-            <strong>EA</strong>: la media empeora 1.6 órdenes de magnitud
-            (de $4.44 \times 10^{-2}$ a $8.23 \times 10^{-1}$) y su tasa
-            de éxito cae del 57 % al 3 %.
-        </li>
-    </ul>
-
-    <p>
-        DE es el método más robusto frente al aumento de dimensión: mantiene
-        una calidad excelente con un incremento moderado en el costo. PSO
-        pierde precisión pero conserva robustez (100 % de éxito en ambas
-        dimensiones). EA pierde ambas cosas: calidad y robustez.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.6. Comparación visual: GD vs PSO</h3>
-
-    <p>
-        Las Figuras 2 y 3, presentadas en la Sección 5, ilustran de forma
-        visual la diferencia entre ambos métodos. En la Figura 2 (GD), el
-        punto amarillo avanza por el valle pero nunca alcanza la estrella
-        roja del óptimo. El panel de la derecha muestra que el gradiente
-        se mantiene alto pero el paso es minúsculo. En la Figura 3 (PSO),
-        las partículas comienzan dispersas por todo el dominio y, a medida
-        que avanza la animación, se concentran progresivamente sobre el
-        óptimo. El panel de diversidad confirma que la población colapsa
-        hacia el mínimo.
-    </p>
-
-    <p>
-        Esta comparación visual <strong>resume la conclusión principal
-        del trabajo</strong>: en una función con un valle estrecho y mal
-        condicionado, la información local del gradiente no es suficiente
-        para guiar al óptimo, mientras que la exploración global de las
-        metaheurísticas permite encontrarlo.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">6.7. Síntesis</h3>
-
-    <p>
-        La comparación entre métodos basados en gradiente y metaheurísticas
-        poblacionales sobre Rosenbrock arroja una conclusión clara:
-        <strong>la información del gradiente no es suficiente para resolver
-        problemas con valles estrechos y mal condicionados</strong>. Las
-        metaheurísticas, que no usan gradiente, logran resultados
-        cualitativamente superiores porque exploran el espacio de búsqueda
-        de forma global antes de concentrarse en las regiones más
-        prometedoras.
-    </p>
-
-    <p>
-        Entre las tres metaheurísticas, <strong>DE se destaca como el mejor
-        balance entre calidad y costo</strong>. PSO ofrece la mayor precisión
-        pero a un costo considerablemente mayor, y EA es adecuado para baja
-        dimensión pero se degrada rápidamente en 3D.
-    </p>
-</section>
-        <!-- Sección 7: Conclusiones -->
-<section id="conclusiones" class="mb-5">
-    <h2 class="h3 fw-bold mb-3">7. Conclusiones</h2>
-
-    <p>
-        Este trabajo comparó cuatro métodos de optimización sobre la función
-        de Rosenbrock en dos y tres dimensiones: descenso por gradiente (GD),
-        optimización por enjambre de partículas (PSO), evolución diferencial
-        (DE) y un algoritmo evolutivo (EA). Los resultados, obtenidos de 30
-        corridas independientes por configuración, permiten extraer las
-        siguientes conclusiones.
-    </p>
-
-    <p>
-        <strong>1. El descenso por gradiente no es adecuado para Rosenbrock.</strong>
-        A pesar de tener un único mínimo global, la geometría de la función
-        —con un valle muy estrecho, curvo y mal condicionado— hace que el
-        gradiente no sea suficiente para guiar al método hacia el óptimo.
-        En 60 corridas totales (30 en 2D y 30 en 3D), la tasa de éxito fue
-        de 0 % en ambas dimensiones, y ninguna corrida cumplió el criterio
-        de convergencia antes del límite de iteraciones. La mejor solución
-        obtenida ($f = 0.497$ en 2D) está tres órdenes de magnitud por
-        encima del umbral de éxito.
-    </p>
-
-    <p>
-        <strong>2. Las metaheurísticas poblacionales son claramente superiores
-        en este problema.</strong> Los tres métodos poblacionales —PSO, DE y
-        EA— alcanzaron sus mejores soluciones en el orden de $10^{-11}$ o
-        inferiores en 2D. PSO y DE alcanzaron una tasa de éxito del 100 % en
-        ambas dimensiones, mientras que EA cayó al 3 % en 3D. La razón
-        principal es que estas técnicas no dependen del gradiente: exploran
-        el espacio de búsqueda de forma global y evitan quedar atrapadas en
-        el valle estrecho de Rosenbrock.
-    </p>
-
-    <p>
-        <strong>3. DE es el mejor balance calidad/costo.</strong> Utilizando
-        la equivalencia de evaluaciones de la Sección 4, DE fue el método
-        más económico en ambas dimensiones: 5092 evaluaciones equivalentes
-        en 2D y 8815 en 3D, con medias de $2.03 \times 10^{-14}$ y
-        $2.09 \times 10^{-13}$ respectivamente. Es decir, logra resultados
-        excelentes con el menor costo computacional de todos los métodos
-        evaluados.
-    </p>
-
-    <p>
-        <strong>4. PSO es el más preciso pero también el más costoso.</strong>
-        Alcanzó las medias más bajas en ambas dimensiones
-        ($2.22 \times 10^{-20}$ en 2D y $4.37 \times 10^{-11}$ en 3D), pero
-        a cambio de un costo equivalente 4.3 veces mayor que DE en 2D y 9.1
-        veces mayor en 3D. Para aplicaciones donde la precisión extrema sea
-        crítica y no haya restricciones fuertes de cómputo, PSO es la mejor
-        opción.
-    </p>
-
-    <p>
-        <strong>5. EA se degrada con la dimensión.</strong> Funciona
-        razonablemente en 2D (éxito del 57 %), pero en 3D su tasa de éxito
-        cae al 3 % y su media empeora 1.6 órdenes de magnitud. La combinación
-        de operadores con elitismo limita la diversidad necesaria para
-        explorar espacios de mayor dimensión.
-    </p>
-
-    <p>
-        <strong>6. La tasa de aprendizaje del descenso por gradiente tiene
-        una ventana útil extremadamente estrecha.</strong> Valores de
-        $\alpha$ menores a 0.001 hacen que el método avance demasiado
-        lento; valores mayores a 0.0012 provocan divergencia inmediata
-        (<code>NaN</code>). Este hallazgo, documentado en la Sección 6.4,
-        refuerza la conclusión de que GD no es robusto en Rosenbrock.
-    </p>
-
-    <p>
-        En síntesis, la comparación confirma que <strong>los métodos que
-        incorporan información del gradiente no son siempre superiores a
-        las metaheurísticas</strong>. Cuando la función objetivo tiene una
-        geometría difícil —como valles estrechos, curvas mal condicionadas
-        o múltiples cuencas de atracción—, las metaheurísticas poblacionales
-        ofrecen una ventaja significativa porque no dependen de información
-        local del gradiente.
-    </p>
-
-    <p>
-        Como trabajo futuro, sería interesante aplicar los mismos métodos a
-        otras funciones de prueba (Rastrigin, Schwefel, Griewank) y analizar
-        si la superioridad de DE se mantiene. También se podría explorar el
-        efecto de hibridar métodos: por ejemplo, usar PSO para una primera
-        fase de exploración global y luego refinar con descenso por
-        gradiente en la región prometedora. Finalmente, sería valioso
-        estudiar la sensibilidad de los métodos poblacionales a sus propios
-        hiperparámetros, para determinar cuánto de su buen desempeño se debe
-        a la elección particular de parámetros y cuánto a la naturaleza del
-        algoritmo.
-    </p>
-</section>
-
-
-<!-- Sección 8: Uso de IA -->
-<section id="uso-ia" class="mb-5">
-    <h2 class="h3 fw-bold mb-3">8. Uso de inteligencia artificial</h2>
-
-    <p>
-        Durante el desarrollo de este trabajo se utilizaron herramientas de
-        inteligencia artificial generativa como apoyo en distintas etapas.
-        En esta sección se documentan los usos principales y se discute su
-        impacto en el resultado final.
-    </p>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">8.1. Usos principales</h3>
-
-    <ul>
-        <li>
-            <strong>Generación de código base:</strong> se usaron asistentes
-            de IA para generar la estructura inicial de los cuatro
-            optimizadores (GD, PSO, DE, EA) y del motor de visualización.
-            Este código fue posteriormente revisado, adaptado y corregido
-            manualmente.
-        </li>
-        <li>
-            <strong>Explicación de conceptos:</strong> se consultaron
-            explicaciones sobre la geometría de Rosenbrock, las ecuaciones
-            de actualización de PSO y DE, y el funcionamiento del cruce
-            BLX-α.
-        </li>
-        <li>
-            <strong>Redacción y estilo:</strong> se usaron sugerencias de IA
-            para estructurar el informe y pulir la redacción técnica.
-        </li>
-        <li>
-            <strong>Depuración de errores:</strong> ante errores de ejecución,
-            se usaron asistentes para identificar causas probables y
-            proponer correcciones.
-        </li>
-    </ul>
-
-    <h3 class="h5 fw-semibold mt-4 mb-2">8.2. Impacto en el resultado</h3>
-
-    <p>
-        El uso de IA aceleró significativamente la implementación inicial
-        del código y permitió resolver dudas conceptuales de forma rápida.
-        Sin embargo, <strong>no reemplazó el trabajo de validación</strong>:
-        varios fragmentos generados por IA contenían errores sutiles que
-        fueron detectados mediante pruebas empíricas, comparación con
-        fuentes primarias y verificación matemática. Estos casos se
-        documentan en la Sección 9.
-    </p>
-
-    <p>
-        En términos generales, el uso de IA fue <strong>productivo pero
-        requirió supervisión constante</strong>. La principal lección
-        aprendida es que las herramientas de IA son útiles como punto de
-        partida, pero no sustituyen el entendimiento profundo del problema.
-    </p>
-</section>
-
-
-
-
-     
-
-    <!-- ===== PIE ===== -->
-   <footer class="border-top py-4 mt-5">
-    <div class="container-fluid px-4 px-lg-5 small text-secondary">
-        Proyecto académico · Redes neuronales y algoritmos bioinspirados
-    </div>
-</footer>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+       
