@@ -141,6 +141,154 @@
       <p>La lectura cuantitativa de estas hipótesis se amplía en la sección de scorecard a partir de los resultados de Gradientes Integrados. Es importante distinguir entre una dirección de atribución observada en el conjunto de prueba y una relación causal: el modelo aprende asociaciones condicionadas por las demás variables incluidas.</p>
     </section>
 
+
+          <!-- ========================================== -->
+      <!-- ANÁLISIS EXPLORATORIO DE HIPÓTESIS (H1-H6) -->
+      <!-- ========================================== -->
+
+      <h3 style="margin-top: 3rem;">Evidencia empírica de las hipótesis</h3>
+      <p>A continuación se presentan los resultados del análisis exploratorio de datos (EDA) realizado sobre los 268.530 créditos, los cuales contrastan los supuestos teóricos con el comportamiento real de la cartera.</p>
+
+            <!-- H1 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H1 · Evolución del riesgo según el nivel de DTI</h3>
+            <p>Relación entre la deuda (DTI) y la tasa de incumplimiento, agrupada por deciles.</p>
+          </div>
+          <span class="chart-tag">Line plot</span>
+        </div>
+        <img src="figuras/eda_H1_dti_line.png" alt="Gráfico de incumplimiento por DTI" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            La gráfica confirma que mientras más deudas tenga una persona en relación con su sueldo (DTI), más difícil le será pagar un nuevo crédito. Los datos forman una escalera perfecta: el grupo de personas con casi cero deudas tiene una tasa de impago del <strong>14,9%</strong>, pero el grupo de personas altamente endeudadas se dispara al <strong>33,9%</strong>. Es decir, el riesgo se duplica.
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            Significa que el nivel de deuda es la primera gran señal de alerta. Si una persona ya está comprometiendo gran parte de su sueldo en otras deudas, el sistema debería rechazar su solicitud o prestarle menos dinero. Es mejor prevenir que lamentar: un cliente que llega muy endeudado tiene el doble de probabilidades de no pagar.
+          </p>
+        </div>
+      </div>
+
+      <!-- H2 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H2 · Distribución del ingreso: Buenos vs. Malos</h3>
+            <p>Curvas de densidad del ingreso anual para clientes que pagan y los que incumplen.</p>
+          </div>
+          <span class="chart-tag">KDE plot</span>
+        </div>
+        <img src="figuras/eda_H2_ingreso_kde.png" alt="Gráfico de densidad de ingresos" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            Las dos curvas (verde para los que pagan, roja para los que no) nos dicen que <strong>ganar más dinero te protege del impago</strong>. La curva roja está concentrada en sueldos bajos (alrededor de $45,000), mientras que la verde se estira hacia sueldos más altos. Al comparar los extremos, la tasa de impago cae del <strong>28,1%</strong> (sueldos bajos) al <strong>16,2%</strong> (sueldos altos).
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            Un buen sueldo da tranquilidad, pero no lo es todo. Alguien que gana bien pero gasta mucho sigue siendo un riesgo. Para la plataforma, esto permite crear "vías rápidas" para clientes con ingresos altos (aprobaciones exprés y mejores tasas). A los que ganan menos, no hay que decirles "no" de inmediato; se les puede prestar montos más pequeños para que puedan pagar cómodamente.
+          </p>
+        </div>
+      </div>
+
+      <!-- H3 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H3 · Tasa de incumplimiento por número de moras</h3>
+            <p>Comportamiento del riesgo según la morosidad registrada en los últimos 2 años.</p>
+          </div>
+          <span class="chart-tag">Barras</span>
+        </div>
+        <img src="figuras/eda_H3_moras.png" alt="Gráfico de barras de moras previas" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            La gráfica nos dice que los clientes con moras recientes son más propensos a incumplir. La tasa de impago sube desde un <strong>21,4%</strong> para los que no tienen moras, hasta un <strong>28,2%</strong> para los que tienen 4 o más. Sin embargo, el salto no es enorme; la diferencia entre tener 3 o 4 moras es casi nula.
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            Si alguien está en la lista de morosos, el banco debe prender las alarmas, pero no necesariamente rechazarlo de tajo. Lo inteligente es investigar por qué se atrasó: ¿perdió el empleo? ¿Fue un olvido? Si su situación actual ha mejorado, podría aprobársele un crédito con un límite más bajo o con una tasa de interés un poco más alta para compensar el riesgo extra.
+          </p>
+        </div>
+      </div>
+
+      <!-- H4 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H4 · Evolución del riesgo según antigüedad del historial</h3>
+            <p>Relación entre los años de historial crediticio y el incumplimiento por deciles.</p>
+          </div>
+          <span class="chart-tag">Line plot + Tabla</span>
+        </div>
+        <img src="figuras/eda_H4_antiguedad_line.png" alt="Gráfico de líneas de antigüedad del historial" style="width: 100%; max-width: 1000px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            La creencia popular dice que "el que tiene más años en el sistema bancario es más confiable". La gráfica demuestra que eso es solo un poco cierto. El grupo con menos de 7 años de historial tiene un riesgo del <strong>23,9%</strong>, y los veteranos (más de 24 años) bajan al <strong>21,1%</strong>. Solo hay una diferencia de 2,8 puntos, y la línea ni siquiera baja de forma constante (tiene altibajos).
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            Tener un historial largo no te hace inmune a no pagar, ni tener un historial corto te condena. Para la plataforma, fijarse solo en la antigüedad es una mala estrategia. Es mucho más importante evaluar la deuda actual (H1) y los ingresos (H2) que simplemente mirar cuántos años lleva la persona usando tarjetas de crédito.
+          </p>
+        </div>
+      </div>
+
+      <!-- H5 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H5 · Tasa de incumplimiento por propósito del crédito</h3>
+            <p>Riesgo asociado al uso que el cliente le dará al préstamo.</p>
+          </div>
+          <span class="chart-tag">Barras horizontales</span>
+        </div>
+        <img src="figuras/eda_H5_purpose_barh.png" alt="Gráfico de barras de propósitos" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            El propósito del crédito cambia radicalmente el riesgo. Financiar una boda o un automóvil tiene las tasas de impago más bajas (alrededor del <strong>14,2%</strong>), mientras que pedir dinero para un pequeño negocio es lo más riesgoso (supera el <strong>32,3%</strong>). También hay riesgos altos en gastos médicos o mudanzas.
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            No se puede tratar a todos los clientes por igual. Si alguien pide un préstamo para un negocio, la plataforma debe cobrarle una tasa de interés más alta (porque hay más riesgo de que quiebre) o pedirle garantías. Si pide dinero para un carro o una boda, se le pueden ofrecer condiciones más favorables.
+          </p>
+        </div>
+      </div>
+
+      <!-- H6 -->
+      <div class="chart-card" style="margin-top: 2rem;">
+        <div class="chart-head">
+          <div>
+            <h3>H6 · Proporción de buenos y malos pagadores por vivienda</h3>
+            <p>Impacto de la tenencia de vivienda en la probabilidad de impago.</p>
+          </div>
+          <span class="chart-tag">Stacked Bar</span>
+        </div>
+        <img src="figuras/eda_H6_vivienda_stacked.png" alt="Gráfico de barras apiladas de vivienda" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        
+        <div class="callout neutral" style="margin-top: 1.5rem;">
+          <strong>¿Qué muestran los datos?</strong>
+          <p style="margin-top: 0.5rem;">
+            Aquí nos llevamos una gran sorpresa. Creíamos que los dueños de casa propia eran los más seguros, pero los datos dicen lo contrario. El orden real de riesgo es: <strong>arrendatarios</strong> (24,4%), seguidos de <strong>dueños sin hipoteca</strong> (23,0%), y los más seguros son los que tienen <strong>hipoteca</strong> (19,6%).
+          </p>
+          <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
+            <strong> ¿Qué significa esto para el negocio?</strong><br>
+            Tener una hipoteca es una señal de formalidad. Para que un banco te preste para una casa, ya te hizo un estudio profundo. Además, sabes que si no pagas, pierdes tu hogar. En cambio, los arrendatarios o los dueños sin hipoteca no tienen ese "filtro" previo. La plataforma debería confiar más en los hipotecados y ser más cuidadosa con los arrendatarios, evaluando bien sus ingresos antes de prestarles.
+          </p>
+        </div>
+      </div>
+      
+      <!-- ========================================== -->
+
     <section class="section" id="preprocesamiento">
       <p class="section-kicker">04 · Preparación de datos</p><h2>Preprocesamiento y partición temporal</h2>
       <p>La preparación se ejecuta mediante un único preprocesador compartido por la regresión logística, la red neuronal y la scorecard. De esta manera, los modelos reciben las mismas columnas, generadas con los mismos criterios y sin ajustar estadísticas sobre datos posteriores.</p>
