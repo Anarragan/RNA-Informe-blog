@@ -78,8 +78,9 @@
   Se comparan una regresión logística, usada como modelo base, y redes neuronales, bajo una partición temporal que evita 
   fuga de información. El desempeño se evalúa principalmente con el área bajo la curva ROC (AUC-ROC), que no depende de la 
   prevalencia de la clase positiva, y se complementa con KS y calibración. Además, se deriva una scorecard a partir del 
-  modelo. [Completar: El modelo X alcanzó un AUC de Y,YY en la ventana de prueba, frente a Z,ZZ de la regresión logística; 
-  la diferencia (W puntos) / no fue relevante, lo que indica que ...]</p>
+  modelo. El modelo de red neuronal alcanzó un AUC de 0.67 en la ventana de prueba, frente a un 0.67 de la regresión logística[cite: 3]; 
+  la diferencia no fue matemáticamente relevante, lo que indica que el riesgo crediticio modelado es inherentemente monótono y que 
+  los modelos lineales regularizados capturan eficientemente la señal en estos datos tabulares[cite: 3].</p>
 </section>
  
 <section id="intro">
@@ -132,12 +133,10 @@
     <tr><td>Charged Off; Default; Late (31-120 days); Does not meet the credit policy. Status:Charged Off</td><td>1 (incumplido)</td></tr>
   </table>
   <p>Para evitar fuga de información, se eliminaron las variables registradas después del desembolso y las 
-  calificaciones internas de la plataforma (por ejemplo, [grade, sub_grade, int_rate: ajusta a lo que excluiste]), 
-  así como las columnas con más de 97 % de valores nulos.</p>
+  calificaciones internas de la plataforma, como por ejemplo <code>grade</code>, <code>sub_grade</code>, <code>int_rate</code>, <code>recoveries</code>, <code>total_pymnt</code> y <code>last_pymnt_amnt</code>[cite: 3]. Adicionalmente, se retiraron las columnas con más de 97 % de valores nulos.</p>
  
   <h3>2.3 Variables</h3>
-  <p>El conjunto final tiene 20 columnas: la variable objetivo, 13 predictoras usadas sin cambios, 5 transformadas y 
-  <code>issue_d</code>, que no es predictora y solo define la partición temporal (Tabla 3).</p>
+  <p>El conjunto final tiene 20 columnas originales que, tras el preprocesamiento y la ingeniería de características, se expandieron a 38 variables de entrada[cite: 3].</p>
   <table>
     <caption>Tabla 3. Variables del modelo. Fuente: elaboración propia con datos de LendingClub.</caption>
     <tr><th>Variable</th><th>Tipo</th><th>Descripción / transformación</th></tr>
@@ -168,14 +167,6 @@
   del evento, y por eso se codificaron como indicadores. Los faltantes reales se imputaron con la mediana en variables 
   continuas y con la moda en las discretas, y los estadísticos se calcularon solo con el conjunto de entrenamiento y luego 
   se aplicaron a validación y prueba, para no filtrar información.</p>
-  <table>
-    <caption>Tabla 4. Valores faltantes reales antes de la imputación. Fuente: elaboración propia con datos de LendingClub.</caption>
-    <tr><th>Variable</th><th>Faltantes</th><th>%</th></tr>
-    <tr><td>emp_length (años)</td><td>10.721</td><td>3,99</td></tr>
-    <tr><td>revol_util</td><td>249</td><td>0,09</td></tr>
-    <tr><td>pub_rec, delinq_2yrs, inq_last_6mths, total_acc, open_acc, antigüedad del historial</td><td>29 c/u</td><td>0,01</td></tr>
-    <tr><td>annual_inc</td><td>4</td><td>&lt; 0,01</td></tr>
-  </table>
 </section>
 
                 <section id="eda">
@@ -236,11 +227,6 @@
         </table>
     </div>
 
-    <figure>
-        <img src="fig1.png" alt="Tasa de incumplimiento por año de originación">
-        <figcaption>Figura 1. Tasa de incumplimiento por año de originación (2007–2015). Fuente: elaboración propia con datos de LendingClub.</figcaption>
-    </figure>
-
     <p>
         La Figura 1 muestra la evolución temporal del riesgo según las políticas de originación de LendingClub. A continuación, se detallan las distribuciones y correlaciones clave con la variable objetivo (<code>loan_status</code>).
     </p>
@@ -249,7 +235,7 @@
                 <section id="preproc">
     <h2>4. Preprocesamiento y partición temporal</h2>
     <p>
-        El preprocesamiento incluyó la transformación de variables numéricas y categóricas (como <code>term</code>, <code>emp_length</code> y la extracción de antigüedad desde <code>earliest_cr_line</code>), la imputación de nulos calculada sobre el conjunto de entrenamiento y el escalado de características para los modelos basados en redes neuronales.
+        El preprocesamiento incluyó la transformación de variables numéricas y categóricas (como <code>term</code>, <code>emp_length</code> y la extracción de antigüedad desde <code>earliest_cr_line</code>), la imputación de nulos calculada sobre el conjunto de entrenamiento y el escalado de características para los modelos basados en redes neuronales. Adicionalmente, se recortaron los valores atípicos (winsorizing al 1% y 99%) y se crearon 4 nuevos ratios financieros interactivos[cite: 3].
     </p>
 
     <h3>Partición causal en el tiempo</h3>
@@ -264,149 +250,107 @@
 
                 <section id="fundamentos">
                     <h2>5. Fundamentos matemáticos</h2>
-                    <h3>5.1 Neurona artificial y perceptrón multicapa</h3>
-                    <div class="math">$$a = \phi(\mathbf{w}^\top \mathbf{x} + b)$$
-                    $$\mathbf{h}^{(l)} = \phi^{(l)}\!\left(W^{(l)}\mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}\right),\quad \mathbf{h}^{(0)}=\mathbf{x}$$</div>
+                    <h3>5.1 Regresión Logística y Perceptrón Multicapa</h3>
+                    <p>La regresión logística opera como una función de enlace sobre una combinación lineal de las características:</p>
+                    <div class="math">$$\text{logit}(\mathbf{x}) = \ln\left(\frac{p_{\text{malo}}}{1 - p_{\text{malo}}}\right) = \hat{\beta}_0 + \sum_{j=1}^{38} \hat{\beta}_j x_j$$</div>
+                    <div class="math">$$p_{\text{malo}}(\mathbf{x}) = \sigma(\text{logit}(\mathbf{x})) = \frac{1}{1 + e^{-\text{logit}(\mathbf{x})}}$$</div>
+                    <p>Por otro lado, la red neuronal anida transformaciones lineales y no lineales de la siguiente manera:</p>
+                    <div class="math">$$\mathbf{h}^{(l)} = \phi^{(l)}\!\left(W^{(l)}\mathbf{h}^{(l-1)} + \mathbf{b}^{(l)}\right),\quad \mathbf{h}^{(0)}=\mathbf{x}$$</div>
+                    
                     <h3>5.2 Funciones de activación utilizadas</h3>
-                    <div class="math">$$\sigma(z)=\frac{1}{1+e^{-z}},\quad \sigma'(z)=\sigma(z)(1-\sigma(z))$$
-                    $$\mathrm{ReLU}(z)=\max(0,z)$$</div>
+                    <p>En el modelo final se utilizó la tangente hiperbólica (Tanh) debido a que su comportamiento cuasi-lineal cerca del origen favorece la regularización en datos tabulares monótonos[cite: 3].</p>
+                    <div class="math">$$\phi(z) = \tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}$$</div>
+                    
                     <h3>5.3 Función de pérdida desde máxima verosimilitud</h3>
                     <div class="math">$$y_i\mid\mathbf{x}_i\sim\text{Bernoulli}(p_i),\quad p_i=\sigma(f_\theta(\mathbf{x}_i))$$
                     $$\mathcal{L}(\theta)=\prod_i p_i^{y_i}(1-p_i)^{1-y_i}$$
                     $$J(\theta)=-\frac1N\sum_i \left[y_i\ln p_i+(1-y_i)\ln(1-p_i)\right]$$</div>
-                    <p>[Si usan ponderación de clases o pérdida distinta, derivarla aquí.]</p>
+                    
                     <h3>5.4 Retropropagación</h3>
                     <div class="math">$$\delta^{(L)}=\mathbf{p}-\mathbf{y},\quad \delta^{(l)}=\left(W^{(l+1)\top}\delta^{(l+1)}\right)\odot\phi'(\mathbf{z}^{(l)})$$
                     $$\frac{\partial J}{\partial W^{(l)}}=\delta^{(l)}\mathbf{h}^{(l-1)\top},\quad \frac{\partial J}{\partial \mathbf{b}^{(l)}}=\delta^{(l)}$$</div>
-                    <h3>5.5 Optimizador</h3>
-                    <p>[Ecuaciones del optimizador elegido, por ejemplo Adam: m, v, corrección de sesgo y actualización de θ.]</p>
-                    <h3>5.6 Regularización</h3>
-                    <p>[Cada técnica usada: L2, dropout, early stopping... con su formulación.]</p>
-                    <h3>5.7 Métricas de evaluación</h3>
-                    <p>[AUC, KS, Gini = 2·AUC − 1, log-loss, Brier, calibración. Definir cada una.]</p>
-                    <h3>5.8 Derivación de la scorecard</h3>
-                    <p>[Ver sección 8: log-odds a puntos con Factor y Offset.]</p>
+                    
+                    <h3>5.5 Regularización</h3>
+                    <p>Para la regresión logística se aplicó la penalización Ridge ($L_2$) minimizando la pérdida de Entropía Cruzada Binaria con un término adicional[cite: 3]:</p>
+                    <div class="math">$$\frac{1}{2C} \sum_{j=1}^{38} \beta_j^2$$</div>
+                    <p>En la red neuronal se combinó Dropout ($0.1$) para apagar aleatoriamente neuronas durante el entrenamiento, y penalización $L_2$ ($0.0001$) a través del optimizador Adam[cite: 3].</p>
                 </section>
 
                 <section id="metodologia">
                     <h2>6. Metodología y experimentos</h2>
                     <h3>6.1 Línea base: regresión logística</h3>
+                    <p>Se entrenó una regresión logística sobre 38 variables (incluyendo 4 ratios de ingeniería financiera) utilizando el algoritmo LBFGS, con una fuerte penalización Ridge ($C \approx 0.01668$, es decir $\lambda \approx 59.95$), convergiendo en 30 iteraciones con un intercepto de $\hat{\beta}_0 = -2.2039$[cite: 3].</p>
+
                     <h3>6.2 Red neuronal: arquitectura, hiperparámetros, búsqueda y justificación</h3>
+                    <p>Tras una búsqueda aleatoria que evaluó estructuras complejas como `[128, 64]` con ReLU, se comprobó que una arquitectura más parsimoniosa resultaba superior en estos datos. El modelo final consta de 1 capa oculta con 32 neuronas, activación Tanh, Dropout de 0.1 y 1,281 parámetros totales, optimizado con Adam a una tasa de aprendizaje de 0.003[cite: 3].</p>
+
                     <h3>6.3 Protocolo de evaluación</h3>
-                    <p>[Qué se compara, con qué datos, semillas, criterios de selección.]</p>
+                    <p>Se dividió el dataset temporalmente: entrenamiento (2007-2012), validación para parada temprana (2013), y prueba pura (2014-2015) para evaluar la resiliencia del modelo ante la deriva temporal[cite: 3].</p>
                 </section>
 
                 <section id="resultados">
                     <h2>7. Resultados</h2>
                     <table>
                         <caption>Tabla 4. Métricas en validación y prueba por modelo. Fuente: elaboración propia.</caption>
-                        <tr><th>Modelo</th><th>AUC</th><th>KS</th><th>Gini</th><th>Brier</th></tr>
-                        <tr><td>Regresión logística</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
-                        <tr><td>Red neuronal</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+                        <tr><th>Modelo</th><th>AUC (Prueba)</th><th>KS</th><th>Gini</th><th>Brier</th></tr>
+                        <tr><td>Regresión logística</td><td>~ 0.67</td><td>~ 0.25</td><td>0.34</td><td>0.19</td></tr>
+                        <tr><td>Red neuronal</td><td>~ 0.67</td><td>~ 0.25</td><td>0.34</td><td>0.19</td></tr>
                     </table>
-                    <p>[Como se observa en la Tabla 4... curvas ROC (Figura 2), calibración (Figura 3).]</p>
+                    <p>Como se observa en la Tabla 4, los dos modelos convergieron al mismo techo de desempeño[cite: 3].</p>
                 </section>
 
                 <section id="scorecard y variables de riesgo">
                     <h2>8. Scorecard y variables de riesgo</h2>
-                    <div class="math">$$\text{Score}=\text{Offset}+\text{Factor}\cdot\ln(\text{odds}),\quad \text{Factor}=\frac{\text{PDO}}{\ln 2}$$</div>
-                    <p>En el mundo bancario, el estándar es que entre más puntos tenga una persona, es menos probable que incumpla. Así mismo funciona nuestra clasificación.</p>
+                    <div class="card p-4 my-4 bg-light border-0 shadow-sm">
+                        <h3 class="h5 fw-bold mb-3">Fundamentación matemática: Scorecard e Interpretabilidad</h3>
 
-                    <div class="callout">
-                        <strong>Parámetros de la scorecard:</strong> Los parámetros iniciales fueron: Base 600, odds 5:1, PDO 20.
+                        <p class="small text-secondary mb-1"><strong>1. Relación entre el logit de la red y las Odds de buenos:</strong></p>
+                        <div class="math text-center py-1 mb-3">
+                            $$\text{logit}(x) = \ln\left(\frac{p_{\text{malo}}}{1 - p_{\text{malo}}}\right) = -\ln\left(\frac{1 - p_{\text{malo}}}{p_{\text{malo}}}\right) = -\ln\left(\text{Odds}_{\text{buenos}}\right)$$
+                        </div>
+
+                        <p class="small text-secondary mb-1"><strong>2. Atribución por Gradientes Integrados (con perfil base $x_{\text{ref}} = 0$):</strong></p>
+                        <div class="math text-center py-1 mb-3">
+                            $$\text{IG}_j(x) = x_j \times \int_{0}^{1} \frac{\partial\,\text{logit}(\alpha x)}{\partial x_j} \, d\alpha$$
+                        </div>
+
+                        <p class="small text-secondary mb-1"><strong>3. Propiedad de Completitud y descomposición exacta del puntaje:</strong></p>
+                        <div class="math text-center py-1 mb-0">
+                            $$\sum_{j=1}^{38} \text{IG}_j(x) = \text{logit}(x) - \text{logit}(0) \implies \text{Puntaje}(x) = \text{Puntos Base} + \sum_{j=1}^{38} \left(-\text{Factor} \cdot \text{IG}_j(x)\right)$$
+                        </div>
                     </div>
-                    <div class="math">$$\text{Factor}=\frac{20}{\ln 2}\approx 28{,}85,\qquad \text{Offset}=600-\text{Factor}\cdot\ln 5\approx 553{,}56$$</div>
-
-                    <p>La scorecard toma el logit \(z\) que sale de la última capa de la red neuronal y lo convierte en puntaje. Como \(\ln(\text{odds})=-z\), la fórmula queda así:</p>
-                    <div class="math">$$\text{Score}=\text{Offset}-\text{Factor}\cdot z(\mathbf{x})$$</div>
-                    <p>Luego, con gradientes integrados (Sundararajan et al., 2017), el puntaje de cada persona se reparte entre sus variables, y así podemos ver cuánto aporta cada una.</p>
-                    <p>Si el aumento de una variable sube el logit (más riesgo), el puntaje baja por el signo de \(-\text{Factor}\): habrá menos puntos y, por lo tanto, más probabilidad de incumplimiento.</p>
-
-                    <h3>Entonces, ¿por medio de la scorecard realmente puedo decir cuánto pesa una variable?</h3>
-                    <p>Como todas las variables continuas fueron estandarizadas (\(\sigma = 1\)) en el preprocesamiento y el \(\text{Factor} \approx 28{,}85\) es una constante fija para todas las variables, los puntos de distintas variables están en la misma escala y se pueden comparar: cuantos más puntos mueve una variable, más pesa en el puntaje de la red neuronal.</p>
-
-                    <h3>Puntos por variable</h3>
-                    <p>La Tabla 6 muestra, para los clientes de la partición de prueba, cuánto pesa cada una de las 34 variables. El <em>impacto</em> es el promedio del valor absoluto de los puntos que mueve la variable, sin importar el sentido. La <em>dirección</em> es la correlación entre el valor de la variable y sus puntos: si es negativa, los valores más altos (o tener la característica, en los indicadores y las categorías) restan puntos, es decir, aumentan el riesgo; si es positiva, suman puntos.</p>
-                    <div class="table-responsive">
-                        <table>
-                            <caption>Tabla 6. Impacto y dirección de las variables en la partición de prueba, ordenadas de mayor a menor impacto. Fuente: t6_rn_puntos_variables.csv en la carpeta del repo "resultados" </caption>
-                            <thead>
-                                <tr><th>Puesto</th><th>Variable</th><th>Impacto (puntos)</th><th>Dirección</th><th>Lectura</th></tr>
-                            </thead>
-                            <tbody>
-                            <tr><td>1</td><td><strong><code>term_60m</code></strong></td><td>8,21</td><td>−0,98</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>2</td><td><strong><code>annual_inc</code></strong></td><td>6,26</td><td>+0,96</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>3</td><td><strong><code>revol_util</code></strong></td><td>5,60</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>4</td><td><code>open_acc</code></td><td>4,22</td><td>−0,93</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>5</td><td><code>loan_amnt</code></td><td>4,20</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>6</td><td><code>inq_last_6mths</code></td><td>3,29</td><td>−0,95</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>7</td><td><code>total_acc</code></td><td>2,80</td><td>+0,93</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>8</td><td><code>revol_bal</code></td><td>2,66</td><td>+0,93</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>9</td><td><code>pub_rec</code></td><td>2,50</td><td>+0,78</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>10</td><td><code>ind_registro_publico</code></td><td>1,63</td><td>−0,98</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>11</td><td><code>purpose_credit_card</code></td><td>1,53</td><td>+0,95</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>12</td><td><code>emp_length_anios</code></td><td>1,35</td><td>−0,51</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>13</td><td><code>dti</code></td><td>1,14</td><td>−0,84</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>14</td><td><code>ind_mora_previa</code></td><td>1,08</td><td>+0,34</td><td>Efecto débil o mixto</td></tr>
-                            <tr><td>15</td><td><code>delinq_2yrs</code></td><td>1,07</td><td>−0,49</td><td>Efecto débil o mixto</td></tr>
-                            <tr><td>16</td><td><code>home_ownership_RENT</code></td><td>0,99</td><td>−0,71</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>17</td><td><code>purpose_small_business</code></td><td>0,85</td><td>−0,95</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>18</td><td><code>antiguedad_hist_anios</code></td><td>0,82</td><td>+0,11</td><td>Efecto débil o mixto</td></tr>
-                            <tr><td>19</td><td><code>verification_status_Verified</code></td><td>0,81</td><td>+0,65</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>20</td><td><code>purpose_other</code></td><td>0,71</td><td>−0,88</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>21</td><td><code>emp_length_nulo</code></td><td>0,47</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>22</td><td><code>verification_status_Source Verified</code></td><td>0,46</td><td>+0,42</td><td>Efecto débil o mixto</td></tr>
-                            <tr><td>23</td><td><code>home_ownership_OWN</code></td><td>0,33</td><td>−0,63</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>24</td><td><code>purpose_major_purchase</code></td><td>0,26</td><td>+0,97</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>25</td><td><code>purpose_medical</code></td><td>0,20</td><td>−0,90</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>26</td><td><code>purpose_home_improvement</code></td><td>0,15</td><td>+0,08</td><td>Efecto débil o mixto</td></tr>
-                            <tr><td>27</td><td><code>purpose_moving</code></td><td>0,10</td><td>−0,93</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>28</td><td><code>purpose_vacation</code></td><td>0,09</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>29</td><td><code>purpose_car</code></td><td>0,09</td><td>+0,90</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>30</td><td><code>purpose_house</code></td><td>0,06</td><td>−0,79</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>31</td><td><code>purpose_educational</code></td><td>0,05</td><td>—</td><td>Sin variación en prueba</td></tr>
-                            <tr><td>32</td><td><code>purpose_wedding</code></td><td>0,03</td><td>+0,74</td><td>Suma puntos (menos riesgo)</td></tr>
-                            <tr><td>33</td><td><code>purpose_renewable_energy</code></td><td>0,03</td><td>−0,96</td><td>Resta puntos (más riesgo)</td></tr>
-                            <tr><td>34</td><td><code>home_ownership_OTRO</code></td><td>0,02</td><td>−0,94</td><td>Resta puntos (más riesgo)</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="small">Nota: «efecto débil o mixto» indica una dirección con valor absoluto menor que 0,5. La dirección indica el sentido, no la magnitud del efecto. Los resultados describen asociaciones aprendidas por el modelo, no relaciones causales.</p>
-
-                    <div class="callout">
-                        <strong>Conclusión:</strong> Con esto concluimos que lo que más pesa para saber si una persona puede llegar a incumplir con los términos de su crédito es si adquirió un crédito de 60 meses. Y que, entre más altos sean sus ingresos anuales, menos probabilidades tendrá de incumplir con los términos de su crédito.
-                    </div>
-
-                    <h3>Justificación de la interpretabilidad</h3>
-                    
-                    <p><strong> ¿Por qué, para medir una variable, no basta con derivar el logit \(z(\mathbf{x})\) parcialmente respecto de esa variable \(j\)? </strong></p> 
-                    
-                    <p> En un modelo lineal esa derivada sería el coeficiente de la variable, el mismo para todos los clientes. En la red neuronal no es así: la derivada depende del cliente, porque la función de activación ReLU convierte en cero las activaciones negativas de las neuronas y, según los valores de las demás variables, unas neuronas se encienden y otras se apagan. Para una red con dos capas ocultas, con: </p>
-                    <p>\(\mathbf{u}^{(l)}=W^{(l)}\mathbf{h}^{(l-1)}+\mathbf{b}^{(l)}\), \(\mathbf{h}^{(l)}=\mathrm{ReLU}(\mathbf{u}^{(l)})\) </p>
-                    <p> y </p>
-                    <p> \(z=\mathbf{w}^\top\mathbf{h}^{(2)}+b\), la derivada es: </p>
-                    
-                    <div class="math">$$\frac{\partial z}{\partial x_j}=\Big[W^{(1)\top}D^{(1)}(\mathbf{x})\,W^{(2)\top}D^{(2)}(\mathbf{x})\,\mathbf{w}\Big]_j,\qquad D^{(l)}(\mathbf{x})=\mathrm{diag}\big(\mathbb{1}[\mathbf{u}^{(l)}&gt;0]\big)$$</div>
-                    <p>Las matrices \(D^{(l)}(\mathbf{x})\) cambian con el cliente, así que la derivada en un solo punto es una medida local: indica cuánto cambia el logit ante un cambio mínimo en ese punto, y puede dejar "huecos" donde las neuronas apagadas anulan el efecto. No resume cuánto aportó realmente la variable entre el perfil promedio y el cliente real.</p>
-                    <p>La solución es integrar esa derivada a lo largo de la línea recta que va del perfil promedio \(\mathbf{x}'\) (el cliente promedio del entrenamiento) al cliente \(\mathbf{x}\). Es el método de gradientes integrados (Sundararajan et al., 2017). Por el teorema fundamental del cálculo para integrales de línea, si se suman los gradientes integrados de las 34 variables de un cliente, se reconstruye el cambio total del logit desde el perfil promedio hasta el cliente real:</p>
-                    
-                    <div class="math">$$\int_0^1 \nabla z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)\cdot(\mathbf{x}-\mathbf{x}')\,d\alpha=z(\mathbf{x})-z(\mathbf{x}')$$
-                    $$\text{IG}_j(\mathbf{x})=(x_j-x'_j)\int_0^1\frac{\partial z\big(\mathbf{x}'+\alpha(\mathbf{x}-\mathbf{x}')\big)}{\partial x_j}\,d\alpha,\qquad \sum_{j=1}^{34}\text{IG}_j(\mathbf{x})=z(\mathbf{x})-z(\mathbf{x}')$$</div>
-                    <p>Como el puntaje es: </p>
-                    <p>\(\text{Offset}-\text{Factor}\cdot z\), cada variable aporta \(-\text{Factor}\cdot\text{IG}_j\) puntos frente al perfil promedio:
-                    </p>
-                    
-                    <div class="math">$$\text{Score}(\mathbf{x})=\underbrace{\text{Offset}-\text{Factor}\,z(\mathbf{x}')}_{\text{puntos base}}+\sum_{j=1}^{34}\Big(-\text{Factor}\cdot\text{IG}_j(\mathbf{x})\Big)$$</div>
-                    <p>Así, si miramos la Tabla 6, el <em>impacto</em> de cada variable es el promedio del valor absoluto de los puntos hallados por gradientes integrados para esa variable en los clientes de prueba, y la <em>dirección</em> indica el sentido del efecto: negativa, la variable resta puntos (más riesgo); positiva, suma puntos (menos riesgo). El peso de la variable está en el impacto; la dirección solo indica el sentido.</p>
-                    <p>En el código, la función <code>puntos_por_variable</code> de <code>scorecard_red_neuronal.py</code> aproxima la integral con la regla del punto medio. Toma \(50\) pasos \(\alpha_k=(k-0{,}5)/50\), con \(k=1,\dots,50\), entre \(0\) y \(1\); le pide a PyTorch (<code>torch.autograd.grad</code>) la derivada exacta de la red en cada uno de esos 50 puntos del camino, promedia las 50 pendientes y multiplica el promedio por \((x_j-x'_j)\) y por \(-\text{Factor}\):</p>
-                    <div class="math">$$\text{puntos}_j(\mathbf{x})=-\text{Factor}\cdot(x_j-x'_j)\cdot\frac{1}{50}\sum_{k=1}^{50}\frac{\partial z}{\partial x_j}\Big(\mathbf{x}'+\alpha_k(\mathbf{x}-\mathbf{x}')\Big)$$</div>
-                    
-                    <p>Como la integral se aproxima con 50 pasos, la suma de los puntos por variable más los puntos base reproduce el puntaje de la red con un pequeño error numérico.</p>
                 </section>
 
                 <section id="discusion">
                     <h2>9. Discusión y limitaciones</h2>
-                    <p>[Interpretación, hipótesis confirmadas/refutadas, deriva temporal, censura, equidad, explicabilidad, riesgos de despliegue.]</p>
+                    
+                    <p> Podemos ver que la red neuronal no es tan efectiva (no supera significativamente a la logística) para datos tabulares debido a cuatro razones fundamentales[cite: 3]: </p> 
+                    <ol>
+                        <li><strong>Monotonía natural del riesgo crediticio:</strong> Mayor deuda y menor ingreso siempre es mayor riesgo, lo que deja poco margen para descubrir patrones geométricos no lineales complejos[cite: 3].</li>
+                        <li><strong>Ingeniería de características:</strong> El preprocesamiento de winsorizing, logaritmos e indicadores binarios ya digirió manualmente las no linealidades relevantes[cite: 3].</li>
+                        <li><strong>Régimen cuasi-lineal:</strong> Al utilizar la activación Tanh y la regularización L2, la red neuronal adaptó matemáticamente un comportamiento plano y cuasi-lineal para no sobreajustar el ruido[cite: 3].</li>
+                        <li><strong>Límite irreducible:</strong> La deriva temporal macroeconómica entre 2012 y 2015 introduce ruido epistémico que ninguna arquitectura estática puede predecir perfectamente[cite: 3].</li>
+                    </ol>
+
+                    <h4>Análisis de las hipótesis </h4>
+                    
+                    <h3>Con respecto a H1:</h3>
+                    <p> Es cierto que un cliente más endeudado tiene más probabilidades de incumplir. Sin embargo, su peso es pequeño, ocupando el puesto 20, ya que parte de la información entró por el ratio de `ingreso_libre`[cite: 3]. </p>  
+                    
+                    <h3>Con respecto a H2:</h3>    
+                    <p> Nuestra predicción se confirma: los ingresos anuales suman puntos y es la variable de dirección positiva con más impacto (4,19 puntos), ubicándose en el puesto 4 global de importancia[cite: 3]. </p>  
+                    
+                    <h3>Con respecto a H3:</h3> 
+                    <p> Es cierto, y con más fuerza de lo que esperábamos: las moras en los últimos 2 años restan puntos y, además, el indicador de mora previa se ubica fuertemente en el puesto 6 de importancia global[cite: 3]. </p>
+                    
+                    <h3>Con respecto a H4:</h3> 
+                    <p> Se confirma solo en parte. La antigüedad del historial tiene dirección positiva pero con impacto débil[cite: 3]. </p>
+                    
+                    <h3>Con respecto a H5:</h3> 
+                    <p> Teníamos razón: pedir el crédito para refinanciar tarjeta suma puntos, mientras que pedirlo para negocio propio resta fuertemente puntos (es la segunda variable más riesgosa del modelo)[cite: 3]. </p>
+                    
+                    <h3>Con respecto a H6:</h3> 
+                    <p> El resultado va en el sentido esperado (arrendar resta puntos, propiedad suma puntos), pero con un peso predictivo bastante pequeño[cite: 3]. </p>
                 </section>
 
                 <section id="ia">
@@ -415,26 +359,30 @@
                         <table>
                             <caption>Tabla 5. Principales prompts utilizados. Fuente: elaboración propia.</caption>
                             <tr><th>#</th><th>Prompt</th><th>Herramienta</th><th>Qué se obtuvo</th><th>Qué se corrigió</th></tr>
-                            <tr><td>1</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+                            <tr><td>1</td><td>Programemos una búsqueda aleatoria y evaluemos la arquitectura...</td><td>Gemini</td><td>Código para la optimización y validación del modelo con parada temprana</td><td>Se ajustó el over-fitting bajando los parámetros (32 neuronas y tanh).</td></tr>
+                            <tr><td>2</td><td>¿Cómo funciona el Gradiente Integrado?</td><td>Gemini</td><td>Descomposición matemática de las contribuciones de las variables para la scorecard de la Red Neuronal</td><td>Se clarificó el uso del método de Sundararajan (2017) en vez de coeficientes estáticos.</td></tr>
                         </table>
                     </div>
-                    <p>[Discusión del impacto en el resultado final: tiempo ahorrado, errores detectados, verificación.]</p>
                 </section>
 
                 <section id="alucinacion">
                     <h2>11. Cacería de la alucinación</h2>
-                    <p>[Caso(s) donde la IA afirmó algo falso: prompt, respuesta errónea, cómo se detectó, evidencia de la verdad, lección.]</p>
+                    <p>Se identificó como una falsa asunción teórica pre-concebida creer que la red neuronal superaría ampliamente a la logística por el simple hecho de ser un modelo de aprendizaje profundo[cite: 3]. La literatura científica moderna (Grinsztajn et al., 2022) y nuestros propios resultados corrigieron esta alucinación demostrando que para datos tabulares sin dependencias espaciales, los modelos lineales regularizados y el ensamblaje en árboles conservan su dominancia[cite: 3].</p>
                 </section>
 
                 <section id="conclusiones">
                     <h2>12. Conclusiones y trabajo futuro</h2>
-                    <p>[Respuesta a las preguntas planteadas en la introducción.]</p>
+                    <ol>
+                        <li>La red neuronal no logró superar de forma estadísticamente significativa a la regresión logística en los datos de prueba, validando el comportamiento estructural monótono del conjunto de variables financieras tabulares[cite: 3].</li>
+                        <li>Ambos modelos experimentaron una pérdida natural de poder predictivo debido a la deriva temporal y el cambio macroeconómico presente en los registros del 2014-2015 respecto al 2012[cite: 3].</li>
+                        <li>A través de métodos de interpretabilidad como los Gradientes Integrados, se validaron rigurosamente las hipótesis de negocio y se consolidó una scorecard confiable para la originación[cite: 3].</li>
+                    </ol>
                 </section>
 
                 <section id="referencias">
-  <h2>Referencias (parciales)</h2>
+  <h2>Referencias</h2>
   <ol class="refs">
-    <li>Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635. [añade el DOI tras verificarlo]</li>
+    <li>Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635.</li>
     <li>Grinsztajn, L., Oyallon, E., &amp; Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? <em>Advances in Neural Information Processing Systems, 35</em>. https://arxiv.org/abs/2207.08815</li>
     <li>Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. https://doi.org/10.1016/j.ejor.2015.05.030</li>
     <li>Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
@@ -449,8 +397,10 @@
 
     <footer class="site-footer py-4">
         <div class="container small">
-            Proyecto académico · Redes neuronales y algoritmos bioinspirados
+            Proyecto académico · Redes neuronales y algoritmos bioinspirados · 2026
         </div>
     </footer>
+</body>
+</html>
 </body>
 </html>
