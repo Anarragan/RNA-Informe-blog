@@ -42,7 +42,7 @@
 
       <a
         class="button button-ghost"
-        href="https://youtu.be/_8jKWtpQcQo"
+        href="https://youtu.be/s9hygc3G09k"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -57,6 +57,18 @@
       >
         Aplicación web ↗
       </a>
+
+      <details class="video-dropdown">
+        <summary class="button button-ghost">Videos de contribución <span aria-hidden="true">⌄</span></summary>
+        <div class="video-dropdown-menu">
+          <a href="https://youtu.be/Y8RJNbRCAFU" target="_blank" rel="noopener noreferrer">
+            Video de Ana ↗
+          </a>
+          <a href="https://youtu.be/_8jKWtpQcQo" target="_blank" rel="noopener noreferrer">
+            Video de Jhojan ↗
+          </a>
+        </div>
+      </details>
     </div>
   </div>
 </header>
@@ -126,7 +138,7 @@
       <div class="callout danger"><strong>Por qué importa.</strong><p>Un modelo puede alcanzar métricas artificialmente altas si recibe información generada después de la decisión que pretende apoyar. La evaluación sería entonces poco representativa de un escenario real de originación.</p></div>
       <h3>2.4 Partición temporal</h3>
       <p>La variable <code>issue_d</code> determina los cortes (Tabla 1). En lugar de mezclar créditos de distintos años, el procedimiento simula un despliegue: aprender del pasado, seleccionar con un periodo posterior y medir en uno aún más reciente. La partición de prueba contiene 32.403 créditos y no interviene en la selección de hiperparámetros ni en la parada temprana.</p>
-      <div class="table-wrap"><table><caption>Tabla 1. Partición temporal definida por <code>preprocesamiento.py</code>; las tasas se leen de <code>t4_semillas.csv</code>.</caption><thead><tr><th>Conjunto</th><th>Regla temporal</th><th class="numeric">Tasa de incumplimiento observada</th></tr></thead><tbody>
+      <div class="table-wrap"><table><caption>Tabla 1. Partición temporal del conjunto de datos. Fuente: elaboración propia con base en <code>preprocesamiento.py</code> y <code>t4_semillas.csv</code>.</caption><thead><tr><th>Conjunto</th><th>Regla temporal</th><th class="numeric">Tasa de incumplimiento observada</th></tr></thead><tbody>
         <tr><td><strong>Entrenamiento</strong></td><td><code>issue_d &lt; 2012-01-01</code> (hasta dic. 2011)</td><td class="numeric">15,78 %</td></tr><tr><td><strong>Validación</strong></td><td>01 ene. – 30 jun. 2012</td><td class="numeric">17,27 %</td></tr><tr><td><strong>Prueba</strong></td><td>01 jul. – 31 dic. 2012</td><td class="numeric">16,44 %</td></tr>
       </tbody></table></div>
       <div class="callout warning"><strong>Deriva temporal y observabilidad.</strong><p>La prevalencia de incumplimiento aumenta entre particiones. Puede reflejar cambios en la población, condiciones de originación y condiciones económicas, además del efecto de excluir préstamos sin desenlace observado. Por ello, una misma puntuación o probabilidad puede no conservar su interpretación temporal sin monitoreo y recalibración.</p></div>
@@ -142,13 +154,14 @@
 
     <section class="section" id="eda">
       <p class="section-kicker">03 · Exploración</p><h2>Análisis descriptivo e hipótesis</h2>
-      <p>Antes de ajustar los modelos se formularon seis hipótesis guiadas por intuiciones de riesgo crediticio. La tasa observada de incumplimiento por partición permite comparar la composición del riesgo entre ventanas; las atribuciones de la scorecard aportan una segunda lectura, pero no deben confundirse con efectos causales.</p>
-      <div class="chart-card"><div class="chart-head"><div><h3>Incumplimiento observado por periodo</h3><p>Proporción de créditos clasificados como incumplidos en cada partición.</p></div><span class="chart-tag">Tasa observada</span></div>
+      <p>Antes de ajustar los modelos se formularon seis hipótesis guiadas por intuiciones de riesgo crediticio. Las hipótesis se resumen en la Tabla 3. La tasa observada de incumplimiento por partición (Figura 1) permite comparar la composición del riesgo entre ventanas; las atribuciones de la scorecard aportan una segunda lectura, pero no deben confundirse con efectos causales.</p>
+      <div class="chart-card"><div class="chart-head"><div><h3>Figura 1. Incumplimiento observado por periodo</h3><p>Proporción de créditos clasificados como incumplidos en cada partición.</p></div><span class="chart-tag">Tasa observada</span></div>
         <div class="split-bars" role="img" aria-label="La tasa de incumplimiento es 15,78 por ciento en entrenamiento, 17,27 por ciento en validación y 16,44 por ciento en prueba.">
           <div class="split-row"><span class="split-name">Entrenamiento</span><div class="bar-track"><div class="bar-fill" style="width:78.88%"></div></div><span class="split-value">15,78 %</span></div><div class="split-row"><span class="split-name">Validación</span><div class="bar-track"><div class="bar-fill" style="width:86.33%"></div></div><span class="split-value">17,27 %</span></div><div class="split-row"><span class="split-name">Prueba</span><div class="bar-track"><div class="bar-fill" style="width:82.21%"></div></div><span class="split-value">16,44 %</span></div>
-        </div><p class="chart-foot">Escala visual máxima: 20 %. Tasas observadas consignadas en <code>t4_semillas.csv</code>; las tres particiones se forman con los cortes temporales del preprocesador.</p>
+        </div><p class="chart-foot">Escala visual máxima: 20 %. Fuente: elaboración propia con las tasas consignadas en <code>t4_semillas.csv</code>; las tres particiones se forman con los cortes temporales del preprocesador.</p>
       </div>
       <h3>Hipótesis de riesgo</h3>
+      <p>Como se muestra en la Tabla 3, cada hipótesis asocia un factor con una dirección de riesgo esperada.</p>
       <div class="table-wrap"><table><caption>Tabla 3. Hipótesis planteadas antes de interpretar el modelo. Fuente: elaboración propia.</caption><thead><tr><th>Hipótesis</th><th>Factor</th><th>Dirección esperada</th></tr></thead><tbody>
         <tr><td>H1</td><td>Relación deuda-ingreso (<code>dti</code>)</td><td>Mayor DTI → mayor riesgo.</td></tr><tr><td>H2</td><td>Ingreso anual (<code>annual_inc</code>)</td><td>Mayor ingreso → menor riesgo.</td></tr><tr><td>H3</td><td>Morosidad previa (<code>delinq_2yrs</code> e indicador asociado)</td><td>Más moras → mayor riesgo futuro.</td></tr><tr><td>H4</td><td>Antigüedad del historial crediticio</td><td>Historial más largo → menor riesgo.</td></tr><tr><td>H5</td><td>Propósito del crédito (<code>purpose</code>)</td><td>El perfil de riesgo difiere según el uso.</td></tr><tr><td>H6</td><td>Tenencia de vivienda (<code>home_ownership</code>)</td><td>Se esperaba RENT &gt; MORTGAGE &gt; OWN en riesgo.</td></tr>
       </tbody></table></div>
@@ -161,23 +174,24 @@
       <!-- ========================================== -->
 
       <h3 style="margin-top: 3rem;">Evidencia empírica de las hipótesis</h3>
-      <p>A continuación se presentan los resultados del análisis exploratorio de datos (EDA) realizado sobre los 268.530 créditos, los cuales contrastan los supuestos teóricos con el comportamiento real de la cartera.</p>
+      <p>A continuación se presentan los resultados del análisis exploratorio de datos (EDA) realizado sobre los 268.530 créditos, los cuales contrastan los supuestos teóricos con el comportamiento real de la cartera: la Figura 2 corresponde a H1, la Figura 3 a H2, la Figura 4 a H3, la Figura 5 a H4, la Figura 6 a H5 y la Figura 7 a H6.</p>
 
             <!-- H1 -->
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H1 · Evolución del riesgo según el nivel de DTI</h3>
+            <h3>Figura 2. H1 · Evolución del riesgo según el nivel de DTI</h3>
             <p>Relación entre la deuda (DTI) y la tasa de incumplimiento, agrupada por deciles.</p>
           </div>
           <span class="chart-tag">Line plot</span>
         </div>
         <img src="./assets/figuras/eda_H1_dti_line.png" alt="Gráfico de incumplimiento por DTI" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            La gráfica confirma que mientras más deudas tenga una persona en relación con su sueldo (DTI), más difícil le será pagar un nuevo crédito. Los datos forman una escalera perfecta: el grupo de personas con casi cero deudas tiene una tasa de impago del <strong>14,9%</strong>, pero el grupo de personas altamente endeudadas se dispara al <strong>33,9%</strong>. Es decir, el riesgo se duplica.
+            Como se observa en la Figura 2, mientras más deudas tenga una persona en relación con su sueldo (DTI), más difícil le será pagar un nuevo crédito. Los datos forman una escalera perfecta: el grupo de personas con casi cero deudas tiene una tasa de impago del <strong>14,9%</strong>, pero el grupo de personas altamente endeudadas se dispara al <strong>33,9%</strong>. Es decir, el riesgo se duplica.
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -190,17 +204,18 @@
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H2 · Distribución del ingreso: Buenos vs. Malos</h3>
+            <h3>Figura 3. H2 · Distribución del ingreso: Buenos vs. Malos</h3>
             <p>Curvas de densidad del ingreso anual para clientes que pagan y los que incumplen.</p>
           </div>
           <span class="chart-tag">KDE plot</span>
         </div>
         <img src="./assets/figuras/eda_H2_ingreso_kde.png" alt="Gráfico de densidad de ingresos" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            Las dos curvas (verde para los que pagan, roja para los que no) nos dicen que <strong>ganar más dinero te protege del impago</strong>. La curva roja está concentrada en sueldos bajos (alrededor de $45,000), mientras que la verde se estira hacia sueldos más altos. Al comparar los extremos, la tasa de impago cae del <strong>28,1%</strong> (sueldos bajos) al <strong>16,2%</strong> (sueldos altos).
+            Las dos curvas de la Figura 3 (verde para los que pagan, roja para los que no) indican que <strong>ganar más dinero te protege del impago</strong>. La curva roja está concentrada en sueldos bajos (alrededor de $45,000), mientras que la verde se estira hacia sueldos más altos. Al comparar los extremos, la tasa de impago cae del <strong>28,1%</strong> (sueldos bajos) al <strong>16,2%</strong> (sueldos altos).
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -213,19 +228,20 @@
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H3 · Tasa de incumplimiento por número de moras</h3>
+            <h3>Figura 4. H3 · Tasa de incumplimiento por número de moras</h3>
             <p>Comportamiento del riesgo según la morosidad registrada en los últimos 2 años.</p>
           </div>
           <span class="chart-tag">Barras</span>
         </div>
         <div class="chart-container">
           <img src="./assets/figuras/eda_H3_moras.png" alt="Gráfico de barras de moras previas" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+          <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         </div>
 
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            La gráfica nos dice que los clientes con moras recientes son más propensos a incumplir. La tasa de impago sube desde un <strong>21,4%</strong> para los que no tienen moras, hasta un <strong>28,2%</strong> para los que tienen 4 o más. Sin embargo, el salto no es enorme; la diferencia entre tener 3 o 4 moras es casi nula.
+            La Figura 4 muestra que los clientes con moras recientes son más propensos a incumplir. La tasa de impago sube desde un <strong>21,4%</strong> para los que no tienen moras, hasta un <strong>28,2%</strong> para los que tienen 4 o más. Sin embargo, el salto no es enorme; la diferencia entre tener 3 o 4 moras es casi nula.
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -238,19 +254,20 @@
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H4 · Evolución del riesgo según antigüedad del historial</h3>
+            <h3>Figura 5. H4 · Evolución del riesgo según antigüedad del historial</h3>
             <p>Relación entre los años de historial crediticio y el incumplimiento por deciles.</p>
           </div>
-          <span class="chart-tag">Line plot + Tabla</span>
+          <span class="chart-tag">Line plot</span>
         </div>
         <div class="chart-container">
           <img src="./assets/figuras/eda_H4_antiguedad_line.png" alt="Gráfico de líneas de antigüedad del historial" style="width: 100%; max-width: 1000px; margin: 0 auto; display: block; border-radius: 8px;">
+          <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         </div>
 
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            La creencia popular dice que "el que tiene más años en el sistema bancario es más confiable". La gráfica demuestra que eso es solo un poco cierto. El grupo con menos de 7 años de historial tiene un riesgo del <strong>23,9%</strong>, y los veteranos (más de 24 años) bajan al <strong>21,1%</strong>. Solo hay una diferencia de 2,8 puntos, y la línea ni siquiera baja de forma constante (tiene altibajos).
+            La creencia popular dice que "el que tiene más años en el sistema bancario es más confiable". La Figura 5 indica que eso es solo un poco cierto. El grupo con menos de 7 años de historial tiene un riesgo del <strong>23,9%</strong>, y los veteranos (más de 24 años) bajan al <strong>21,1%</strong>. Solo hay una diferencia de 2,8 puntos, y la línea ni siquiera baja de forma constante (tiene altibajos).
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -263,19 +280,20 @@
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H5 · Tasa de incumplimiento por propósito del crédito</h3>
+            <h3>Figura 6. H5 · Tasa de incumplimiento por propósito del crédito</h3>
             <p>Riesgo asociado al uso que el cliente le dará al préstamo.</p>
           </div>
           <span class="chart-tag">Barras horizontales</span>
         </div>
         <div class="chart-container">
           <img src="./assets/figuras/eda_H5_purpose_barh.png" alt="Gráfico de barras de propósitos" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+          <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         </div>
 
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            El propósito del crédito cambia radicalmente el riesgo. Financiar una boda o un automóvil tiene las tasas de impago más bajas (alrededor del <strong>14,2%</strong>), mientras que pedir dinero para un pequeño negocio es lo más riesgoso (supera el <strong>32,3%</strong>). También hay riesgos altos en gastos médicos o mudanzas.
+            Según la Figura 6, el propósito del crédito cambia radicalmente el riesgo. Financiar una boda o un automóvil tiene las tasas de impago más bajas (alrededor del <strong>14,2%</strong>), mientras que pedir dinero para un pequeño negocio es lo más riesgoso (supera el <strong>32,3%</strong>). También hay riesgos altos en gastos médicos o mudanzas.
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -288,19 +306,20 @@
       <div class="chart-card" style="margin-top: 2rem;">
         <div class="chart-head">
           <div>
-            <h3>H6 · Proporción de buenos y malos pagadores por vivienda</h3>
+            <h3>Figura 7. H6 · Proporción de buenos y malos pagadores por vivienda</h3>
             <p>Impacto de la tenencia de vivienda en la probabilidad de impago.</p>
           </div>
           <span class="chart-tag">Stacked Bar</span>
         </div>
         <div class="chart-container">
           <img src="./assets/figuras/eda_H6_vivienda_stacked.png" alt="Gráfico de barras apiladas de vivienda" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+          <p class="chart-foot">Fuente: elaboración propia a partir de <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>).</p>
         </div>
 
         <div class="callout neutral" style="margin-top: 1.5rem;">
           <strong>¿Qué muestran los datos?</strong>
           <p style="margin-top: 0.5rem;">
-            Aquí nos llevamos una gran sorpresa. Creíamos que los dueños de casa propia eran los más seguros, pero los datos dicen lo contrario. El orden real de riesgo es: <strong>arrendatarios</strong> (24,4%), seguidos de <strong>dueños sin hipoteca</strong> (23,0%), y los más seguros son los que tienen <strong>hipoteca</strong> (19,6%).
+            La Figura 7 trae una gran sorpresa. Creíamos que los dueños de casa propia eran los más seguros, pero los datos dicen lo contrario. El orden real de riesgo es: <strong>arrendatarios</strong> (24,4%), seguidos de <strong>dueños sin hipoteca</strong> (23,0%), y los más seguros son los que tienen <strong>hipoteca</strong> (19,6%).
           </p>
           <p style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(0,0,0,0.1);">
             <strong> ¿Qué significa esto para el negocio?</strong><br>
@@ -376,7 +395,7 @@
 
       <h3>4.5 Métricas de evaluación y de negocio</h3>
       <p>La Tabla 4 define las métricas. Sean \(s\) la puntuación del modelo (probabilidad de incumplimiento) y \(F_1,F_0\) las funciones de distribución acumulada de \(s\) en incumplidos y cumplidos.</p>
-      <div class="table-wrap"><table><caption>Tabla 4. Definiciones de las métricas.</caption><thead><tr><th>Métrica</th><th>Definición</th><th>Lectura</th></tr></thead><tbody>
+      <div class="table-wrap"><table><caption>Tabla 4. Definiciones de las métricas de evaluación. Fuente: elaboración propia.</caption><thead><tr><th>Métrica</th><th>Definición</th><th>Lectura</th></tr></thead><tbody>
         <tr><td><strong>ROC-AUC</strong></td><td>\(\displaystyle AUC=P(s_{\text{malo}}>s_{\text{bueno}})+\tfrac12P(s_{\text{malo}}=s_{\text{bueno}})=\int_0^1 TPR\;d(FPR)\)</td><td>0,5 = azar; 1 = separación perfecta.</td></tr>
         <tr><td><strong>Gini</strong></td><td>\(Gini=2\cdot AUC-1\)</td><td>Reescala el AUC a [0, 1] respecto al azar.</td></tr>
         <tr><td><strong>KS</strong></td><td>\(\displaystyle KS=\max_{s}\,\lvert F_1(s)-F_0(s)\rvert\)</td><td>Máxima separación entre las distribuciones de ambas clases.</td></tr>
@@ -422,18 +441,18 @@
     <section class="section" id="resultados">
       <p class="section-kicker">06 · Evidencia cuantitativa</p><h2>Resultados</h2>
       <h3>6.1 PD: discriminación y calibración</h3>
-      <p>La Tabla 6 compara el AUC de la regresión logística con el de la red guardada (semilla 19) y con la media de las 30 semillas; las figuras 4 y 5 lo resumen.</p>
+      <p>La Tabla 6 compara el AUC de la regresión logística con el de la red guardada (semilla 19) y con la media de las 30 semillas; las Figuras 8 y 9 lo resumen.</p>
       <div class="table-wrap"><table><caption>Tabla 6. AUC en la partición de prueba. Fuente: <code>t3_resumen.csv</code> y cálculo descriptivo sobre las 30 filas de prueba de <code>t4_semillas.csv</code>.</caption><thead><tr><th>Modelo</th><th class="numeric">AUC de prueba</th><th class="numeric">Desv. estándar</th><th class="numeric">Mínimo</th><th class="numeric">Máximo</th></tr></thead><tbody>
         <tr><td><strong>Regresión logística</strong></td><td class="numeric">0,6809</td><td class="numeric">—</td><td class="numeric">0,6809</td><td class="numeric">0,6809</td></tr><tr><td><strong>MLP guardada · semilla 19</strong></td><td class="numeric">0,6827</td><td class="numeric">—</td><td class="numeric">0,6827</td><td class="numeric">0,6827</td></tr><tr><td><strong>MLP · media de 30 semillas</strong></td><td class="numeric">0,6805</td><td class="numeric">0,0027</td><td class="numeric">0,6733</td><td class="numeric">0,6848</td></tr>
       </tbody></table></div>
       <div class="dual-charts">
-        <div class="chart-card"><div class="chart-head"><div><h3>Figura 4. AUC-ROC en prueba</h3><p>La MLP muestra el promedio de 30 entrenamientos.</p></div><span class="chart-tag">Mayor es mejor</span></div>
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 8. AUC-ROC en prueba</h3><p>La MLP muestra el promedio de 30 entrenamientos.</p></div><span class="chart-tag">Mayor es mejor</span></div>
           <div class="bar-chart" role="img" aria-label="AUC de prueba: regresión logística 0,6809; red neuronal media de 30 semillas 0,6805."><div class="bar-chart-row"><span class="bar-chart-label">Logística</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:68.09%"></div></div><span class="bar-chart-val">0,6809</span></div><div class="bar-chart-row"><span class="bar-chart-label">MLP · media</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:68.05%"></div></div><span class="bar-chart-val">0,6805</span></div></div>
-          <p class="chart-foot">La diferencia entre la media de la MLP y la regresión logística es de aproximadamente −0,0004 puntos de AUC.</p>
+          <p class="chart-foot">La diferencia entre la media de la MLP y la regresión logística es de aproximadamente −0,0004 puntos de AUC. Fuente: elaboración propia con base en <code>t3_resumen.csv</code> y <code>t4_semillas.csv</code>.</p>
         </div>
-        <div class="chart-card"><div class="chart-head"><div><h3>Figura 5. Variabilidad de la MLP</h3><p>Rango del AUC observado en las 30 semillas.</p></div><span class="chart-tag">Mínimo–máximo</span></div>
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 9. Variabilidad de la MLP</h3><p>Rango del AUC observado en las 30 semillas.</p></div><span class="chart-tag">Mínimo–máximo</span></div>
           <div class="bar-chart" role="img" aria-label="La red neuronal obtuvo AUC mínimo de 0,6733 y máximo de 0,6848 en las 30 semillas."><div class="bar-chart-row"><span class="bar-chart-label">Mínimo</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:67.33%"></div></div><span class="bar-chart-val">0,6733</span></div><div class="bar-chart-row"><span class="bar-chart-label">Media</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:68.05%"></div></div><span class="bar-chart-val">0,6805</span></div><div class="bar-chart-row"><span class="bar-chart-label">Máximo</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:68.48%"></div></div><span class="bar-chart-val">0,6848</span></div></div>
-          <p class="chart-foot">Desviación estándar muestral: 0,0027. La dispersión entre inicializaciones es mayor que la diferencia entre las medias de ambos modelos.</p>
+          <p class="chart-foot">Fuente: elaboración propia con base en <code>t4_semillas.csv</code>. Desviación estándar muestral: 0,0027. La dispersión entre inicializaciones es mayor que la diferencia entre las medias de ambos modelos.</p>
         </div>
       </div>
       <div class="callout"><strong>Lectura correcta de la comparación.</strong><p>La MLP guardada obtiene AUC = 0,6827 en prueba, una diferencia de aproximadamente +0,0018 frente a la regresión logística (0,6809). No obstante, el promedio de las 30 semillas es 0,6805 (−0,0004 frente a la logística), con desviación estándar de 0,0027. La ventaja del modelo guardado es pequeña y no demuestra por sí sola una superioridad generalizable. Para afirmar significancia o equivalencia se necesitaría un contraste formal, por ejemplo intervalos de confianza o una prueba pareada sobre predicciones.</p></div>
@@ -441,8 +460,8 @@
       <p><strong>Calibración.</strong> La tasa observada en prueba es 16,44 %. La probabilidad media estimada es 16,13 % para la red guardada, aproximadamente 15,76 % como promedio de las 30 semillas y 14,74 % para la regresión logística. La red queda más cerca de la tasa real, aunque la subestima levemente; esto no reemplaza una curva de calibración por deciles.</p>
       <h3>6.2 Scorecard y variables de riesgo</h3>
       <p>La salida de la red se convierte en puntaje con la escala de la sección 4.6 (600 puntos con odds 5:1 y PDO = 20, según la práctica descrita en <a class="cite" href="#ref-siddiqi">Siddiqi, 2006</a>): <strong>más puntos representan menor riesgo</strong>. Sumar 20 puntos duplica las odds de buenos frente a malos; no reduce a la mitad la probabilidad de incumplimiento. Para explicar el puntaje de cada crédito se usan Gradientes Integrados (<a class="cite" href="#ref-sundararajan">Sundararajan et al., 2017</a>) respecto al perfil promedio de entrenamiento.</p>
-      <p>La Figura 6 y la Tabla 7 ordenan las variables por el promedio del valor absoluto de los puntos atribuidos en la prueba. La columna de dirección es la correlación entre el valor de la característica y los puntos que recibe: una correlación negativa indica que valores más altos suelen reducir el puntaje.</p>
-      <div class="chart-card"><div class="chart-head"><div><h3>Figura 6. Impacto medio absoluto en puntos</h3><p>Diez variables con mayor magnitud media de atribución en la prueba.</p></div><span class="chart-tag">Puntos · prueba</span></div>
+      <p>La Figura 10 y la Tabla 7 ordenan las variables por el promedio del valor absoluto de los puntos atribuidos en la prueba. La columna de dirección es la correlación entre el valor de la característica y los puntos que recibe: una correlación negativa indica que valores más altos suelen reducir el puntaje.</p>
+      <div class="chart-card"><div class="chart-head"><div><h3>Figura 10. Impacto medio absoluto en puntos</h3><p>Diez variables con mayor magnitud media de atribución en la prueba.</p></div><span class="chart-tag">Puntos · prueba</span></div>
         <div class="feature-list" role="img" aria-label="Impacto medio absoluto: uso rotativo 9,7504; plazo 60 meses 8,8711; consultas recientes 5,6913; ingreso anual 4,1920; ratio préstamo-ingreso 3,7788; indicador mora previa 2,7738; ratio cuentas activas 2,4708; antigüedad laboral 2,4663; propósito tarjeta de crédito 2,4280; ingreso libre 2,1687.">
           <div class="feature-row"><span class="feature-name">Uso rotativo</span><div class="feature-track"><div class="feature-fill" style="width:100%"></div></div><span class="feature-value">9,75</span></div>
           <div class="feature-row"><span class="feature-name">Plazo 60 meses</span><div class="feature-track"><div class="feature-fill" style="width:91.00%"></div></div><span class="feature-value">8,87</span></div>
@@ -454,7 +473,7 @@
           <div class="feature-row"><span class="feature-name">Antigüedad laboral</span><div class="feature-track"><div class="feature-fill" style="width:25.29%"></div></div><span class="feature-value">2,47</span></div>
           <div class="feature-row"><span class="feature-name">Propósito: tarjeta</span><div class="feature-track"><div class="feature-fill" style="width:24.90%"></div></div><span class="feature-value">2,43</span></div>
           <div class="feature-row"><span class="feature-name">Ingreso libre</span><div class="feature-track"><div class="feature-fill" style="width:22.24%"></div></div><span class="feature-value">2,17</span></div>
-        </div><p class="chart-foot">El impacto medio absoluto mide cuánto se mueve el puntaje en promedio; no indica por sí solo si la variable aumenta o reduce el puntaje.</p>
+        </div><p class="chart-foot">El impacto medio absoluto mide cuánto se mueve el puntaje en promedio; no indica por sí solo si la variable aumenta o reduce el puntaje. Fuente: elaboración propia con base en <code>t6_rn_puntos_variables.csv</code>.</p>
       </div>
       <div class="table-wrap"><table><caption>Tabla 7. Diez variables de mayor impacto en la scorecard. Fuente: <code>t6_rn_puntos_variables.csv</code>.</caption><thead><tr><th>Variable</th><th class="numeric">Impacto medio absoluto</th><th class="numeric">Correlación con puntos</th><th>Lectura descriptiva</th></tr></thead><tbody>
         <tr><td><code>revol_util</code></td><td class="numeric">9,7504</td><td class="numeric">−0,9940</td><td>Mayor utilización del crédito rotativo se asocia con menos puntos.</td></tr><tr><td><code>term_60m</code></td><td class="numeric">8,8711</td><td class="numeric">−0,9977</td><td>El plazo de 60 meses se asocia con una reducción del puntaje.</td></tr><tr><td><code>inq_last_6mths</code></td><td class="numeric">5,6913</td><td class="numeric">−0,9926</td><td>Más consultas recientes se asocian con menos puntos.</td></tr><tr><td><code>annual_inc</code></td><td class="numeric">4,1920</td><td class="numeric">+0,9735</td><td>Mayores ingresos se asocian con más puntos.</td></tr><tr><td><code>ratio_prestamo_ingreso</code></td><td class="numeric">3,7788</td><td class="numeric">−0,9788</td><td>Una mayor proporción préstamo-ingreso se asocia con menos puntos.</td></tr><tr><td><code>ind_mora_previa</code></td><td class="numeric">2,7738</td><td class="numeric">−0,9806</td><td>El indicador de mora previa se asocia con menos puntos.</td></tr><tr><td><code>ratio_cuentas_activas</code></td><td class="numeric">2,4708</td><td class="numeric">−0,9561</td><td>Valores mayores del ratio se asocian con menos puntos.</td></tr><tr><td><code>emp_length_anios</code></td><td class="numeric">2,4663</td><td class="numeric">−0,9240</td><td>Mayor antigüedad laboral se asocia con menos puntos, lo que contradice la intuición y conviene revisar.</td></tr><tr><td><code>purpose_credit_card</code></td><td class="numeric">2,4280</td><td class="numeric">+0,9979</td><td>La categoría tarjeta de crédito se asocia con más puntos frente a la referencia.</td></tr><tr><td><code>ingreso_libre</code></td><td class="numeric">2,1687</td><td class="numeric">+0,6972</td><td>Mayor ingreso libre estimado tiende a aportar puntos.</td></tr>
@@ -521,11 +540,11 @@
     <section class="section" id="referencias">
       <p class="section-kicker">09 · Fuentes</p><h2>Referencias</h2>
       <ol class="reference-list">
-        <li id="ref-baesens">Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635.</li>
+        <li id="ref-baesens">Baesens, B., Van Gestel, T., Viaene, S., Stepanova, M., Suykens, J., &amp; Vanthienen, J. (2003). Benchmarking state-of-the-art classification algorithms for credit scoring. <em>Journal of the Operational Research Society, 54</em>(6), 627–635. <a href="https://doi.org/10.1057/palgrave.jors.2601545" target="_blank" rel="noopener noreferrer">https://doi.org/10.1057/palgrave.jors.2601545</a></li>
         <li id="ref-grinsztajn">Grinsztajn, L., Oyallon, E., &amp; Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? <em>Advances in Neural Information Processing Systems, 35</em>. <a href="https://arxiv.org/abs/2207.08815" target="_blank" rel="noopener noreferrer">arXiv:2207.08815</a>.</li>
-        <li id="ref-lessmann">Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. <a href="https://doi.org/10.1016/j.ejor.2015.05.030" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.ejor.2015.05.030</a>.</li>
+        <li id="ref-lessmann">Lessmann, S., Baesens, B., Seow, H.-V., &amp; Thomas, L. C. (2015). Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. <em>European Journal of Operational Research, 247</em>(1), 124–136. <a href="https://doi.org/10.1016/j.ejor.2015.05.030" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.ejor.2015.05.030</a></li>
         <li id="ref-siddiqi">Siddiqi, N. (2006). <em>Credit risk scorecards: Developing and implementing intelligent credit scoring</em>. John Wiley &amp; Sons.</li>
-        <li id="ref-ranadeep">ranadeep. (s. f.). <em>Credit Risk Dataset</em> [Conjunto de datos]. Kaggle. <a href="https://www.kaggle.com/datasets/ranadeep/credit-risk-dataset" target="_blank" rel="noopener noreferrer">Consultar conjunto de datos</a>.</li>
+        <li id="ref-ranadeep">ranadeep. (s. f.). <em>Credit Risk Dataset</em> [Conjunto de datos]. Kaggle. <a href="https://www.kaggle.com/datasets/ranadeep/credit-risk-dataset" target="_blank" rel="noopener noreferrer">https://www.kaggle.com/datasets/ranadeep/credit-risk-dataset</a></li>
         <li id="ref-sundararajan">Sundararajan, M., Taly, A., &amp; Yan, Q. (2017). Axiomatic attribution for deep networks. <em>Proceedings of the 34th International Conference on Machine Learning, 70</em>, 3319–3328. <a href="https://arxiv.org/abs/1703.01365" target="_blank" rel="noopener noreferrer">arXiv:1703.01365</a>.</li>
       </ol>
     </section>
