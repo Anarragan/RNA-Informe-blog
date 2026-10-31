@@ -437,9 +437,9 @@
       La LGD es la fracción de la exposición que la entidad pierde finalmente cuando un cliente incumple. A diferencia de la PD, que se estima sobre toda la cartera de originación, la LGD se estima <strong>solo sobre los créditos que efectivamente incumplieron</strong>, porque es en ese subconjunto donde existe un proceso de recuperación observable.
     </p>
 
-    <h4>5.5.1 Variable objetivo y construcción de la recuperación</h4>
+    <h4>5.5.1 Variable objetivo, recuperación y EAD</h4>
     <p>
-      Para cada crédito clasificado como incumplido en la Parte 1 (<code>loan_status</code> en las categorías "malas"), se construyó la LGD a partir del monto desembolsado y de lo efectivamente recuperado:
+      Para cada crédito clasificado como incumplido en la Parte 1 (<code>loan_status</code> en las categorías "malas"), se construyó la LGD a partir del monto desembolsado y de lo efectivamente recuperado. La definición operativa y las variables utilizadas se resumen en la <strong>Tabla 5b</strong>.
     </p>
     <div class="formula-box">
       <div class="formula-label">Definición de la LGD</div>
@@ -464,9 +464,17 @@
       <p>(i) <em>Censura</em>: créditos aún vigentes o sin desenlace terminal quedan fuera de la estimación. (ii) <em>Recuperaciones tardías</em>: cobros posteriores a la fecha de corte del conjunto no son observados, lo que puede sobreestimar la LGD. (iii) <em>Selección</em>: la LGD se calcula solo sobre créditos que ya incumplieron y no es extrapolable directamente a la cartera total. (iv) <em>Definición contable</em>: la noción de "recuperado" depende del diccionario de Kaggle y no de una convención contable propia.</p>
     </div>
 
+    <p>
+      La <strong>EAD</strong> utilizada es <code>funded_amnt</code> (monto desembolsado), coherente con el caso de uso de la Parte 1: la decisión de aprobar y fijar cupo se toma en el momento de originación, cuando la exposición relevante es el monto aprobado y no el saldo insoluto posterior. La pérdida esperada combina los tres componentes:
+    </p>
+    <div class="formula-box">
+      <div class="formula-label">Pérdida esperada</div>
+      <div class="math">\[\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD},\qquad \text{LGD}=1-\text{tasa de recuperación}\]</div>
+    </div>
+
     <h4>5.5.2 Población de entrenamiento y distribución observada</h4>
     <p>
-      El conjunto de trabajo para la LGD quedó con <strong>8.560 registros</strong> de créditos incumplidos y <strong>31 variables</strong>, cubriendo originaciones entre <strong>junio de 2007 y diciembre de 2013</strong>. La variable <code>target_lgd</code> se mantiene en [0, 1] con masa en los extremos (varios 0,0 y 1,0), lo que confirma la asimetría que debe reflejarse en la elección de la función de pérdida. Se respetó la misma lógica de partición temporal de la Tabla 1, de modo que la evaluación de la LGD sea coherente con el escenario de originación de la PD.
+      El conjunto de trabajo para la LGD quedó con <strong>8.560 registros</strong> de créditos incumplidos y <strong>31 variables</strong>, cubriendo originaciones entre <strong>junio de 2007 y diciembre de 2013</strong>. La variable <code>target_lgd</code> se mantiene en [0, 1] con masa en los extremos (varios 0,0 y 1,0), lo que confirma la asimetría que debe reflejarse en la elección de la función de pérdida. La distribución observada se muestra en la <strong>Figura 5b</strong>. Se respetó la misma lógica de partición temporal de la Tabla 1, de modo que la evaluación de la LGD sea coherente con el escenario de originación de la PD.
     </p>
 
     <div class="chart-card" style="margin-top: 2rem;">
@@ -488,16 +496,7 @@
       <p>La forma de la LGD muestra que promediarla esconde dos regímenes: créditos donde se recupera mucho y créditos donde se pierde casi todo. Para el negocio, esto sugiere segmentar la LGD por producto, canal de cobranza o antigüedad del crédito, en lugar de usar una sola LGD promedio. También justifica modelar con una función de pérdida robusta a la asimetría (MAE) en lugar de MSE.</p>
     </div>
 
-    <h4>5.5.3 Definición de la EAD en la pérdida esperada</h4>
-    <p>
-      La <strong>EAD</strong> utilizada es <code>funded_amnt</code> (monto desembolsado), coherente con el caso de uso de la Parte 1: la decisión de aprobar y fijar cupo se toma en el momento de originación, cuando la exposición relevante es el monto aprobado y no el saldo insoluto posterior. La pérdida esperada combina los tres componentes:
-    </p>
-    <div class="formula-box">
-      <div class="formula-label">Pérdida esperada</div>
-      <div class="math">\[\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD},\qquad \text{LGD}=1-\text{tasa de recuperación}\]</div>
-    </div>
-
-    <h4>5.5.4 Arquitectura del modelo lineal y del MLP</h4>
+    <h4>5.5.3 Arquitectura del modelo lineal y del MLP</h4>
     <p>
       Se compararon dos enfoques con las mismas variables y particiones:
     </p>
@@ -519,9 +518,9 @@
       <p>El Ridge se ajustó una sola vez, mientras que la red se exploró con 13 configuraciones × 30 semillas. Esta asimetría de esfuerzo se reporta de forma explícita para no presentar la comparación como "justa" sin contexto: si la red no supera al Ridge incluso con un presupuesto de búsqueda mucho mayor, el argumento a favor del modelo simple se refuerza.</p>
     </div>
 
-    <h4>5.5.5 Métricas de evaluación y estabilidad</h4>
+    <h4>5.5.4 Métricas de evaluación y estabilidad</h4>
     <p>
-      Al tratarse de una variable continua acotada, la evaluación de la LGD usa métricas de error absoluto y cuadrático, complementadas con la inspección de la distribución predicha frente a la observada y con la verificación de estabilidad entre inicializaciones.
+      Al tratarse de una variable continua acotada, la evaluación de la LGD usa métricas de error absoluto y cuadrático, complementadas con la inspección de la distribución predicha frente a la observada y con la verificación de estabilidad entre inicializaciones. Las métricas empleadas se detallan en la <strong>Tabla 5c</strong>.
     </p>
     <div class="table-wrap">
       <table>
@@ -535,6 +534,10 @@
         </tbody>
       </table>
     </div>
+
+    <p>
+      La estabilidad del modelo final se verificó corriendo el MLP [32] con 30 semillas independientes; el MAE resultante por semilla se presenta en la <strong>Figura 5c</strong>.
+    </p>
 
     <div class="chart-card" style="margin-top: 2rem;">
       <div class="chart-head">
@@ -596,9 +599,9 @@
       <div class="table-wrap"><table><caption>Tabla 7. Diez variables de mayor impacto en la scorecard. Fuente: <code>t6_rn_puntos_variables.csv</code>.</caption><thead><tr><th>Variable</th><th class="numeric">Impacto medio absoluto</th><th class="numeric">Correlación con puntos</th><th>Lectura descriptiva</th></tr></thead><tbody>
         <tr><td><code>revol_util</code></td><td class="numeric">9,7504</td><td class="numeric">−0,9940</td><td>Mayor utilización del crédito rotativo se asocia con menos puntos.</td></tr><tr><td><code>term_60m</code></td><td class="numeric">8,8711</td><td class="numeric">−0,9977</td><td>El plazo de 60 meses se asocia con una reducción del puntaje.</td></tr><tr><td><code>inq_last_6mths</code></td><td class="numeric">5,6913</td><td class="numeric">−0,9926</td><td>Más consultas recientes se asocian con menos puntos.</td></tr><tr><td><code>annual_inc</code></td><td class="numeric">4,1920</td><td class="numeric">+0,9735</td><td>Mayores ingresos se asocian con más puntos.</td></tr><tr><td><code>ratio_prestamo_ingreso</code></td><td class="numeric">3,7788</td><td class="numeric">−0,9788</td><td>Una mayor proporción préstamo-ingreso se asocia con menos puntos.</td></tr><tr><td><code>ind_mora_previa</code></td><td class="numeric">2,7738</td><td class="numeric">−0,9806</td><td>El indicador de mora previa se asocia con menos puntos.</td></tr><tr><td><code>ratio_cuentas_activas</code></td><td class="numeric">2,4708</td><td class="numeric">−0,9561</td><td>Valores mayores del ratio se asocian con menos puntos.</td></tr><tr><td><code>emp_length_anios</code></td><td class="numeric">2,4663</td><td class="numeric">−0,9240</td><td>Mayor antigüedad laboral se asocia con menos puntos, lo que contradice la intuición y conviene revisar.</td></tr><tr><td><code>purpose_credit_card</code></td><td class="numeric">2,4280</td><td class="numeric">+0,9979</td><td>La categoría tarjeta de crédito se asocia con más puntos frente a la referencia.</td></tr><tr><td><code>ingreso_libre</code></td><td class="numeric">2,1687</td><td class="numeric">+0,6972</td><td>Mayor ingreso libre estimado tiende a aportar puntos.</td></tr>
       </tbody></table></div>
-      <h3>6.3 LGD y pérdida esperada</h3>
+     <h3>6.3 LGD y pérdida esperada</h3>
     <p>
-      La Tabla 6b compara el desempeño del modelo lineal y del MLP para la LGD en las tres particiones. La Figura 6b muestra la distribución observada de la LGD en la cartera, la Figura 6c compara la distribución observada con la predicha por el MLP en prueba, y la Figura 6d resume el MAE por semilla del modelo final.
+      La <strong>Tabla 6b</strong> compara el desempeño del modelo lineal y del MLP para la LGD en las tres particiones. La <strong>Figura 6b</strong> compara la distribución observada con la predicha por el MLP en prueba, la <strong>Figura 6c</strong> resume el MAE por semilla del modelo final, y la <strong>Figura 6d</strong> presenta, como referencia cruzada de la Parte 1, la curva de calibración por deciles del modelo de PD.
     </p>
 
     <div class="table-wrap">
@@ -617,13 +620,11 @@
       </table>
     </div>
 
-  
-
     <!-- FIGURA 6b · Distribución observada vs. predicha -->
     <div class="chart-card" style="margin-top: 2rem;">
       <div class="chart-head">
         <div>
-          <h3>Figura 6c. Distribución observada vs. predicha de LGD</h3>
+          <h3>Figura 6b. Distribución observada vs. predicha de LGD</h3>
           <p>MLP [32], partición de prueba.</p>
         </div>
         <span class="chart-tag">Densidades</span>
@@ -643,7 +644,7 @@
     <div class="chart-card" style="margin-top: 2rem;">
       <div class="chart-head">
         <div>
-          <h3>Figura 6d. MAE por semilla del modelo final de LGD</h3>
+          <h3>Figura 6c. MAE por semilla del modelo final de LGD</h3>
           <p>30 corridas independientes del MLP [32].</p>
         </div>
         <span class="chart-tag">Estabilidad</span>
@@ -692,7 +693,7 @@
     <!-- REFERENCIA CRUZADA · Curva de calibración de PD (Parte 1) -->
     <h4>Referencia cruzada: calibración del modelo de PD</h4>
     <p>
-      La curva de calibración por deciles pertenece a la <strong>Parte 1 (PD)</strong>, no a la LGD, y se conserva aquí como referencia del modelo de clasificación que alimenta la fórmula de pérdida esperada. La calibración, más que la discriminación (ROC-AUC), es lo que permite traducir probabilidades en pesos: un modelo mal calibrado puede aprobar una campaña que parecía rentable y terminar con una mora superior a la presupuestada.
+      La curva de calibración por deciles pertenece a la <strong>Parte 1 (PD)</strong>, no a la LGD, y se conserva aquí como referencia del modelo de clasificación que alimenta la fórmula de pérdida esperada. La calibración, más que la discriminación (ROC-AUC), es lo que permite traducir probabilidades en pesos: un modelo mal calibrado puede aprobar una campaña que parecía rentable y terminar con una mora superior a la presupuestada. La curva se presenta en la <strong>Figura 6d</strong>.
     </p>
 
     <div class="chart-card" style="margin-top: 2rem;">
@@ -713,7 +714,6 @@
       <strong>Cómo leer la calibración.</strong>
       <p>Responde a la pregunta que el banco se hace a diario: <em>"cuando el modelo dice 10 % de probabilidad de no pagar, ¿de verdad incumple uno de cada diez?"</em>. Puntos por debajo de la diagonal indican sobreestimación del riesgo (se rechazan buenos clientes); puntos por encima, subestimación (se presta barato a clientes riesgosos). La calibración es lo que permite convertir probabilidades en pesos de provisión.</p>
     </div>
-
     <section class="section" id="discusion">
       <p class="section-kicker">07 · Interpretación y cierre</p><h2>Discusión y conclusiones</h2>
       <h3>7.1 Qué aportó la red</h3>
