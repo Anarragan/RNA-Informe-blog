@@ -77,7 +77,7 @@
   <aside class="sidebar" aria-label="Navegación del informe">
     <p class="sidebar-title">En este informe <span aria-hidden="true">⌄</span></p>
     <ol class="toc" id="toc-desktop">
-      <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#datos">Datos y preprocesamiento</a></li><li><a href="#eda">Análisis descriptivo e hipótesis</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión y conclusiones</a></li><li><a href="#ia">Uso de IA y cacería de la alucinación</a></li><li><a href="#referencias">Referencias</a></li>
+      <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#datos">Datos y preprocesamiento</a></li><li><a href="#eda">Análisis descriptivo e hipótesis</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión y conclusiones</a></li><li><a href="#ia">Uso de IA</a></li><li><a href="#referencias">Referencias</a></li>
     </ol>
    </aside>
 
@@ -85,7 +85,7 @@
     <details class="mobile-toc">
       <summary>Contenido del informe</summary>
       <ol class="toc" id="toc-mobile">
-        <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#datos">Datos y preprocesamiento</a></li><li><a href="#eda">Análisis descriptivo e hipótesis</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión y conclusiones</a></li><li><a href="#ia">Uso de IA y cacería de la alucinación</a></li><li><a href="#referencias">Referencias</a></li>
+        <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#datos">Datos y preprocesamiento</a></li><li><a href="#eda">Análisis descriptivo e hipótesis</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión y conclusiones</a></li><li><a href="#ia">Uso de IA</a></li><li><a href="#referencias">Referencias</a></li>
       </ol>
     </details>
 
@@ -433,130 +433,16 @@
       <h3>5.4 Protocolo de evaluación</h3>
       <p>Ambos modelos usan las mismas 38 columnas y la partición de la Tabla 1. Se reportan AUC, Gini, KS y Brier (sección 4.5) en la partición de prueba. Para la red se distinguen dos resultados: el del modelo guardado y la media de las 30 semillas; la prueba nunca se utiliza para elegir la semilla.</p>
       <h3>5.5 Diseño de la LGD</h3>
-    <p>
-      La LGD es la fracción de la exposición que la entidad pierde finalmente cuando un cliente incumple. A diferencia de la PD, que se estima sobre toda la cartera de originación, la LGD se estima <strong>solo sobre los créditos que efectivamente incumplieron</strong>, porque es en ese subconjunto donde existe un proceso de recuperación observable.
-    </p>
-
-    <h4>5.5.1 Variable objetivo, recuperación y EAD</h4>
-    <p>
-      Para cada crédito clasificado como incumplido en la Parte 1 (<code>loan_status</code> en las categorías "malas"), se construyó la LGD a partir del monto desembolsado y de lo efectivamente recuperado. La definición operativa y las variables utilizadas se resumen en la <strong>Tabla 5b</strong>.
-    </p>
-    <div class="formula-box">
-      <div class="formula-label">Definición de la LGD</div>
-      <div class="math">\[\text{LGD}=\frac{\text{EAD}-\text{Recuperado}}{\text{EAD}}=\frac{\texttt{funded\_amnt}-(\texttt{recoveries}+\texttt{total\_rec\_prncp})}{\texttt{funded\_amnt}}\]</div>
-      <div class="math">\[\text{LGD}=1-\text{tasa de recuperación}\]</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <caption>Tabla 5b. Construcción de la variable objetivo de la LGD. Fuente: elaboración propia con datos de Lending Club (Kaggle).</caption>
-        <thead><tr><th>Componente</th><th>Variable del dataset</th><th>Justificación</th></tr></thead>
-        <tbody>
-          <tr><td><strong>EAD</strong> (denominador)</td><td><code>funded_amnt</code></td><td>Monto efectivamente desembolsado; es la exposición real del banco al momento del incumplimiento.</td></tr>
-          <tr><td><strong>Recuperado</strong></td><td><code>recoveries</code> + <code>total_rec_prncp</code></td><td>Dinero recuperado por cobranza, garantías o pagos posteriores al incumplimiento.</td></tr>
-          <tr><td><strong>LGD</strong></td><td><code>target_lgd</code> ∈ [0, 1]</td><td>Fracción de la exposición perdida; se conserva acotada al intervalo unitario.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout warning">
-      <strong>Limitaciones documentadas de la LGD.</strong>
-      <p>(i) <em>Censura</em>: créditos aún vigentes o sin desenlace terminal quedan fuera de la estimación. (ii) <em>Recuperaciones tardías</em>: cobros posteriores a la fecha de corte del conjunto no son observados, lo que puede sobreestimar la LGD. (iii) <em>Selección</em>: la LGD se calcula solo sobre créditos que ya incumplieron y no es extrapolable directamente a la cartera total. (iv) <em>Definición contable</em>: la noción de "recuperado" depende del diccionario de Kaggle y no de una convención contable propia.</p>
-    </div>
-
-    <p>
-      La <strong>EAD</strong> utilizada es <code>funded_amnt</code> (monto desembolsado), coherente con el caso de uso de la Parte 1: la decisión de aprobar y fijar cupo se toma en el momento de originación, cuando la exposición relevante es el monto aprobado y no el saldo insoluto posterior. La pérdida esperada combina los tres componentes:
-    </p>
-    <div class="formula-box">
-      <div class="formula-label">Pérdida esperada</div>
-      <div class="math">\[\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD},\qquad \text{LGD}=1-\text{tasa de recuperación}\]</div>
-    </div>
-
-    <h4>5.5.2 Población de entrenamiento y distribución observada</h4>
-    <p>
-      El conjunto de trabajo para la LGD quedó con <strong>8.560 registros</strong> de créditos incumplidos y <strong>31 variables</strong>, cubriendo originaciones entre <strong>junio de 2007 y diciembre de 2013</strong>. La variable <code>target_lgd</code> se mantiene en [0, 1] con masa en los extremos (varios 0,0 y 1,0), lo que confirma la asimetría que debe reflejarse en la elección de la función de pérdida. La distribución observada se muestra en la <strong>Figura 5b</strong>. Se respetó la misma lógica de partición temporal de la Tabla 1, de modo que la evaluación de la LGD sea coherente con el escenario de originación de la PD.
-    </p>
-
-    <div class="chart-card" style="margin-top: 2rem;">
-      <div class="chart-head">
-        <div>
-          <h3>Figura 5b. Distribución observada de la LGD</h3>
-          <p>Cartera de créditos incumplidos (n = 8.560; periodo 2007-06 a 2013-12).</p>
-        </div>
-        <span class="chart-tag">Histograma</span>
+      <p>La LGD es la fracción de la exposición que se pierde cuando un cliente incumple. Se estima solo con los créditos incumplidos, porque son los únicos con un proceso de recuperación observable, y se define como:</p>
+      <div class="formula-box"><div class="formula-label">Definición de la LGD</div><div class="math">\[\text{LGD}=\frac{\text{EAD}-\text{Recuperado}}{\text{EAD}}=\frac{\texttt{funded\_amnt}-(\texttt{recoveries}+\texttt{total\_rec\_prncp})}{\texttt{funded\_amnt}}\]</div></div>
+      <p>La EAD es el monto desembolsado (<code>funded_amnt</code>), porque la decisión de aprobar se toma al originar el crédito. La LGD queda acotada en [0, 1]. La pérdida esperada combina los tres componentes:</p>
+      <div class="formula-box"><div class="formula-label">Pérdida esperada</div><div class="math">\[\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD}\]</div></div>
+      <p>La muestra tiene 8.560 créditos incumplidos y conserva la partición temporal de la Tabla 1. Como la LGD se concentra en los extremos (Figura 11), se usa el MAE como pérdida, que es menos sensible a esa asimetría que el MSE. Se comparan dos modelos con las mismas variables:</p>
+      <div class="grid-2">
+        <article class="info-card"><span class="number">MODELO LINEAL</span><h3>Regresión Ridge</h3><p>39 parámetros (38 coeficientes e intercepto), ajustado una sola vez con penalización L2 como línea base.</p></article>
+        <article class="info-card"><span class="number">RED NEURONAL</span><h3>MLP [32]</h3><p>Una capa oculta de 32 neuronas, salida sigmoide y 1.281 parámetros. Se probaron 13 configuraciones y la final se entrenó con 30 semillas.</p></article>
       </div>
-      <img src="./figuras/t4_distribucion_lgd.png"
-          alt="Distribución observada de la LGD en la cartera de créditos incumplidos"
-          style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
-      <p class="chart-foot">Concentración cerca de 1 (pérdida casi total por ausencia de recuperación) y cola hacia valores bajos (casos con cobranza exitosa o garantías). Fuente: elaboración propia con datos de Lending Club (Kaggle).</p>
-    </div>
-
-    <div class="callout neutral">
-      <strong>Lectura de la distribución.</strong>
-      <p>La forma de la LGD muestra que promediarla esconde dos regímenes: créditos donde se recupera mucho y créditos donde se pierde casi todo. Para el negocio, esto sugiere segmentar la LGD por producto, canal de cobranza o antigüedad del crédito, en lugar de usar una sola LGD promedio. También justifica modelar con una función de pérdida robusta a la asimetría (MAE) en lugar de MSE.</p>
-    </div>
-
-    <h4>5.5.3 Arquitectura del modelo lineal y del MLP</h4>
-    <p>
-      Se compararon dos enfoques con las mismas variables y particiones:
-    </p>
-    <div class="grid-2">
-      <article class="info-card">
-        <span class="number">MODELO LINEAL</span>
-        <h3>Regresión Ridge</h3>
-        <p><strong>39 parámetros</strong> entrenables (38 coeficientes + intercepto). Se ajustó una sola vez como línea base de baja complejidad. Penalización L2 sobre los coeficientes para controlar la colinealidad entre variables financieras.</p>
-      </article>
-      <article class="info-card">
-        <span class="number">RED NEURONAL</span>
-        <h3>MLP [32] con salida sigmoide</h3>
-        <p>Una capa oculta de <strong>32 neuronas</strong>; la salida usa activación sigmoide para mantener la predicción en [0, 1]. <strong>1.281 parámetros</strong> entrenables. Función de pérdida <strong>MAE</strong> (equivalente a un modelo laplaciano por máxima verosimilitud), justificada por la masa de valores cerca de 1 observada en la distribución de la LGD. Se entrenaron <strong>13 configuraciones</strong> de arquitectura/hiperparámetros y la configuración final se corrió con <strong>30 semillas independientes</strong>.</p>
-      </article>
-    </div>
-
-    <div class="callout neutral">
-      <strong>Presupuesto de búsqueda explícito.</strong>
-      <p>El Ridge se ajustó una sola vez, mientras que la red se exploró con 13 configuraciones × 30 semillas. Esta asimetría de esfuerzo se reporta de forma explícita para no presentar la comparación como "justa" sin contexto: si la red no supera al Ridge incluso con un presupuesto de búsqueda mucho mayor, el argumento a favor del modelo simple se refuerza.</p>
-    </div>
-
-    <h4>5.5.4 Métricas de evaluación y estabilidad</h4>
-    <p>
-      Al tratarse de una variable continua acotada, la evaluación de la LGD usa métricas de error absoluto y cuadrático, complementadas con la inspección de la distribución predicha frente a la observada y con la verificación de estabilidad entre inicializaciones. Las métricas empleadas se detallan en la <strong>Tabla 5c</strong>.
-    </p>
-    <div class="table-wrap">
-      <table>
-        <caption>Tabla 5c. Métricas de evaluación de la LGD.</caption>
-        <thead><tr><th>Métrica</th><th>Definición</th><th>Lectura</th></tr></thead>
-        <tbody>
-          <tr><td><strong>MAE</strong></td><td>\(\displaystyle MAE=\frac{1}{N}\sum_{i=1}^{N}\lvert \hat{y}_i-y_i\rvert\)</td><td>Error medio en puntos porcentuales de la exposición; robusto a la asimetría de la LGD.</td></tr>
-          <tr><td><strong>RMSE</strong></td><td>\(\displaystyle RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2}\)</td><td>Penaliza más los errores grandes; útil para detectar subestimación de la cola.</td></tr>
-          <tr><td><strong>Estabilidad entre semillas</strong></td><td>Media, desviación estándar, mínimo y máximo del MAE sobre 30 inicializaciones.</td><td>Verifica que el resultado no dependa de una sola inicialización.</td></tr>
-          <tr><td><strong>Distribución obs. vs. pred.</strong></td><td>Comparación gráfica de densidades en la partición de prueba.</td><td>Evalúa si el modelo captura la forma del riesgo, no solo el promedio.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      La estabilidad del modelo final se verificó corriendo el MLP [32] con 30 semillas independientes; el MAE resultante por semilla se presenta en la <strong>Figura 5c</strong>.
-    </p>
-
-    <div class="chart-card" style="margin-top: 2rem;">
-      <div class="chart-head">
-        <div>
-          <h3>Figura 5c. MAE por semilla del modelo final de LGD</h3>
-          <p>30 corridas independientes del MLP [32].</p>
-        </div>
-        <span class="chart-tag">Estabilidad</span>
-      </div>
-      <img src="./figuras/t4_mae_semillas_final.png"
-          alt="MAE por semilla del modelo final de LGD en 30 corridas independientes"
-          style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
-      <p class="chart-foot">Media 0,18340; desviación estándar 0,00026; mejor 0,18281; peor 0,18387. La baja dispersión indica que el resultado no depende de una sola inicialización. Fuente: elaboración propia.</p>
-    </div>
-
-    <div class="callout neutral">
-      <strong>Estabilidad entre inicializaciones.</strong>
-      <p>La desviación estándar del MAE entre semillas (0,00026) es menor que la diferencia entre modelos, lo que confirma que la comparación no está dominada por el azar de la inicialización. Si la dispersión hubiera sido grande, el modelo no sería apto para producción sin fijar semillas y validar repetidamente.</p>
-    </div>
+      <p>Se evalúan el MAE y el RMSE en validación y prueba, y la estabilidad del MLP como la desviación estándar del MAE entre las 30 semillas. El Ridge recibió menos esfuerzo de búsqueda que la red; si aun así la red no lo supera, el argumento a favor del modelo simple se refuerza.</p>
     </section>
 
     <section class="section" id="resultados">
@@ -603,121 +489,24 @@
       <div class="table-wrap"><table><caption>Tabla 7. Diez variables de mayor impacto en la scorecard. Fuente: <code>t6_rn_puntos_variables.csv</code>.</caption><thead><tr><th>Variable</th><th class="numeric">Impacto medio absoluto</th><th class="numeric">Correlación con puntos</th><th>Lectura descriptiva</th></tr></thead><tbody>
         <tr><td><code>revol_util</code></td><td class="numeric">9,7504</td><td class="numeric">−0,9940</td><td>Mayor utilización del crédito rotativo se asocia con menos puntos.</td></tr><tr><td><code>term_60m</code></td><td class="numeric">8,8711</td><td class="numeric">−0,9977</td><td>El plazo de 60 meses se asocia con una reducción del puntaje.</td></tr><tr><td><code>inq_last_6mths</code></td><td class="numeric">5,6913</td><td class="numeric">−0,9926</td><td>Más consultas recientes se asocian con menos puntos.</td></tr><tr><td><code>annual_inc</code></td><td class="numeric">4,1920</td><td class="numeric">+0,9735</td><td>Mayores ingresos se asocian con más puntos.</td></tr><tr><td><code>ratio_prestamo_ingreso</code></td><td class="numeric">3,7788</td><td class="numeric">−0,9788</td><td>Una mayor proporción préstamo-ingreso se asocia con menos puntos.</td></tr><tr><td><code>ind_mora_previa</code></td><td class="numeric">2,7738</td><td class="numeric">−0,9806</td><td>El indicador de mora previa se asocia con menos puntos.</td></tr><tr><td><code>ratio_cuentas_activas</code></td><td class="numeric">2,4708</td><td class="numeric">−0,9561</td><td>Valores mayores del ratio se asocian con menos puntos.</td></tr><tr><td><code>emp_length_anios</code></td><td class="numeric">2,4663</td><td class="numeric">−0,9240</td><td>Mayor antigüedad laboral se asocia con menos puntos, lo que contradice la intuición y conviene revisar.</td></tr><tr><td><code>purpose_credit_card</code></td><td class="numeric">2,4280</td><td class="numeric">+0,9979</td><td>La categoría tarjeta de crédito se asocia con más puntos frente a la referencia.</td></tr><tr><td><code>ingreso_libre</code></td><td class="numeric">2,1687</td><td class="numeric">+0,6972</td><td>Mayor ingreso libre estimado tiende a aportar puntos.</td></tr>
       </tbody></table></div>
-     <h3>6.3 LGD y pérdida esperada</h3>
-    <p>
-      La <strong>Tabla 6b</strong> compara el desempeño del modelo lineal y del MLP para la LGD en las tres particiones. La <strong>Figura 6b</strong> compara la distribución observada con la predicha por el MLP en prueba, la <strong>Figura 6c</strong> resume el MAE por semilla del modelo final, y la <strong>Figura 6d</strong> presenta, como referencia cruzada de la Parte 1, la curva de calibración por deciles del modelo de PD.
-    </p>
-
-    <div class="table-wrap">
-      <table>
-        <caption>Tabla 6b. Desempeño de los modelos de LGD por partición. Fuente: <code>t4_*</code> del repositorio.</caption>
-        <thead>
-          <tr><th>Modelo</th><th>Partición</th><th class="numeric">Parámetros</th><th class="numeric">MAE</th><th class="numeric">RMSE</th></tr>
-        </thead>
+      <h3>6.3 LGD y pérdida esperada</h3>
+      <p>La Tabla 8 compara el modelo lineal (Ridge) con el MLP en la LGD. Ambos tienen un error casi idéntico en prueba: el MLP no mejora al Ridge, aun con 33 veces más parámetros y una búsqueda mucho mayor. La Figura 11 muestra la distribución observada de la LGD que motivó el uso del MAE.</p>
+      <div class="table-wrap"><table><caption>Tabla 8. Desempeño de los modelos de LGD. Fuente: elaboración propia con base en los archivos <code>t4_*</code> del repositorio.</caption>
+        <thead><tr><th>Modelo</th><th class="numeric">Parámetros</th><th class="numeric">MAE validación</th><th class="numeric">MAE prueba</th><th class="numeric">RMSE prueba</th></tr></thead>
         <tbody>
-          <tr><td>Ridge</td><td>Entrenamiento</td><td class="numeric">39</td><td class="numeric">0,20554</td><td class="numeric">0,24332</td></tr>
-          <tr><td>Ridge</td><td>Validación</td><td class="numeric">39</td><td class="numeric">0,19214</td><td class="numeric">0,22853</td></tr>
-          <tr><td><strong>Ridge</strong></td><td><strong>Prueba</strong></td><td class="numeric"><strong>39</strong></td><td class="numeric"><strong>0,18311</strong></td><td class="numeric"><strong>0,22396</strong></td></tr>
-          <tr><td>MLP [32]</td><td>Validación</td><td class="numeric">1.281</td><td class="numeric">0,19190</td><td class="numeric">0,22858</td></tr>
-          <tr><td><strong>MLP [32]</strong></td><td><strong>Prueba</strong></td><td class="numeric"><strong>1.281</strong></td><td class="numeric"><strong>0,18340</strong></td><td class="numeric"><strong>0,22464</strong></td></tr>
+          <tr><td><strong>Ridge</strong></td><td class="numeric">39</td><td class="numeric">0,19214</td><td class="numeric">0,18311</td><td class="numeric">0,22396</td></tr>
+          <tr><td><strong>MLP [32] · media de 30 semillas</strong></td><td class="numeric">1.281</td><td class="numeric">0,19190</td><td class="numeric">0,18340</td><td class="numeric">0,22464</td></tr>
         </tbody>
-      </table>
-    </div>
-
-    <!-- FIGURA 6b · Distribución observada vs. predicha -->
-    <div class="chart-card" style="margin-top: 2rem;">
-      <div class="chart-head">
-        <div>
-          <h3>Figura 6b. Distribución observada vs. predicha de LGD</h3>
-          <p>MLP [32], partición de prueba.</p>
-        </div>
-        <span class="chart-tag">Densidades</span>
+      </table></div>
+      <div class="chart-card">
+        <div class="chart-head"><div><h3>Figura 11. Distribución observada de la LGD</h3><p>Créditos incumplidos (n = 8.560).</p></div><span class="chart-tag">Histograma</span></div>
+        <img src="./figuras/t4_distribucion_lgd.png" alt="Distribución observada de la LGD en los créditos incumplidos" style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
+        <p class="chart-foot">Fuente: elaboración propia con base en <code>loan.csv</code> (<a class="cite" href="#ref-ranadeep">ranadeep, s. f.</a>). Muchos créditos se concentran cerca de 1 (pérdida casi total).</p>
       </div>
-      <img src="./figuras/t4_distribucion_obs_pred.png"
-          alt="Distribución observada vs. predicha de LGD con el MLP en la partición de prueba"
-          style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
-      <p class="chart-foot">Si ambas distribuciones se solapan bien, el modelo captura la forma del riesgo; si se "aplana" cerca del promedio, subestima los casos extremos y la provisión resulta insuficiente. Fuente: elaboración propia.</p>
-    </div>
+      <div class="callout"><strong>Hallazgo de la LGD.</strong><p>El MAE medio del MLP en prueba (0,18340) es ligeramente peor que el del Ridge (0,18311), y la desviación estándar entre semillas es 0,00026. La red no se justifica para esta tarea: el Ridge logra el mismo error con un modelo más simple, barato e interpretable.</p></div>
+      <p>Con ambos componentes, la pérdida esperada de cada crédito es \(\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD}\). Por ejemplo, con PD = 5 %, LGD = 40 % y un crédito de 10.000, EL = 0,05 × 0,40 × 10.000 = 200.</p>
+    </section>
 
-    <div class="callout neutral">
-      <strong>Por qué importa la forma, no solo el promedio.</strong>
-      <p>Un modelo que acierta el promedio pero aplana la distribución puede rankear bien y, sin embargo, provisionar de menos para los créditos que se pierden completos. Esta figura separa un modelo útil para <em>provisionar</em> (necesita la cola) de uno que solo sirve para <em>rankear</em>.</p>
-    </div>
-
-    <!-- FIGURA 6c · MAE por semilla -->
-    <div class="chart-card" style="margin-top: 2rem;">
-      <div class="chart-head">
-        <div>
-          <h3>Figura 6c. MAE por semilla del modelo final de LGD</h3>
-          <p>30 corridas independientes del MLP [32].</p>
-        </div>
-        <span class="chart-tag">Estabilidad</span>
-      </div>
-      <img src="./figuras/t4_mae_semillas_final.png"
-          alt="MAE por semilla del modelo final de LGD en 30 corridas independientes"
-          style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
-      <p class="chart-foot">Media 0,18340; desviación estándar 0,00026; mejor 0,18281; peor 0,18387. La baja dispersión indica que el resultado no depende de una sola inicialización. Fuente: elaboración propia.</p>
-    </div>
-
-    <div class="callout neutral">
-      <strong>Estabilidad entre inicializaciones.</strong>
-      <p>La desviación estándar del MAE entre semillas (0,00026) es menor que la diferencia entre modelos, lo que confirma que la comparación no está dominada por el azar de la inicialización. Si la dispersión hubiera sido grande, el modelo no sería apto para producción sin fijar semillas y validar repetidamente.</p>
-    </div>
-
-    <h4>Síntesis comparativa</h4>
-    <div class="table-wrap">
-      <table>
-        <caption>Tabla 6c. Comparación Ridge vs. MLP para la LGD en la partición de prueba.</caption>
-        <thead><tr><th>Criterio</th><th>Ridge</th><th>MLP [32]</th><th>Ganador</th></tr></thead>
-        <tbody>
-          <tr><td>MAE prueba (media)</td><td>0,18311</td><td>0,18340</td><td>Ridge (por 0,00029)</td></tr>
-          <tr><td>RMSE prueba (media)</td><td>0,22396</td><td>0,22464</td><td>Ridge</td></tr>
-          <tr><td>Parámetros entrenables</td><td>39</td><td>1.281</td><td>Ridge (33× más simple)</td></tr>
-          <tr><td>Estabilidad entre semillas</td><td>n/a (1 ajuste)</td><td>desv. 0,00026</td><td>MLP (solo si se corre 30 veces)</td></tr>
-          <tr><td>Costo de cómputo</td><td>Bajo</td><td>Alto (13 configs × 30 semillas)</td><td>Ridge</td></tr>
-          <tr><td>Interpretabilidad</td><td>Coeficientes directos</td><td>Caja negra</td><td>Ridge</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout">
-      <strong>Hallazgo de la LGD.</strong>
-      <p>La red neuronal <strong>no aportó una mejora material</strong> sobre el Ridge: su MAE medio en prueba (0,18340) es ligeramente peor que el del Ridge (0,18311), y su mejor corrida (0,18281) apenas lo supera en 0,0003, por debajo de la dispersión entre semillas (0,00026). Con 33 veces más parámetros y un costo de cómputo mucho mayor, la red no se justifica para esta tarea. En términos de negocio, si el banco ya tiene un Ridge calibrado, migrar a una MLP no le reduce la reserva esperada; solo agrega complejidad operativa y opacidad regulatoria. El resultado es consistente con la literatura que señala que las MLP no siempre superan a los modelos lineales en datos tabulares de tamaño moderado y relaciones aproximadamente monotónicas.</p>
-    </div>
-
-    <h4>Pérdida esperada</h4>
-    <p>
-      Combinando ambos modelos se estima la pérdida esperada de cada crédito con \(\text{EL}=\text{PD}\times\text{LGD}\times\text{EAD}\), usando <code>funded_amnt</code> como EAD. Un error de 0,0003 en el MAE de la LGD parece pequeño en abstracto, pero sobre una cartera de miles de millones se traduce en millones de sobre/subprovisión: por eso la elección entre Ridge y MLP no es solo académica, es una decisión de riesgo.
-    </p>
-    <div class="callout neutral">
-      <strong>Ejemplo numérico.</strong>
-      <p>Si la PD predice 5 % de probabilidad de impago, la LGD predice 40 % de pérdida sobre lo expuesto y el crédito es de 10.000, la pérdida esperada es \(0{,}05\times0{,}40\times10.000=200\). Ese número alimenta la provisión del banco y, en última instancia, el precio del crédito.</p>
-    </div>
-
-    <!-- REFERENCIA CRUZADA · Curva de calibración de PD (Parte 1) -->
-    <h4>Referencia cruzada: calibración del modelo de PD</h4>
-    <p>
-      La curva de calibración por deciles pertenece a la <strong>Parte 1 (PD)</strong>, no a la LGD, y se conserva aquí como referencia del modelo de clasificación que alimenta la fórmula de pérdida esperada. La calibración, más que la discriminación (ROC-AUC), es lo que permite traducir probabilidades en pesos: un modelo mal calibrado puede aprobar una campaña que parecía rentable y terminar con una mora superior a la presupuestada. La curva se presenta en la <strong>Figura 6d</strong>.
-    </p>
-
-    <div class="chart-card" style="margin-top: 2rem;">
-      <div class="chart-head">
-        <div>
-          <h3>Figura 6d. Curva de calibración por deciles del modelo de PD</h3>
-          <p>Parte 1 · Probabilidad predicha vs. frecuencia observada de incumplimiento.</p>
-        </div>
-        <span class="chart-tag">Parte 1 · PD</span>
-      </div>
-      <img src="./figuras/t4_calibracion_deciles.png"
-          alt="Curva de calibración por deciles del modelo de PD de la Parte 1"
-          style="width: 100%; max-width: 900px; margin: 0 auto; display: block; border-radius: 8px;">
-      <p class="chart-foot">Si los puntos se pegan a la diagonal, la probabilidad predicha coincide con la frecuencia observada y el modelo sirve para fijar tasas y cupos con confianza. Fuente: elaboración propia.</p>
-    </div>
-
-    <div class="callout neutral">
-      <strong>Cómo leer la calibración.</strong>
-      <p>Responde a la pregunta que el banco se hace a diario: <em>"cuando el modelo dice 10 % de probabilidad de no pagar, ¿de verdad incumple uno de cada diez?"</em>. Puntos por debajo de la diagonal indican sobreestimación del riesgo (se rechazan buenos clientes); puntos por encima, subestimación (se presta barato a clientes riesgosos). La calibración es lo que permite convertir probabilidades en pesos de provisión.</p>
-    </div>
     <section class="section" id="discusion">
       <p class="section-kicker">07 · Interpretación y cierre</p><h2>Discusión y conclusiones</h2>
       <h3>7.1 Qué aportó la red</h3>
@@ -758,20 +547,17 @@
     </section>
 
     <section class="section" id="ia">
-      <p class="section-kicker">08 · Herramientas y verificación</p><h2>Uso de IA y cacería de la alucinación</h2>
+      <p class="section-kicker">08 · Herramientas y verificación</p><h2>Uso de IA</h2>
       <h3>8.1 Uso de inteligencia artificial</h3>
-      <p>La IA se utilizó como apoyo para explorar implementaciones y comprender métodos (Tabla 8). Las sugerencias se incorporaron después de revisar su pertinencia frente a los datos, las métricas y los fundamentos del proyecto; la herramienta no sustituye la comprobación experimental ni la responsabilidad del equipo sobre el código y las conclusiones.</p>
-      <div class="table-wrap"><table><caption>Tabla 8. Ejemplos de uso documentados por el equipo. Fuente: elaboración propia.</caption><thead><tr><th>#</th><th>Consulta / tarea</th><th>Herramienta</th><th>Apoyo obtenido</th><th>Revisión realizada</th></tr></thead><tbody>
+      <p>La IA se utilizó como apoyo para explorar implementaciones y comprender métodos (Tabla 9). Las sugerencias se incorporaron después de revisar su pertinencia frente a los datos, las métricas y los fundamentos del proyecto; la herramienta no sustituye la comprobación experimental ni la responsabilidad del equipo sobre el código y las conclusiones.</p>
+      <div class="table-wrap"><table><caption>Tabla 9. Ejemplos de uso documentados por el equipo. Fuente: elaboración propia.</caption><thead><tr><th>#</th><th>Consulta / tarea</th><th>Herramienta</th><th>Apoyo obtenido</th><th>Revisión realizada</th></tr></thead><tbody>
         <tr><td>1</td><td>Programar la búsqueda de hiperparámetros y la evaluación del modelo.</td><td>Gemini</td><td>Propuesta de código para búsqueda de hiperparámetros y parada temprana.</td><td>Se contrastaron las configuraciones con las pérdidas de validación y los resultados sobre las particiones.</td></tr>
         <tr><td>2</td><td>Explicar el método de Gradientes Integrados.</td><td>Gemini</td><td>Descomposición de la salida de la red en contribuciones por variable.</td><td>Se revisó la referencia utilizada, la propiedad de completitud y la conversión de logit a puntos.</td></tr>
         <tr><td>3</td><td>Cambiar el estilo de la app.</td><td>Chatgpt</td><td>Gran cambio estetico y estructural, se mejoró el indice.</td><td>Se revisó la estructura del HTML, y que los puntos en la pagina correspondieran a lo que habia que entregar, es decir, que la IA no se hubiera comido ningun punto.</td></tr>
         <tr><td>4</td><td>Desarrollo de un perceptron multicapas.</td><td>Gemini</td><td> Se generó la red, aunque con ciertos errores. </td><td>Se reviso de donde provenian los datos y de que documento, se reviso la fase de forward propagation, se verificó que la arquitectura de la red fuera la deseada, y la ejecuion de la funcion de activacion, se revisó la generacion del logit y que las predicciones generales tuvieran sentido con respecto a nuestros datos. </td></tr>
         <tr><td>5</td><td>Generacion del scorecard y explicacion profunda. </td><td>Claude</td><td> Se generó el scorecard, y se dio la explicación. </td><td>Se verificó nuevamente toda la estructura, se verificó que se aplicara el metodo de gradientes integrados. Se evaluaron los resultados, y los datos con los que se generó el scorecard, esto para generar resultados 100% alineados con los resultados reales del modelo.</td></tr>
       </tbody></table></div>
-      <h3>8.2 Cacería de la alucinación</h3>
-      <p>La suposición que se puso a prueba fue que una red neuronal debía superar ampliamente a la regresión logística por ser más compleja. La verificación mostró por qué no basta con comparar una cifra aislada: hay que identificar la rama, la configuración seleccionada, el corte temporal y si el resultado corresponde a una sola inicialización o al promedio de varias. El modelo guardado (semilla 19) supera a la logística por una diferencia mínima, mientras que la media de las 30 semillas queda ligeramente por debajo (Tabla 6).</p>
-      <p>Un segundo caso fue la configuración: en <code>develop</code> la búsqueda parte de ReLU, pero la red seleccionada usa Tanh (Tabla 5); confundir la configuración inicial con la ganadora cambia la descripción del modelo.</p>
-    </section>
+      </section>
 
     <section class="section" id="referencias">
       <p class="section-kicker">09 · Fuentes</p><h2>Referencias</h2>
