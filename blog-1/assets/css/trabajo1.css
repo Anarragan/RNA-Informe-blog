@@ -1,0 +1,45 @@
+/* Piezas propias del Trabajo 1: menú de videos, figuras, pestañas y referencias APA. */
+
+.hero{overflow:visible}
+.hero-actions{align-items:flex-start}
+.video-menu{position:relative;z-index:5;margin:0;border:0;border-radius:10px;background:transparent}
+.video-menu summary{list-style:none;cursor:pointer;padding:10px 16px;color:#f2f6fb;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)}
+.video-menu summary:hover,.video-menu[open] summary{color:#fff;background:rgba(255,255,255,.12)}
+.video-menu summary::-webkit-details-marker{display:none}
+.video-menu[open] summary span{display:inline-block;transform:rotate(180deg)}
+.video-menu ul{position:absolute;top:calc(100% + 6px);left:0;min-width:270px;margin:0;padding:6px;list-style:none;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+.video-menu a{display:block;padding:9px 12px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:.86rem;font-weight:650}
+.video-menu a:hover,.video-menu a:focus-visible{background:var(--teal-soft);color:#075f64}
+
+.figure{margin:24px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.figure-title{margin:0 0 2px;color:var(--navy);font-weight:800;font-size:.92rem}
+.figure-subtitle{margin:0 0 12px;color:#33435d;font-style:italic;font-size:.9rem}
+.figure img,.figure iframe{display:block;width:100%;border:0;border-radius:10px;background:#f6f8fb}
+.figure iframe{height:440px}
+.figure-note{margin:12px 0 0;color:var(--muted);font-size:.76rem;line-height:1.55}
+.figure-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.figure-pair h4{margin:0 0 8px!important;font-size:.88rem!important}
+
+.part-banner{display:flex;align-items:center;gap:12px;margin:34px 0 6px;padding:10px 14px;border-left:3px solid var(--teal);border-radius:0 10px 10px 0;background:var(--teal-soft);color:#075f64;font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+
+.tabs{margin-top:4px}
+.tab-list{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+.tab-list button{min-height:36px;padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#43536a;font:inherit;font-size:.8rem;font-weight:750;cursor:pointer}
+.tab-list button[aria-selected=true]{border-color:var(--teal);background:var(--teal);color:#fff}
+.tab-panel[hidden]{display:none}
+
+.equation-note{margin-top:-6px;color:var(--muted);font-size:.8rem}
+.reference-list.apa{list-style:none;padding-left:0}
+.reference-list.apa li{padding-left:2.2rem;text-indent:-2.2rem;margin-bottom:12px}
+.reference-list.apa a{word-break:break-all}
+.cost-split{display:flex;height:13px;border-radius:4px;overflow:hidden;background:#eef2f6;min-width:120px}
+.cost-split span{display:block;height:100%}
+.cost-split .fuel{background:#367b9f}.cost-split .toll{background:#a45e12}.cost-split .time{background:#34a197}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 0;font-size:.76rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+.table-wrap caption{caption-side:top;padding:0 2px 10px;color:#33435d;font-size:.8rem;line-height:1.5}
+.table-wrap{margin:18px 0 22px}
+
+@media(max-width:780px){.figure-pair{grid-template-columns:1fr}.figure iframe{height:340px}}
+@media print{.video-menu{display:none}.tab-panel[hidden]{display:block}.tab-list{display:none}.figure{break-inside:avoid}}

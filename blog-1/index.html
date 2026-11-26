@@ -1,156 +1,668 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabajo 1 | Redes neuronales y algoritmos bioinspirados</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/site.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111d35">
+<meta name="description" content="Informe técnico: comparación de descenso por gradiente y metaheurísticas sobre las funciones de Schwefel y Rosenbrock, y recorrido óptimo por las 47 capitales peninsulares de España con colonias de hormigas y algoritmos genéticos.">
+<meta property="og:type" content="article"><meta property="og:title" content="Trabajo 1 | Optimización numérica, metaheurística y combinatoria"><meta property="og:description" content="Gradiente frente a metaheurísticas en funciones de prueba continuas y en el problema del viajante por España.">
+<title>Trabajo 1 | Optimización numérica, metaheurística y combinatoria</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/hero.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/charts.css">
+<link rel="stylesheet" href="assets/css/report.css">
+<link rel="stylesheet" href="assets/css/responsive.css">
+<link rel="stylesheet" href="assets/css/print.css">
+<link rel="stylesheet" href="assets/css/trabajo1.css">
 </head>
-
 <body>
-    <header class="bg-dark text-white py-5">
-        <div class="container py-4">
-            <p class="text-uppercase small text-secondary mb-2">Blog académico · 2026</p>
-            <h1 class="display-4 fw-bold">Trabajo 1</h1>
-            <p class="lead text-secondary mt-3 mb-0">
-                Optimización numérica y combinatoria mediante algoritmos bioinspirados.
-            </p>
+<a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+<div class="reading-progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+<header class="hero" id="inicio">
+  <div class="hero-inner">
+    <p class="eyebrow">Trabajo 1 · Semestre 2026-02</p>
+    <h1>
+      Seguir la pendiente
+      <br>
+      <span>o explorar el paisaje.</span>
+    </h1>
+    <p class="hero-lead">Optimización numérica, metaheurística y combinatoria: descenso por gradiente frente a algoritmos evolutivos, enjambres de partículas y evolución diferencial en funciones de prueba continuas, y colonias de hormigas frente a algoritmos genéticos en un recorrido real por España.</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="https://github.com/Anarragan/RNA-Trabajo1-Optimizacion-Metaheuristica-Combinatoria/tree/develop" target="_blank" rel="noopener noreferrer">Repositorio ↗</a>
+      <details class="video-menu">
+        <summary class="button button-ghost">Videos de sustentación <span aria-hidden="true">▾</span></summary>
+        <ul>
+          <li><a href="https://youtu.be/8JSDc4k_XTU" target="_blank" rel="noopener noreferrer">Ana María Barragán Ariza ↗</a></li>
+          <li><a href="https://www.youtube.com/watch?v=EMRf0D3nj98" target="_blank" rel="noopener noreferrer">Mauricio David Timaná Getial ↗</a></li>
+          <li><a href="https://www.youtube.com/watch?v=cOjXOD4GMnw" target="_blank" rel="noopener noreferrer">Samuel Fernández Ortiz ↗</a></li>
+          <li><a href="https://www.youtube.com/watch?v=wAB_k4Er6iU" target="_blank" rel="noopener noreferrer">Jhojan Esteban Jiménez Jaramillo ↗</a></li>
+        </ul>
+      </details>
+      <a class="button button-ghost" href="../index.html">Volver al inicio</a>
+    </div>
+  </div>
+</header>
+
+<main class="layout" id="contenido">
+  <aside class="sidebar" aria-label="Navegación del informe">
+    <p class="sidebar-title">En este informe <span aria-hidden="true">⌄</span></p>
+    <ol class="toc" id="toc-desktop">
+      <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión</a></li><li><a href="#conclusiones">Conclusiones y limitaciones</a></li><li><a href="#ia">Uso de inteligencia artificial</a></li><li><a href="#referencias">Referencias</a></li>
+    </ol>
+  </aside>
+
+  <div class="content">
+    <details class="mobile-toc">
+      <summary>Contenido del informe</summary>
+      <ol class="toc" id="toc-mobile">
+        <li><a href="#resumen">Resumen ejecutivo</a></li><li><a href="#introduccion">Introducción</a></li><li><a href="#fundamentos">Fundamentos matemáticos</a></li><li><a href="#metodologia">Metodología experimental</a></li><li><a href="#resultados">Resultados</a></li><li><a href="#discusion">Discusión</a></li><li><a href="#conclusiones">Conclusiones y limitaciones</a></li><li><a href="#ia">Uso de inteligencia artificial</a></li><li><a href="#referencias">Referencias</a></li>
+      </ol>
+    </details>
+
+    <!-- ================================================= -->
+    <section class="section" id="resumen">
+      <p class="section-kicker">00 · Síntesis</p>
+      <h2>Resumen ejecutivo</h2>
+      <p class="lead-paragraph">
+        Este trabajo compara métodos de optimización que usan el gradiente con métodos metaheurísticos que solo evalúan la función objetivo. La comparación se hace primero sobre dos funciones de prueba continuas, Schwefel y Rosenbrock, en dos y tres dimensiones, y después sobre un problema combinatorio real: recorrer en carro las 47 capitales de provincia de la España peninsular al menor costo posible.
+      </p>
+      <p>
+        En la parte continua, cada método se ejecutó 30 veces por función y dimensión, y el esfuerzo se midió en evaluaciones equivalentes de \(f\), contando un gradiente como \(2d\) evaluaciones de la función. El descenso por gradiente fue el método más barato en Schwefel, pero acertó el mínimo global en el 3 % de las corridas en 2D y en ninguna en 3D, porque la función tiene \(8^d\) mínimos locales. En Rosenbrock, que tiene un único mínimo, tampoco tuvo éxito en ninguna corrida: el valle es tan estrecho y mal condicionado que el paso de aprendizaje debe ser diminuto para no divergir. La evolución diferencial (DE) fue el método más fiable en ambas funciones (100 % y 97 % de éxito en Schwefel; 100 % en Rosenbrock) con un costo comparable o menor que los demás.
+      </p>
+      <p>
+        En la parte combinatoria, el costo de cada tramo suma combustible, peajes y el tiempo del vendedor valorado en \(v\) €/h. La colonia de hormigas (ACO) encontró rutas entre un 29 % y un 44 % más baratas que el algoritmo genético (GA) para los cinco valores de \(v\) estudiados, a cambio de unas 18 veces más tiempo de cómputo. Con \(v = 25\) €/h, el tiempo del vendedor representa el 77 % del costo total.
+      </p>
+      <div class="callout"><strong>Hallazgo central:</strong> lo que decide qué método conviene es la geometría del problema. Cuando hay muchos valles (Schwefel) o un valle mal condicionado (Rosenbrock), la información local del gradiente no basta y las metaheurísticas poblacionales aportan la exploración necesaria. El gradiente sigue siendo valioso para refinar dentro de un valle ya identificado. En el problema combinatorio, la heurística constructiva de ACO, que prefiere los tramos baratos desde la primera iteración, supera a un GA que parte de recorridos aleatorios.</div>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="introduccion">
+      <p class="section-kicker">01 · Contexto</p><h2>Introducción</h2>
+      <p class="lead-paragraph">Optimizar es encontrar los valores de entrada que minimizan o maximizan una función. Qué tan difícil resulta depende de la geometría de esa función: cuántos mínimos locales tiene, si es convexa cerca del óptimo y qué tan bien condicionada está. Este trabajo estudia esa relación con dos familias de métodos.</p>
+      <p>La primera familia usa el gradiente: el <strong>descenso por gradiente</strong> sigue la dirección de máxima pendiente desde un único punto (<a class="cite" href="#ref-nocedal">Nocedal y Wright, 2006</a>). La segunda la forman metaheurísticas poblacionales que no usan derivadas: un <strong>algoritmo evolutivo</strong> con codificación real (<a class="cite" href="#ref-eiben">Eiben y Smith, 2015</a>), la <strong>optimización por enjambre de partículas</strong> (<a class="cite" href="#ref-kennedy">Kennedy y Eberhart, 1995</a>) y la <strong>evolución diferencial</strong> (<a class="cite" href="#ref-storn">Storn y Price, 1997</a>). Para el problema combinatorio se usan las <strong>colonias de hormigas</strong> (<a class="cite" href="#ref-dorigo">Dorigo et al., 1996</a>) y los <strong>algoritmos genéticos</strong> (<a class="cite" href="#ref-goldberg">Goldberg, 1989</a>).</p>
+      <p>De las seis funciones de prueba propuestas se escogieron dos con dificultades opuestas. La función de <strong>Schwefel</strong> es multimodal: tiene muchos valles y el mejor está lejos del segundo mejor. La función de <strong>Rosenbrock</strong> es unimodal, pero su único mínimo está en el fondo de un valle curvo y muy estrecho. Así se pueden separar dos causas de fracaso del gradiente: la presencia de muchos mínimos locales y el mal condicionamiento.</p>
+      <p>El problema combinatorio pide recorrer las 47 capitales de provincia de la España peninsular y volver a la ciudad de salida. Se excluyen Palma, Las Palmas de Gran Canaria y Santa Cruz de Tenerife por ser insulares, y Ceuta y Melilla por no ser provincias ni ser accesibles por carretera desde la península. El costo de cada tramo combina el valor de la hora del vendedor, los peajes y el combustible, y se estudia cómo cambia la solución al variar el valor de la hora.</p>
+      <h3>Preguntas que guían el informe</h3>
+      <ol>
+        <li>¿Qué aportan los métodos de descenso por gradiente y qué aportan los heurísticos, en términos del valor final de la función objetivo y del número de evaluaciones?</li>
+        <li>¿Cómo explica la geometría de cada función (convexidad local, número de mínimos locales y condicionamiento) esas diferencias?</li>
+        <li>¿Qué método encuentra recorridos más baratos por España, y cambia la ruta óptima al variar el valor de la hora del vendedor? ¿A partir de qué valor?</li>
+      </ol>
+      <p>El informe sigue el orden en que se hizo el trabajo. La sección 2 define formalmente las funciones, el problema del viajante y cada algoritmo con sus ecuaciones de actualización. La sección 3 describe el protocolo experimental, la regla de comparación justa y las fuentes de datos. La sección 4 presenta los resultados, la sección 5 los discute a la luz de la geometría de cada problema y la sección 6 recoge las conclusiones y limitaciones. La sección 7 documenta el uso de inteligencia artificial.</p>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="fundamentos">
+      <p class="section-kicker">02 · Marco matemático</p><h2>Fundamentos matemáticos</h2>
+      <p class="lead-paragraph">Esta sección define los objetos que se optimizan y las reglas con las que cada algoritmo se mueve por el espacio de búsqueda. Primero las funciones continuas, después los cuatro métodos que las optimizan, luego el problema del viajante y, por último, los dos métodos que lo resuelven.</p>
+      <p class="small muted">Notación: \(\mathbf{x}=(x_1,\dots,x_d)\in\mathbb{R}^d\) es un punto del dominio, \(d\in\{2,3\}\) la dimensión, \(f\) la función objetivo y \(t\) el índice de iteración.</p>
+
+      <h3>2.1 Funciones de prueba</h3>
+      <h4>Función de Schwefel</h4>
+      <p>La función de Schwefel (<a class="cite" href="#ref-schwefel">Schwefel, 1981</a>) es una de las más engañosas de la optimización continua y forma parte de las colecciones de referencia de funciones de prueba (<a class="cite" href="#ref-jamil">Jamil y Yang, 2013</a>). Se define en la Ecuación 1:</p>
+      <div class="formula-box"><div class="formula-label">Función de Schwefel</div><div class="math">\[f(\mathbf{x}) = 418.9829\, d - \sum_{i=1}^{d} x_i \sin\sqrt{|x_i|}, \qquad x_i\in[-500,500] \tag{1}\]</div></div>
+      <p>Su mínimo global es \(f(\mathbf{x}^*)\approx 0\) en \(x_i^*=420.9687\) para todo \(i\), es decir, en una esquina del dominio. La función es separable: cada coordenada aporta un término independiente, con 8 mínimos locales por eje, de modo que en \(d\) dimensiones hay \(8^d\) mínimos locales (64 en 2D y 512 en 3D). El segundo mejor valle de cada eje está al otro lado del dominio, cerca de \(x_i\approx-302.5\), y es solo 118.44 unidades peor. Para el descenso por gradiente se usó el gradiente analítico de la Ecuación 2:</p>
+      <div class="formula-box"><div class="math">\[\frac{\partial f}{\partial x_i} = -\sin\sqrt{|x_i|} - \tfrac{1}{2}\sqrt{|x_i|}\,\cos\sqrt{|x_i|} \tag{2}\]</div></div>
+      <p>La Figura 1 muestra la superficie de la función en 3D. Dentro de cada valle la función es suave y localmente convexa, así que descender es fácil. Lo difícil es elegir el valle correcto.</p>
+      <figure class="figure" id="fig-1">
+        <p class="figure-title">Figura 1</p>
+        <p class="figure-subtitle">Superficie tridimensional de la función de Schwefel</p>
+        <iframe src="utils/graphs/schwefel_3d.html" title="Superficie 3D interactiva de la función de Schwefel con múltiples valles" loading="lazy"></iframe>
+        <p class="figure-note"><em>Nota.</em> Superficie 3D interactiva \(z=f(x_1,x_2)\) generada a partir de la Ecuación 1 en una malla de 80 × 80 puntos. El mínimo global está en la esquina positiva del dominio. Fuente: elaboración propia.</p>
+      </figure>
+
+      <h4>Función de Rosenbrock</h4>
+      <p>La función de Rosenbrock, llamada también <em>función banana</em> por la forma de sus curvas de nivel, fue propuesta como caso de prueba para algoritmos de optimización (<a class="cite" href="#ref-rosenbrock">Rosenbrock, 1960</a>). En \(n\) dimensiones se define en la Ecuación 3:</p>
+      <div class="formula-box"><div class="formula-label">Función de Rosenbrock</div><div class="math">\[f(\mathbf{x}) = \sum_{i=1}^{n-1} \left[ 100\,(x_{i+1} - x_i^2)^2 + (1 - x_i)^2 \right], \qquad x_i\in[-5,10] \tag{3}\]</div></div>
+      <p>El dominio \([-5,10]^n\) es el estándar en la literatura para esta función (<a class="cite" href="#ref-surjanovic">Surjanovic y Bingham, 2013</a>). El único mínimo global en 2D y 3D es \(\mathbf{x}^*=(1,\dots,1)\) con \(f(\mathbf{x}^*)=0\). La Figura 2 muestra sus curvas de nivel: el mínimo está en el fondo de un valle parabólico estrecho y curvo cuyo fondo es casi plano. El gradiente analítico se calcula con la Ecuación 4:</p>
+      <div class="formula-box">
+        <div class="math">\[\frac{\partial f}{\partial x_1} = -400\, x_1 (x_2 - x_1^2) - 2(1 - x_1) \tag{4a}\]</div>
+        <div class="math">\[\frac{\partial f}{\partial x_i} = 200(x_i - x_{i-1}^2) - 400\, x_i (x_{i+1} - x_i^2) - 2(1 - x_i), \quad 1 < i < n \tag{4b}\]</div>
+        <div class="math">\[\frac{\partial f}{\partial x_n} = 200(x_n - x_{n-1}^2) \tag{4c}\]</div>
+      </div>
+      <figure class="figure" id="fig-2">
+        <p class="figure-title">Figura 2</p>
+        <p class="figure-subtitle">Curvas de nivel de la función de Rosenbrock en dos dimensiones</p>
+        <img src="utils/graphs/rosenbrock_contours.png" alt="Curvas de nivel de la función de Rosenbrock en 2D con forma de banana y el mínimo global marcado con una estrella roja en (1, 1)" loading="lazy">
+        <p class="figure-note"><em>Nota.</em> La estrella roja marca el mínimo global en (1, 1). Fuente: elaboración propia a partir de la Ecuación 3.</p>
+      </figure>
+      <p>La Tabla 1 resume las propiedades de ambas funciones que se usarán en la discusión.</p>
+      <div class="table-wrap"><table><caption>Tabla 1. Propiedades de las funciones de prueba seleccionadas. Fuente: elaboración propia con base en <a class="cite" href="#ref-jamil">Jamil y Yang (2013)</a> y <a class="cite" href="#ref-surjanovic">Surjanovic y Bingham (2013)</a>.</caption>
+        <thead><tr><th>Propiedad</th><th>Schwefel</th><th>Rosenbrock</th></tr></thead><tbody>
+        <tr><td>Dominio</td><td>\([-500,500]^d\)</td><td>\([-5,10]^d\)</td></tr>
+        <tr><td>Mínimo global</td><td>\(f\approx0\) en \(x_i=420.9687\)</td><td>\(f=0\) en \(x_i=1\)</td></tr>
+        <tr><td>Número de mínimos locales</td><td>\(8^d\) (64 en 2D, 512 en 3D)</td><td>Uno solo en 2D y 3D</td></tr>
+        <tr><td>Convexidad</td><td>No convexa; localmente convexa dentro de cada valle</td><td>No convexa; localmente convexa cerca del óptimo</td></tr>
+        <tr><td>Condicionamiento cerca del óptimo</td><td>Bueno dentro de cada valle</td><td>Malo: número de condición \(\approx 2.5\times10^{3}\) (sección 5.1)</td></tr>
+        <tr><td>Separabilidad</td><td>Separable</td><td>No separable</td></tr>
+      </tbody></table></div>
+
+      <h3>2.2 Métodos para las funciones continuas</h3>
+      <h4>Descenso por gradiente (GD)</h4>
+      <p>Es un método de primer orden: un único punto se mueve en dirección opuesta al gradiente con una tasa de aprendizaje \(\eta>0\) (<a class="cite" href="#ref-nocedal">Nocedal y Wright, 2006</a>).</p>
+      <div class="formula-box"><div class="formula-label">Actualización</div><div class="math">\[\mathbf{x}_{t+1} = \mathbf{x}_t - \eta\,\nabla f(\mathbf{x}_t) \tag{5}\]</div></div>
+
+      <h4>Algoritmo evolutivo (EA)</h4>
+      <p>El algoritmo evolutivo con codificación real combina selección por torneo, cruce BLX-\(\alpha\) (<a class="cite" href="#ref-eshelman">Eshelman y Schaffer, 1993</a>), mutación gaussiana con desviación decreciente y elitismo (<a class="cite" href="#ref-eiben">Eiben y Smith, 2015</a>). Cada padre se elige como el mejor de \(k=3\) individuos tomados al azar. Dos padres \(\mathbf{p}_1,\mathbf{p}_2\) generan un hijo \(\mathbf{h}\) muestreando cada componente en un intervalo extendido (Ecuación 6), y después cada componente se perturba con probabilidad \(p_m=0.1\) y desviación \(\sigma_t\) (Ecuación 7). Los 2 mejores individuos pasan intactos a la siguiente generación.</p>
+      <div class="formula-box"><div class="formula-label">Cruce BLX-α y mutación gaussiana</div>
+        <div class="math">\[h_j \sim U\!\left[\min(p_{1j}, p_{2j}) - \alpha\,\delta_j,\; \max(p_{1j}, p_{2j}) + \alpha\,\delta_j \right], \qquad \delta_j = |p_{1j} - p_{2j}|,\ \alpha=0.5 \tag{6}\]</div>
+        <div class="math">\[h_j \leftarrow h_j + \sigma_t\,\mathcal{N}(0,1), \qquad \sigma_t = 0.1\,(\text{hi} - \text{lo})\left(1 - \tfrac{t}{T}\right) + 10^{-4} \tag{7}\]</div>
+      </div>
+      <p class="small muted">\(\text{hi}\) y \(\text{lo}\) son los límites del dominio y \(T\) el número máximo de generaciones.</p>
+
+      <h4>Optimización por enjambre de partículas (PSO)</h4>
+      <p>Cada partícula \(i\) tiene una posición \(\mathbf{x}_i\) y una velocidad \(\mathbf{v}_i\). La velocidad combina inercia, atracción hacia la mejor posición personal \(\mathbf{p}_i\) y atracción hacia la mejor posición del enjambre \(\mathbf{g}\) (<a class="cite" href="#ref-kennedy">Kennedy y Eberhart, 1995</a>). Las posiciones se recortan al dominio en cada paso.</p>
+      <div class="formula-box"><div class="formula-label">Actualización</div>
+        <div class="math">\[\mathbf{v}_i^{t+1} = w\,\mathbf{v}_i^{t} + c_1 r_1 (\mathbf{p}_i - \mathbf{x}_i^{t}) + c_2 r_2 (\mathbf{g} - \mathbf{x}_i^{t}), \qquad \mathbf{x}_i^{t+1} = \mathbf{x}_i^{t} + \mathbf{v}_i^{t+1} \tag{8}\]</div>
+      </div>
+      <p class="small muted">\(w\) es el peso de inercia, \(c_1,c_2\) los coeficientes cognitivo y social y \(r_1,r_2\sim U(0,1)\).</p>
+
+      <h4>Evolución diferencial (DE)</h4>
+      <p>Para cada individuo \(\mathbf{x}_i\) se construye un vector mutante a partir de la diferencia entre otros dos individuos (Ecuación 9), se cruza con el padre de forma binomial (Ecuación 10) y el resultado reemplaza al padre solo si es mejor (Ecuación 11) (<a class="cite" href="#ref-storn">Storn y Price, 1997</a>).</p>
+      <div class="formula-box"><div class="formula-label">Mutación, cruce y selección</div>
+        <div class="math">\[\mathbf{u}_i = \mathbf{x}_a + F\,(\mathbf{x}_b - \mathbf{x}_c), \qquad a\neq b\neq c\neq i \tag{9}\]</div>
+        <div class="math">\[y_{ij} = \begin{cases} u_{ij} & \text{si } r_j \leq CR \ \text{o}\ j=j_{\text{rand}} \\ x_{ij} & \text{en otro caso} \end{cases} \tag{10}\]</div>
+        <div class="math">\[\mathbf{x}_i^{t+1} = \begin{cases} \mathbf{y}_i & \text{si } f(\mathbf{y}_i)\le f(\mathbf{x}_i^{t}) \\ \mathbf{x}_i^{t} & \text{en otro caso} \end{cases} \tag{11}\]</div>
+      </div>
+      <p>Como el paso de DE nace de diferencias entre individuos, es grande cuando la población está dispersa y pequeño cuando se concentra. Esta propiedad, que explora al principio y refina al final, será clave en la discusión.</p>
+
+      <h3>2.3 El problema del viajante (TSP)</h3>
+      <p>Sea \(V=\{1,\dots,n\}\) el conjunto de \(n=47\) capitales y \(C_{ij}\) el costo de ir de la ciudad \(i\) a la ciudad \(j\). Un recorrido cerrado es una permutación \(\pi\) de \(V\), y el problema consiste en encontrar la permutación de costo mínimo (<a class="cite" href="#ref-applegate">Applegate et al., 2006</a>):</p>
+      <div class="formula-box"><div class="formula-label">Formulación por permutaciones</div>
+        <div class="math">\[\min_{\pi\in S_n}\; L(\pi) = \sum_{k=1}^{n-1} C_{\pi(k)\,\pi(k+1)} + C_{\pi(n)\,\pi(1)} \tag{12}\]</div>
+      </div>
+      <p>De forma equivalente, con variables binarias \(x_{ij}=1\) si el recorrido va directamente de \(i\) a \(j\), el problema se escribe como un programa entero (<a class="cite" href="#ref-dantzig">Dantzig et al., 1954</a>):</p>
+      <div class="formula-box"><div class="formula-label">Formulación entera</div>
+        <div class="math">\[\min \sum_{i\neq j} C_{ij}\,x_{ij} \quad\text{s. a.}\quad \sum_{j\neq i} x_{ij}=1\ \ \forall i,\qquad \sum_{i\neq j} x_{ij}=1\ \ \forall j,\qquad \sum_{i,j\in S} x_{ij}\le |S|-1\ \ \forall S\subsetneq V,\ |S|\ge2 \tag{13}\]</div>
+      </div>
+      <p>Las dos primeras restricciones obligan a entrar y salir una vez de cada ciudad; la tercera elimina subciclos. Como los tiempos de viaje de ida y vuelta no son iguales, \(C_{ij}\neq C_{ji}\) y el problema es un <strong>TSP asimétrico</strong>. Fijando la ciudad de salida, hay \((n-1)! = 46! \approx 5.5\times10^{57}\) recorridos distintos; incluso si los costos fueran simétricos quedarían \(46!/2\). Revisarlos todos es imposible, por eso se usan metaheurísticas.</p>
+      <h4>Costo de cada tramo</h4>
+      <p>El costo de desplazamiento entre dos ciudades suma el combustible, los peajes y el tiempo del vendedor (Ecuación 14):</p>
+      <div class="formula-box"><div class="formula-label">Matriz de costos</div>
+        <div class="math">\[C_{ij}(v) = \underbrace{\frac{d_{ij}}{100}\, c\, p}_{\text{combustible}} + \underbrace{P_{ij}}_{\text{peajes}} + \underbrace{v\, t_{ij}}_{\text{tiempo}} \tag{14}\]</div>
+      </div>
+      <p class="small muted">\(d_{ij}\) es la distancia por carretera en km, \(t_{ij}\) el tiempo de viaje en horas, \(c\) el consumo del vehículo en L/100 km, \(p\) el precio del combustible en €/L, \(P_{ij}\) el peaje del trayecto en € y \(v\) el valor de la hora del vendedor en €/h.</p>
+      <p>El valor de la hora \(v\) traduce cada hora de viaje a dinero. Reúne el costo laboral directo (salario, prestaciones y sobrecostos) y el costo de oportunidad, es decir, las ventas que se dejan de hacer mientras se conduce; la literatura sobre el valor del tiempo de viaje en Europa lo estudia con detalle (<a class="cite" href="#ref-wardman">Wardman et al., 2016</a>). Con \(v=0\) solo importan el combustible y los peajes. Cuanto mayor es \(v\), más conviene ahorrar horas aunque cueste más en carretera. Como el costo de un recorrido fijo \(R\) es lineal en \(v\),</p>
+      <div class="formula-box"><div class="math">\[L_R(v) = \underbrace{(F_R + P_R)}_{\text{combustible + peajes}} + v\,T_R, \tag{15}\]</div></div>
+      <p>dos recorridos \(A\) y \(B\) intercambian su orden de preferencia en el valor \(v^* = \dfrac{(F_B+P_B)-(F_A+P_A)}{T_A-T_B}\). Esta relación permite responder a partir de qué valor cambia la ruta óptima (sección 5.3).</p>
+
+      <h3>2.4 Métodos para el problema combinatorio</h3>
+      <h4>Colonia de hormigas (ACO)</h4>
+      <p>Cada hormiga construye un recorrido ciudad por ciudad. Desde la ciudad \(i\), elige la siguiente ciudad \(j\) entre las no visitadas \(\mathcal{N}_i\) con una probabilidad que combina la feromona acumulada \(\tau_{ij}\) y la visibilidad \(\eta_{ij}=1/C_{ij}\) (Ecuación 16). Al terminar la iteración, la feromona se evapora a tasa \(\rho\) y cada hormiga \(k\) deposita una cantidad inversamente proporcional al costo \(L_k\) de su recorrido en los tramos que usó (Ecuación 17) (<a class="cite" href="#ref-dorigo">Dorigo et al., 1996</a>).</p>
+      <div class="formula-box"><div class="formula-label">Regla de transición y actualización de feromona</div>
+        <div class="math">\[P_{ij}^{k} = \frac{\tau_{ij}^{\alpha}\,\eta_{ij}^{\beta}}{\sum_{l\in\mathcal{N}_i}\tau_{il}^{\alpha}\,\eta_{il}^{\beta}}, \qquad j\in\mathcal{N}_i \tag{16}\]</div>
+        <div class="math">\[\tau_{ij} \leftarrow (1-\rho)\,\tau_{ij} + \sum_{k=1}^{m}\Delta\tau_{ij}^{k}, \qquad \Delta\tau_{ij}^{k} = \begin{cases}1/L_k & \text{si la hormiga } k \text{ usó el tramo } (i,j)\\ 0 & \text{en otro caso}\end{cases} \tag{17}\]</div>
+      </div>
+      <p>El exponente \(\alpha\) pondera la memoria colectiva y \(\beta\) la información heurística. Con \(\beta>0\), incluso la primera generación de hormigas prefiere los tramos baratos.</p>
+
+      <h4>Algoritmo genético (GA)</h4>
+      <p>El algoritmo genético mantiene una población de recorridos completos codificados como permutaciones (<a class="cite" href="#ref-goldberg">Goldberg, 1989</a>). En cada generación se seleccionan los mejores recorridos según su costo \(L(\pi)\), se cruzan y se mutan. Como un hijo debe seguir siendo una permutación válida, se usan operadores específicos: el cruce parcialmente mapeado (PMX) copia un segmento de un padre y completa el resto respetando el orden del otro sin repetir ciudades (<a class="cite" href="#ref-goldberg-lingle">Goldberg y Lingle, 1985</a>), y la mutación por inversión toma dos posiciones \((a&lt;b)\) e invierte el tramo entre ellas (Ecuación 18).</p>
+      <div class="formula-box"><div class="formula-label">Mutación por inversión</div>
+        <div class="math">\[(\pi_1,\dots,\pi_a,\pi_{a+1},\dots,\pi_b,\dots,\pi_n)\;\longmapsto\;(\pi_1,\dots,\pi_b,\dots,\pi_{a+1},\pi_a,\dots,\pi_n) \tag{18}\]</div>
+      </div>
+      <p>A diferencia de ACO, la población inicial del GA es aleatoria: no usa la matriz de costos para construir recorridos, solo para evaluarlos.</p>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="metodologia">
+      <p class="section-kicker">03 · Diseño experimental</p><h2>Metodología experimental</h2>
+      <p class="lead-paragraph">El experimento se hizo en dos etapas. Primero se optimizaron las funciones continuas con los cuatro métodos de la sección 2.2. Después se construyó la matriz de costos de España y se resolvió el TSP con los dos métodos de la sección 2.4. Todo se implementó en Python; el código, las semillas y los archivos de configuración están en el repositorio.</p>
+
+      <p class="part-banner">Etapa 1 · Optimización numérica</p>
+      <h3>3.1 Protocolo de las funciones continuas</h3>
+      <p>Cada combinación de función, método y dimensión se ejecutó en <strong>30 corridas independientes</strong>, cada una desde una condición inicial aleatoria dentro del dominio. Las condiciones comunes y las propias de cada función se resumen en la Tabla 2, y los hiperparámetros de cada método en la Tabla 3.</p>
+      <div class="table-wrap"><table><caption>Tabla 2. Condiciones experimentales de la etapa numérica. Fuente: elaboración propia; configuración del repositorio (<code>configs/CLI_defaults_rosenbrock.json</code> para Rosenbrock).</caption>
+        <thead><tr><th>Condición</th><th>Schwefel</th><th>Rosenbrock</th></tr></thead><tbody>
+        <tr><td>Dimensiones</td><td>2 y 3</td><td>2 y 3</td></tr>
+        <tr><td>Corridas por método y dimensión</td><td>30</td><td>30 (semilla \(42+i\) en la corrida \(i\))</td></tr>
+        <tr><td>Punto inicial</td><td>Aleatorio en \([-500,500]^d\)</td><td>Aleatorio en \([-5,10]^d\)</td></tr>
+        <tr><td>Iteraciones máximas</td><td>2000</td><td>2000</td></tr>
+        <tr><td>Parada del descenso por gradiente</td><td>Paso menor que \(10^{-6}\)</td><td>\(\lVert\nabla f\rVert < 10^{-8}\)</td></tr>
+        <tr><td>Parada de los métodos poblacionales</td><td>50 iteraciones sin mejorar el mejor valor</td><td>Criterio de convergencia de la configuración o límite de iteraciones</td></tr>
+        <tr><td>Criterio de éxito</td><td>\(f \le 10^{-3}\)</td><td>\(f \le 10^{-3}\)</td></tr>
+      </tbody></table></div>
+      <div class="table-wrap"><table><caption>Tabla 3. Hiperparámetros de cada método. Fuente: elaboración propia.</caption>
+        <thead><tr><th>Método</th><th>Schwefel</th><th>Rosenbrock</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td>\(\eta = 0.1\), gradiente analítico (Ecuación 2)</td><td>\(\eta = 10^{-4}\), gradiente analítico (Ecuación 4)</td></tr>
+        <tr><td>Algoritmo evolutivo</td><td colspan="2">Población 40, torneo \(k=3\), BLX-\(\alpha\) con \(\alpha=0.5\), \(p_m=0.1\), 2 élites</td></tr>
+        <tr><td>PSO</td><td colspan="2">40 partículas, \(w = 0.7\), \(c_1 = c_2 = 1.5\)</td></tr>
+        <tr><td>Evolución diferencial</td><td colspan="2">Población 40, \(F = 0.8\), \(CR = 0.9\)</td></tr>
+      </tbody></table></div>
+      <p>Los hiperparámetros de las metaheurísticas son valores estándar y no se ajustaron por método. La tasa de aprendizaje del gradiente sí es distinta en cada función: en Rosenbrock tuvo que reducirse a \(10^{-4}\) porque valores mayores hacen diverger el método, como se documenta en la Tabla 11.</p>
+      <div class="callout warning"><strong>Los dos protocolos no son idénticos.</strong><p>Los criterios de parada del gradiente y de los métodos poblacionales difieren entre Schwefel y Rosenbrock (Tabla 2). Por eso las comparaciones de costo se hacen <em>dentro</em> de cada función y no entre funciones: comparar las evaluaciones de DE en Schwefel con las de DE en Rosenbrock mezclaría el efecto de la geometría con el de la regla de parada.</p></div>
+      <p>De cada conjunto de 30 corridas se reportan la media, la desviación estándar, el mejor y el peor valor final de \(f\), la tasa de éxito con el umbral \(f\le10^{-3}\) y el número promedio de evaluaciones. El umbral es exigente: en Schwefel exige haber encontrado el valle global en todas las coordenadas, ya que el segundo mejor valle queda 118.44 unidades por encima.</p>
+
+      <h3>3.2 Regla de comparación justa</h3>
+      <p>Una iteración de PSO evalúa \(f\) en 40 partículas y una del gradiente calcula un solo gradiente, así que comparar por iteraciones no tiene sentido. Se cuentan por separado las evaluaciones de la función, \(E_f\), y las del gradiente, \(E_{\nabla f}\), y luego se unen en una sola cifra.</p>
+      <p>La equivalencia propuesta parte de que, si el gradiente no se conociera de forma analítica, aproximarlo por diferencias centrales (Ecuación 19) costaría dos evaluaciones de \(f\) por coordenada, es decir, \(2d\) evaluaciones en dimensión \(d\) (<a class="cite" href="#ref-nocedal">Nocedal y Wright, 2006</a>). De ahí sale el costo equivalente de la Ecuación 20:</p>
+      <div class="formula-box"><div class="formula-label">Equivalencia entre evaluaciones</div>
+        <div class="math">\[\frac{\partial f}{\partial x_i} \approx \frac{f(\mathbf{x} + h\mathbf{e}_i) - f(\mathbf{x} - h\mathbf{e}_i)}{2h} \tag{19}\]</div>
+        <div class="math">\[E_{eq} = E_f + 2d \cdot E_{\nabla f} \tag{20}\]</div>
+      </div>
+      <p>En 2D un gradiente equivale a 4 evaluaciones de \(f\) y en 3D, a 6. Por ejemplo, si el descenso por gradiente hace 2000 iteraciones en Rosenbrock 2D, su costo equivalente es \(0 + 4\times2000 = 8000\).</p>
+      <div class="grid-2">
+        <article class="info-card"><span class="number">QUÉ SE CUENTA</span><h3>Solo lo que hace avanzar al algoritmo</h3><p>En GD no se cuentan las evaluaciones de \(f\) que solo sirven para guardar el historial de las gráficas. En el algoritmo evolutivo, los individuos élite no se vuelven a evaluar. En los métodos poblacionales cuenta cada evaluación de un individuo.</p></article>
+        <article class="info-card"><span class="number">POR QUÉ 2d</span><h3>Una regla conservadora</h3><p>El gradiente analítico de Schwefel y Rosenbrock cuesta en la práctica menos que \(2d\) evaluaciones de \(f\). Usar \(2d\) penaliza al gradiente y, aun así, como se verá, no cambia las conclusiones sobre cuál método es más fiable.</p></article>
+      </div>
+
+      <p class="part-banner">Etapa 2 · Optimización combinatoria</p>
+      <h3>3.3 Datos del recorrido por España</h3>
+      <p>Todos los datos se descargaron una vez y se guardaron en archivos CSV, de modo que los algoritmos corren sin conexión. La Tabla 4 resume de dónde sale cada componente del costo de la Ecuación 14.</p>
+      <div class="table-wrap"><table><caption>Tabla 4. Fuentes de los componentes del costo y fecha de consulta. Fuente: elaboración propia.</caption>
+        <thead><tr><th>Componente</th><th>Cómo se obtuvo</th><th>Fuente</th><th>Consulta</th></tr></thead><tbody>
+        <tr><td>Distancias \(d_{ij}\) y tiempos \(t_{ij}\)</td><td>Servicio <em>Table</em> de OSRM en modo conducción, una sola consulta para los 47 × 47 pares sobre la red vial de OpenStreetMap</td><td><a class="cite" href="#ref-luxen">Luxen y Vetter (2011)</a></td><td>Octubre de 2026</td></tr>
+        <tr><td>Peajes \(P_{ij}\)</td><td>Tarifas vigentes de las autopistas de peaje de la Red de Carreteras del Estado, cargadas a mano en una matriz simétrica</td><td><a class="cite" href="#ref-mitma">Ministerio de Transportes y Movilidad Sostenible (2026)</a></td><td>10 de octubre de 2026</td></tr>
+        <tr><td>Precio del combustible \(p\)</td><td>Gasolina 95: \(p = 1.55\) €/L</td><td><a class="cite" href="#ref-miteco">Ministerio para la Transición Ecológica y el Reto Demográfico (2026)</a></td><td>10 de octubre de 2026</td></tr>
+        <tr><td>Consumo \(c\)</td><td>\(c = 5.5\) L/100 km (consumo homologado del vehículo elegido)</td><td>Ver nota</td><td>—</td></tr>
+        <tr><td>Valor de la hora \(v\)</td><td>Referencia del coste laboral por hora efectiva, alrededor de 25 €/h; se estudiaron 0, 15, 25, 35 y 60 €/h</td><td><a class="cite" href="#ref-ine">INE (2026)</a></td><td>11 de octubre de 2026</td></tr>
+      </tbody></table></div>
+      <div class="callout warning"><strong>Por completar: vehículo.</strong><p>El enunciado pide el modelo del vehículo, su consumo homologado y el tipo de combustible con la fuente citada. Indicar aquí la marca y modelo cuyo consumo homologado es 5.5 L/100 km de gasolina 95 y añadir la ficha técnica (fabricante o base de datos WLTP) a las referencias.</p></div>
+      <div class="grid-2">
+        <article class="info-card"><span class="number">DETALLE 1</span><h3>Orden de las coordenadas</h3><p>OSRM exige las coordenadas como longitud y latitud. Invertir el orden sitúa las ciudades en el océano y produce distancias sin sentido.</p></article>
+        <article class="info-card"><span class="number">DETALLE 2</span><h3>Asimetría</h3><p>Los tiempos de ida y vuelta no son iguales, así que las instancias se guardaron como TSP asimétrico en formato TSPLIB95 con matriz completa (<a class="cite" href="#ref-reinelt">Reinelt, 1991</a>). La matriz de peajes, en cambio, usa el mismo precio en ambos sentidos.</p></article>
+        <article class="info-card"><span class="number">DETALLE 3</span><h3>Peajes cambiantes</h3><p>La red de autopistas de peaje en España ha cambiado mucho en los últimos años; por ejemplo, la AP-7 y la AP-2 dejaron de cobrar peaje en 2021. Los precios usados son una fotografía de la fecha de consulta.</p></article>
+        <article class="info-card"><span class="number">DETALLE 4</span><h3>Una matriz por cada valor de la hora</h3><p>Para cada \(v\) se construye una matriz \(C(v)\) de 47 × 47 con la Ecuación 14. Las soluciones se evalúan después por separado con las matrices de distancia, tiempo, combustible y peajes para desglosar su costo.</p></article>
+      </div>
+
+      <h3>3.4 Protocolo del problema combinatorio</h3>
+      <p>Ambos métodos se implementaron con la librería scikit-opt (<a class="cite" href="#ref-sko">Guo, s. f.</a>) y se ejecutaron con la configuración de la Tabla 5. Con 60 recorridos por iteración durante 150 iteraciones, cada método construye o evalúa del orden de 9 000 recorridos, de modo que el presupuesto de búsqueda es comparable.</p>
+      <div class="table-wrap"><table><caption>Tabla 5. Protocolo e hiperparámetros del problema combinatorio. Fuente: elaboración propia.</caption>
+        <thead><tr><th>Elemento</th><th>Colonia de hormigas</th><th>Algoritmo genético</th></tr></thead><tbody>
+        <tr><td>Ciudades</td><td colspan="2">47 capitales peninsulares, recorrido cerrado</td></tr>
+        <tr><td>Valores de la hora \(v\)</td><td colspan="2">0, 15, 25, 35 y 60 €/h</td></tr>
+        <tr><td>Población</td><td>60 hormigas</td><td>60 recorridos</td></tr>
+        <tr><td>Iteraciones</td><td>150</td><td>150 generaciones</td></tr>
+        <tr><td>Parámetros</td><td>\(\alpha = 1\), \(\beta = 2\), \(\rho = 0.1\)</td><td>Probabilidad de mutación 0.1; resto de operadores por defecto de scikit-opt</td></tr>
+        <tr><td>Semilla y corridas</td><td colspan="2">Semilla 42, una corrida por valor de \(v\)</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="resultados">
+      <p class="section-kicker">04 · Evidencia cuantitativa</p><h2>Resultados</h2>
+      <p class="lead-paragraph">Los resultados se presentan en el mismo orden del experimento: primero Schwefel, después Rosenbrock y por último el recorrido por España. En todas las tablas de la etapa numérica, \(M\) es la media, \(DE\) la desviación estándar, Mejor y Peor el menor y el mayor valor final de \(f\), y Éxito el porcentaje de corridas con \(f\le10^{-3}\).</p>
+
+      <p class="part-banner">Etapa 1 · Optimización numérica</p>
+      <h3>4.1 Función de Schwefel</h3>
+      <h4>Un punto frente a una nube</h4>
+      <p>Las Figuras 3 y 4 muestran una corrida de cada familia en 2D sobre la misma superficie, con el óptimo marcado por una estrella roja. El descenso por gradiente baja por la ladera más cercana y se detiene en el primer valle (Figura 3). El enjambre empieza repartido por todo el dominio y se concentra poco a poco en un valle (Figura 4).</p>
+      <div class="figure-pair">
+        <figure class="figure" id="fig-3">
+          <p class="figure-title">Figura 3</p>
+          <p class="figure-subtitle">Trayectoria del descenso por gradiente sobre Schwefel 2D</p>
+          <img src="utils/graphs/gd_2d.gif" alt="Animación de un punto que desciende por la superficie de Schwefel en 2D y se detiene en un valle local" loading="lazy">
+          <p class="figure-note"><em>Nota.</em> Corrida individual con \(\eta=0.1\). Fuente: elaboración propia.</p>
+        </figure>
+        <figure class="figure" id="fig-4">
+          <p class="figure-title">Figura 4</p>
+          <p class="figure-subtitle">Evolución del enjambre de partículas sobre Schwefel 2D</p>
+          <img src="utils/graphs/pso_2d.gif" alt="Animación de una nube de partículas que se concentra en un valle de la superficie de Schwefel en 2D" loading="lazy">
+          <p class="figure-note"><em>Nota.</em> Corrida individual con 40 partículas. Fuente: elaboración propia.</p>
+        </figure>
+      </div>
+      <h4>Estadísticas de 30 corridas</h4>
+      <p>Las Tablas 6 y 7 reportan el valor final y el costo promedio por corrida en 2D y 3D. DE es el único método que encuentra el óptimo casi siempre. El gradiente es el más barato, pero solo acierta una vez en 60 corridas.</p>
+      <div class="table-wrap"><table><caption>Tabla 6. Resultados de los cuatro métodos en Schwefel 2D (30 corridas). Fuente: elaboración propia.</caption>
+        <thead><tr><th>Método</th><th class="numeric">M</th><th class="numeric">DE</th><th class="numeric">Mejor</th><th class="numeric">Peor</th><th class="numeric">Éxito</th><th class="numeric">\(E_f\)</th><th class="numeric">\(E_{\nabla f}\)</th><th class="numeric">\(E_{eq}\)</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td class="numeric">456.37</td><td class="numeric">174.96</td><td class="numeric">≈ 0</td><td class="numeric">710.70</td><td class="numeric">3 %</td><td class="numeric">0</td><td class="numeric">553</td><td class="numeric"><strong>2 214</strong></td></tr>
+        <tr><td>Algoritmo evolutivo</td><td class="numeric">55.27</td><td class="numeric">60.10</td><td class="numeric">≈ 0</td><td class="numeric">118.44</td><td class="numeric">53 %</td><td class="numeric">4 576</td><td class="numeric">0</td><td class="numeric">4 576</td></tr>
+        <tr><td>PSO</td><td class="numeric">74.35</td><td class="numeric">77.88</td><td class="numeric">≈ 0</td><td class="numeric">236.88</td><td class="numeric">47 %</td><td class="numeric">6 775</td><td class="numeric">0</td><td class="numeric">6 775</td></tr>
+        <tr><td>Evolución diferencial</td><td class="numeric"><strong>≈ 0</strong></td><td class="numeric">≈ 0</td><td class="numeric">≈ 0</td><td class="numeric">≈ 0</td><td class="numeric"><strong>100 %</strong></td><td class="numeric">5 040</td><td class="numeric">0</td><td class="numeric">5 040</td></tr>
+      </tbody></table></div>
+      <div class="table-wrap"><table><caption>Tabla 7. Resultados de los cuatro métodos en Schwefel 3D (30 corridas). Fuente: elaboración propia.</caption>
+        <thead><tr><th>Método</th><th class="numeric">M</th><th class="numeric">DE</th><th class="numeric">Mejor</th><th class="numeric">Peor</th><th class="numeric">Éxito</th><th class="numeric">\(E_f\)</th><th class="numeric">\(E_{\nabla f}\)</th><th class="numeric">\(E_{eq}\)</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td class="numeric">667.84</td><td class="numeric">222.47</td><td class="numeric">118.44</td><td class="numeric">1125.73</td><td class="numeric">0 %</td><td class="numeric">0</td><td class="numeric">575</td><td class="numeric"><strong>3 449</strong></td></tr>
+        <tr><td>Algoritmo evolutivo</td><td class="numeric">86.85</td><td class="numeric">92.96</td><td class="numeric">≈ 0</td><td class="numeric">355.32</td><td class="numeric">43 %</td><td class="numeric">7 242</td><td class="numeric">0</td><td class="numeric">7 242</td></tr>
+        <tr><td>PSO</td><td class="numeric">109.88</td><td class="numeric">105.95</td><td class="numeric">≈ 0</td><td class="numeric">355.32</td><td class="numeric">37 %</td><td class="numeric">7 884</td><td class="numeric">0</td><td class="numeric">7 884</td></tr>
+        <tr><td>Evolución diferencial</td><td class="numeric"><strong>4.42</strong></td><td class="numeric">24.21</td><td class="numeric">≈ 0</td><td class="numeric">132.61</td><td class="numeric"><strong>97 %</strong></td><td class="numeric">8 343</td><td class="numeric">0</td><td class="numeric">8 343</td></tr>
+      </tbody></table></div>
+      <p class="small muted">En las Tablas 6 y 7, ≈ 0 indica un valor menor que \(10^{-9}\); las evaluaciones son promedios por corrida y \(E_{eq}\) se calcula con la Ecuación 20. En negrita, el mejor resultado de M, Éxito y \(E_{eq}\).</p>
+      <p>La Figura 5 resume las dos dimensiones del compromiso: fiabilidad y costo. Las tasas de éxito de los heurísticos son muy distintas aunque sus costos son parecidos.</p>
+      <div class="dual-charts" id="fig-5">
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 5a. Tasa de éxito en Schwefel</h3><p>Porcentaje de las 30 corridas con \(f\le10^{-3}\).</p></div><span class="chart-tag">Mayor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="Tasa de éxito en Schwefel. Gradiente: 3 % en 2D y 0 % en 3D. Evolutivo: 53 % y 43 %. PSO: 47 % y 37 %. Evolución diferencial: 100 % y 97 %.">
+            <div class="bar-chart-row"><span class="bar-chart-label">GD · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:3.3%"></div></div><span class="bar-chart-val">3 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">GD · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:0%"></div></div><span class="bar-chart-val">0 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">EA · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:53.3%"></div></div><span class="bar-chart-val">53 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">EA · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:43.3%"></div></div><span class="bar-chart-val">43 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">PSO · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:46.7%"></div></div><span class="bar-chart-val">47 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">PSO · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:36.7%"></div></div><span class="bar-chart-val">37 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">DE · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:100%"></div></div><span class="bar-chart-val">100 %</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">DE · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:96.7%"></div></div><span class="bar-chart-val">97 %</span></div>
+          </div>
+          <p class="chart-foot">Fuente: elaboración propia a partir de las Tablas 6 y 7.</p>
         </div>
-    </header>
-
-    <main class="container py-5">
-        <p><a href="../index.html" class="btn btn-outline-dark">Volver al inicio</a></p>
-
-        <section class="mb-5">
-            <h2 class="h3 fw-bold">Parte 1: Optimización numérica</h2>
-            <p class="text-secondary">
-                Comparación de algoritmos de búsqueda global sobre funciones de prueba clásicas.
-            </p>
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-4 h-100">
-                        <p class="small text-secondary mb-2">FUNCIÓN DE PRUEBA 1</p>
-                        <h3 class="h4 fw-bold">Función de Schwefel</h3>
-                        <p class="text-secondary">
-                            Comparación de cuatro algoritmos de optimización en dos y tres
-                            dimensiones, desde sus estrategias de búsqueda hasta los resultados experimentales.
-                        </p>
-                        <a href="pages/schwefel.html" class="btn btn-dark mt-2">Explorar el trabajo</a>
-                    </article>
-                </div>
-                <div class="col-md-6">
-                    <article class="border rounded-4 p-4 h-100">
-                        <p class="small text-secondary mb-2">FUNCIÓN DE PRUEBA 2</p>
-                        <h3 class="h4 fw-bold">Función de Rosenbrock</h3>
-                        <p class="text-secondary">
-                            Análisis del problema, aplicación de los métodos de optimización
-                            y comparación de los resultados.
-                        </p>
-                        <a href="pages/rosenbrock.html" class="btn btn-outline-dark mt-2">Explorar el trabajo</a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="mb-5">
-            <h2 class="h3 fw-bold">Parte 2: Optimización combinatoria</h2>
-            <p class="text-secondary">
-                Comparación de metaheurísticas sobre el problema del viajante.
-            </p>
-            <article class="border rounded-4 p-4">
-                <p class="small text-secondary mb-2">PROBLEMA DEL VIAJANTE</p>
-                <h3 class="h4 fw-bold">El vendedor en España</h3>
-                <p class="text-secondary">
-                    Recorrido por las 47 capitales peninsulares con colonias de hormigas
-                    y algoritmos genéticos, estudiando cómo cambia la solución según el valor
-                    de la hora del vendedor.
-                </p>
-                <a href="pages/viajante.html" class="btn btn-dark mt-2">Explorar el trabajo</a>
-            </article>
-        </section>
-
-        <section class="mb-5" id="videos">
-            <h2 class="h3 fw-bold">Videos</h2>
-            <p class="text-secondary">Sustentación en video de cada integrante.</p>
-            <article class="border rounded-4 p-3">
-                <h3 class="h6 fw-bold mb-3">Video ANA</h3>
-                <div class="ratio ratio-16x9">
-                    <iframe src="https://www.youtube.com/embed/8JSDc4k_XTU"
-                            title="Video Ana"
-                            class="rounded-3"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
-                </div>
-                <a href="https://youtu.be/8JSDc4k_XTU" class="small mt-2 d-inline-block"
-                   target="_blank" rel="noopener">Ver en YouTube</a>
-            </article>
-            <div class="row g-4 mt-1">
-                <div class="col-md-4">
-                    <article class="border rounded-4 p-3 h-100">
-                        <h3 class="h6 fw-bold mb-3">Video MAURICIO</h3>
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/EMRf0D3nj98"
-                                    title="Video Mauricio"
-                                    class="rounded-3"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
-                        <a href="https://www.youtube.com/watch?v=EMRf0D3nj98"
-                           class="small mt-2 d-inline-block" target="_blank" rel="noopener">
-                            Ver en YouTube
-                        </a>
-                    </article>
-                </div>
-                <div class="col-md-4">
-                    <article class="border rounded-4 p-3 h-100">
-                        <h3 class="h6 fw-bold mb-3">Video SAMUEL</h3>
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/cOjXOD4GMnw"
-                                    title="Video Samuel"
-                                    class="rounded-3"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
-                        <a href="https://www.youtube.com/watch?v=cOjXOD4GMnw"
-                           class="small mt-2 d-inline-block" target="_blank" rel="noopener">
-                            Ver en YouTube
-                        </a>
-                    </article>
-                </div>
-                <div class="col-md-4">
-                    <article class="border rounded-4 p-3 h-100">
-                        <h3 class="h6 fw-bold mb-3">Video JHOJAN</h3>
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/wAB_k4Er6iU"
-                                    title="Video Jhojan"
-                                    class="rounded-3"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
-                        <a href="https://www.youtube.com/watch?v=wAB_k4Er6iU"
-                           class="small mt-2 d-inline-block" target="_blank" rel="noopener">
-                            Ver en YouTube
-                        </a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="repositorio">
-            <h2 class="h3 fw-bold">Repositorio</h2>
-            <p class="text-secondary">Código fuente y experimentos:</p>
-            <a href="https://github.com/Anarragan/RNA-Trabajo1-Optimizacion-Metaheuristica-Combinatoria/tree/develop"
-               class="btn btn-dark" target="_blank" rel="noopener">
-                Ver repositorio en GitHub
-            </a>
-        </section>
-    </main>
-
-    <footer class="border-top py-4">
-        <div class="container small text-secondary">
-            Proyecto académico · Redes neuronales y algoritmos bioinspirados
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 5b. Costo equivalente en Schwefel</h3><p>\(E_{eq}\) promedio por corrida (Ecuación 20).</p></div><span class="chart-tag">Menor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="Evaluaciones equivalentes en Schwefel. Gradiente: 2214 en 2D y 3449 en 3D. Evolutivo: 4576 y 7242. PSO: 6775 y 7884. Evolución diferencial: 5040 y 8343.">
+            <div class="bar-chart-row"><span class="bar-chart-label">GD · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:26.5%"></div></div><span class="bar-chart-val">2 214</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">GD · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:41.3%"></div></div><span class="bar-chart-val">3 449</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">EA · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:54.8%"></div></div><span class="bar-chart-val">4 576</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">EA · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:86.8%"></div></div><span class="bar-chart-val">7 242</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">PSO · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:81.2%"></div></div><span class="bar-chart-val">6 775</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">PSO · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:94.5%"></div></div><span class="bar-chart-val">7 884</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">DE · 2D</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:60.4%"></div></div><span class="bar-chart-val">5 040</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">DE · 3D</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:100%"></div></div><span class="bar-chart-val">8 343</span></div>
+          </div>
+          <p class="chart-foot">Fuente: elaboración propia a partir de las Tablas 6 y 7. Barras oscuras: 2D; claras: 3D.</p>
         </div>
-    </footer>
+      </div>
+      <p>La Tabla 8 añade las iteraciones y el tiempo de reloj. Todos los métodos terminan en milisegundos, así que en este problema el costo relevante es el número de evaluaciones y no el tiempo de cómputo.</p>
+      <details><summary>Tabla 8. Iteraciones y tiempo promedio por corrida en Schwefel</summary><div class="details-body">
+        <div class="table-wrap"><table><caption>Tabla 8. Iteraciones y tiempo promedio por corrida en Schwefel (30 corridas). Fuente: elaboración propia.</caption>
+          <thead><tr><th>Método</th><th class="numeric">Iteraciones 2D</th><th class="numeric">Tiempo 2D (s)</th><th class="numeric">Iteraciones 3D</th><th class="numeric">Tiempo 3D (s)</th></tr></thead><tbody>
+          <tr><td>Descenso por gradiente</td><td class="numeric">553</td><td class="numeric">0.017</td><td class="numeric">575</td><td class="numeric">0.019</td></tr>
+          <tr><td>Algoritmo evolutivo</td><td class="numeric">119</td><td class="numeric">0.023</td><td class="numeric">190</td><td class="numeric">0.038</td></tr>
+          <tr><td>PSO</td><td class="numeric">168</td><td class="numeric">0.015</td><td class="numeric">196</td><td class="numeric">0.018</td></tr>
+          <tr><td>Evolución diferencial</td><td class="numeric">125</td><td class="numeric">0.022</td><td class="numeric">208</td><td class="numeric">0.037</td></tr>
+        </tbody></table></div>
+      </div></details>
+
+      <h3>4.2 Función de Rosenbrock</h3>
+      <h4>El valle que el gradiente no alcanza a recorrer</h4>
+      <p>La Figura 6 muestra que el descenso por gradiente avanza hacia el valle, pero tras 2000 iteraciones apenas ha recorrido una fracción del camino hacia el mínimo; el panel derecho muestra que la norma del gradiente se mantiene del orden de \(10^{-1}\): el gradiente no se anula, pero el paso es demasiado pequeño para avanzar. En la Figura 7, las partículas de PSO empiezan dispersas y se concentran progresivamente sobre el óptimo, como confirma el panel de diversidad de la población.</p>
+      <figure class="figure" id="fig-6">
+        <p class="figure-title">Figura 6</p>
+        <p class="figure-subtitle">Evolución del descenso por gradiente en Rosenbrock 2D</p>
+        <img src="utils/graphs/rosenbrock_gd_2d.gif" alt="Animación del descenso por gradiente sobre las curvas de nivel de Rosenbrock 2D, con paneles del valor objetivo, las coordenadas y la norma del gradiente" loading="lazy">
+        <p class="figure-note"><em>Nota.</em> A la izquierda, la trayectoria sobre las curvas de nivel; a la derecha, la evolución del valor objetivo, de las coordenadas y de \(\lVert\nabla f\rVert\). Fuente: elaboración propia.</p>
+      </figure>
+      <figure class="figure" id="fig-7">
+        <p class="figure-title">Figura 7</p>
+        <p class="figure-subtitle">Evolución del enjambre de partículas en Rosenbrock 2D</p>
+        <img src="utils/graphs/rosenbrock_pso_2d.gif" alt="Animación de PSO sobre las curvas de nivel de Rosenbrock 2D, con las partículas concentrándose en el mínimo global" loading="lazy">
+        <p class="figure-note"><em>Nota.</em> A la izquierda, las partículas sobre las curvas de nivel; a la derecha, la evolución del mejor valor, de las coordenadas y de la diversidad de la población. Fuente: elaboración propia.</p>
+      </figure>
+      <h4>Estadísticas de 30 corridas</h4>
+      <p>Las Tablas 9 y 10 muestran que el gradiente no alcanzó el umbral en ninguna de las 60 corridas, mientras que PSO y DE lo alcanzaron en todas. El algoritmo evolutivo pasa de un 57 % de éxito en 2D a un 3 % en 3D.</p>
+      <div class="table-wrap"><table><caption>Tabla 9. Resultados de los cuatro métodos en Rosenbrock 2D (30 corridas). Fuente: elaboración propia.</caption>
+        <thead><tr><th>Método</th><th class="numeric">M</th><th class="numeric">DE</th><th class="numeric">Mejor</th><th class="numeric">Peor</th><th class="numeric">Éxito</th><th class="numeric">Iter.</th><th class="numeric">\(E_f\)</th><th class="numeric">\(E_{\nabla f}\)</th><th class="numeric">\(E_{eq}\)</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td class="numeric">\(4.89\)</td><td class="numeric">\(4.96\)</td><td class="numeric">\(4.97\times10^{-1}\)</td><td class="numeric">\(1.57\times10^{1}\)</td><td class="numeric">0 %</td><td class="numeric">2000</td><td class="numeric">0</td><td class="numeric">2 000</td><td class="numeric">8 000</td></tr>
+        <tr><td>PSO</td><td class="numeric"><strong>\(2.22\times10^{-20}\)</strong></td><td class="numeric">\(8.36\times10^{-20}\)</td><td class="numeric">\(0\)</td><td class="numeric">\(4.39\times10^{-19}\)</td><td class="numeric"><strong>100 %</strong></td><td class="numeric">544</td><td class="numeric">21 813</td><td class="numeric">0</td><td class="numeric">21 813</td></tr>
+        <tr><td>Evolución diferencial</td><td class="numeric">\(2.03\times10^{-14}\)</td><td class="numeric">\(1.90\times10^{-14}\)</td><td class="numeric">\(1.53\times10^{-15}\)</td><td class="numeric">\(6.47\times10^{-14}\)</td><td class="numeric"><strong>100 %</strong></td><td class="numeric">126</td><td class="numeric">5 092</td><td class="numeric">0</td><td class="numeric"><strong>5 092</strong></td></tr>
+        <tr><td>Algoritmo evolutivo</td><td class="numeric">\(4.44\times10^{-2}\)</td><td class="numeric">\(1.48\times10^{-1}\)</td><td class="numeric">\(3.48\times10^{-11}\)</td><td class="numeric">\(6.14\times10^{-1}\)</td><td class="numeric">57 %</td><td class="numeric">1627</td><td class="numeric">61 884</td><td class="numeric">0</td><td class="numeric">61 884</td></tr>
+      </tbody></table></div>
+      <div class="table-wrap"><table><caption>Tabla 10. Resultados de los cuatro métodos en Rosenbrock 3D (30 corridas). Fuente: elaboración propia.</caption>
+        <thead><tr><th>Método</th><th class="numeric">M</th><th class="numeric">DE</th><th class="numeric">Mejor</th><th class="numeric">Peor</th><th class="numeric">Éxito</th><th class="numeric">Iter.</th><th class="numeric">\(E_f\)</th><th class="numeric">\(E_{\nabla f}\)</th><th class="numeric">\(E_{eq}\)</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td class="numeric">\(2.29\)</td><td class="numeric">\(2.65\)</td><td class="numeric">\(9.23\times10^{-3}\)</td><td class="numeric">\(1.02\times10^{1}\)</td><td class="numeric">0 %</td><td class="numeric">2000</td><td class="numeric">0</td><td class="numeric">2 000</td><td class="numeric">12 000</td></tr>
+        <tr><td>PSO</td><td class="numeric">\(4.37\times10^{-11}\)</td><td class="numeric">\(7.84\times10^{-11}\)</td><td class="numeric">\(2.64\times10^{-16}\)</td><td class="numeric">\(3.58\times10^{-10}\)</td><td class="numeric"><strong>100 %</strong></td><td class="numeric">2000</td><td class="numeric">80 040</td><td class="numeric">0</td><td class="numeric">80 040</td></tr>
+        <tr><td>Evolución diferencial</td><td class="numeric"><strong>\(2.09\times10^{-13}\)</strong></td><td class="numeric">\(1.48\times10^{-13}\)</td><td class="numeric">\(1.35\times10^{-14}\)</td><td class="numeric">\(5.63\times10^{-13}\)</td><td class="numeric"><strong>100 %</strong></td><td class="numeric">219</td><td class="numeric">8 815</td><td class="numeric">0</td><td class="numeric"><strong>8 815</strong></td></tr>
+        <tr><td>Algoritmo evolutivo</td><td class="numeric">\(8.23\times10^{-1}\)</td><td class="numeric">\(1.20\)</td><td class="numeric">\(3.95\times10^{-4}\)</td><td class="numeric">\(4.91\)</td><td class="numeric">3 %</td><td class="numeric">2000</td><td class="numeric">76 040</td><td class="numeric">0</td><td class="numeric">76 040</td></tr>
+      </tbody></table></div>
+      <p class="small muted">En las Tablas 9 y 10, Iter. es el número medio de iteraciones; \(E_{eq}=E_f+2d\,E_{\nabla f}\) con \(2d=4\) en 2D y \(2d=6\) en 3D. Ninguna corrida del gradiente cumplió el criterio \(\lVert\nabla f\rVert<10^{-8}\): todas se detuvieron en el límite de 2000 iteraciones.</p>
+      <h4>Sensibilidad del gradiente a la tasa de aprendizaje</h4>
+      <p>Para elegir \(\eta\) se hizo un barrido preliminar en Rosenbrock 2D con dominio \([-2,2]^2\). La Tabla 11 muestra que la ventana útil es extremadamente estrecha: con \(\eta\le0.001\) el método avanza demasiado lento, y desde \(\eta=0.0012\) diverge (<code>NaN</code>) en pocas iteraciones.</p>
+      <div class="table-wrap"><table><caption>Tabla 11. Sensibilidad del descenso por gradiente a la tasa de aprendizaje en Rosenbrock 2D (experimento preliminar con dominio \([-2,2]^2\)). Fuente: elaboración propia.</caption>
+        <thead><tr><th class="numeric">\(\eta\)</th><th class="numeric">Valor final de \(f\)</th><th>Comportamiento</th></tr></thead><tbody>
+        <tr><td class="numeric">0.0005</td><td class="numeric">9.15</td><td>Avance demasiado lento</td></tr>
+        <tr><td class="numeric">0.0010</td><td class="numeric">3.30</td><td>Avance lento</td></tr>
+        <tr><td class="numeric">0.0012</td><td class="numeric">NaN</td><td>Divergencia</td></tr>
+        <tr><td class="numeric">0.0014</td><td class="numeric">NaN</td><td>Divergencia</td></tr>
+        <tr><td class="numeric">0.0020</td><td class="numeric">NaN</td><td>Divergencia</td></tr>
+        <tr><td class="numeric">0.0050</td><td class="numeric">NaN</td><td>Divergencia</td></tr>
+        <tr><td class="numeric">0.0100</td><td class="numeric">NaN</td><td>Divergencia</td></tr>
+      </tbody></table></div>
+      <p>Como el experimento principal usa el dominio más amplio \([-5,10]^n\), donde la curvatura lejos del óptimo es aún mayor, se adoptó \(\eta=10^{-4}\) para evitar la divergencia en todas las corridas, a costa de avanzar todavía más despacio.</p>
+
+      <p class="part-banner">Etapa 2 · Optimización combinatoria</p>
+      <h3>4.3 Recorrido por las 47 capitales</h3>
+      <h4>Cómo evoluciona la mejor ruta</h4>
+      <p>La Figura 8 muestra, para cada valor de la hora, cómo evoluciona la mejor ruta de cada método: a la izquierda de cada animación, el recorrido dibujado sobre el mapa de España; a la derecha, la curva del costo mínimo. La estrella roja marca la ciudad de salida. Use las pestañas para cambiar el valor de \(v\).</p>
+      <figure class="figure" id="fig-8">
+        <p class="figure-title">Figura 8</p>
+        <p class="figure-subtitle">Evolución de la mejor ruta de la colonia de hormigas y del algoritmo genético según el valor de la hora del vendedor</p>
+        <div class="tabs">
+          <div class="tab-list" role="tablist" aria-label="Valor de la hora del vendedor">
+            <button type="button" role="tab" id="tab-h0" aria-controls="panel-h0" aria-selected="false">0 €/h</button>
+            <button type="button" role="tab" id="tab-h15" aria-controls="panel-h15" aria-selected="false">15 €/h</button>
+            <button type="button" role="tab" id="tab-h25" aria-controls="panel-h25" aria-selected="true">25 €/h</button>
+            <button type="button" role="tab" id="tab-h35" aria-controls="panel-h35" aria-selected="false">35 €/h</button>
+            <button type="button" role="tab" id="tab-h60" aria-controls="panel-h60" aria-selected="false">60 €/h</button>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-h0" aria-labelledby="tab-h0" tabindex="0">
+            <div class="figure-pair">
+              <div><h4>(a) Colonia de hormigas · costo final 578.14 €</h4><img src="utils/gifs2/aco_espana47_hora_0.gif" alt="Animación de la colonia de hormigas sobre el mapa de España con el valor de la hora en 0 euros" loading="lazy"></div>
+              <div><h4>(b) Algoritmo genético · costo final 835.34 €</h4><img src="utils/gifs2/ga_espana47_hora_0.gif" alt="Animación del algoritmo genético sobre el mapa de España con el valor de la hora en 0 euros" loading="lazy"></div>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-h15" aria-labelledby="tab-h15" tabindex="0" hidden>
+            <div class="figure-pair">
+              <div><h4>(a) Colonia de hormigas · costo final 1 868.39 €</h4><img src="utils/gifs2/aco_espana47_hora_15.gif" alt="Animación de la colonia de hormigas sobre el mapa de España con el valor de la hora en 15 euros" loading="lazy"></div>
+              <div><h4>(b) Algoritmo genético · costo final 2 454.67 €</h4><img src="utils/gifs2/ga_espana47_hora_15.gif" alt="Animación del algoritmo genético sobre el mapa de España con el valor de la hora en 15 euros" loading="lazy"></div>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-h25" aria-labelledby="tab-h25" tabindex="0">
+            <div class="figure-pair">
+              <div><h4>(a) Colonia de hormigas · costo final 2 648.53 €</h4><img src="utils/gifs2/aco_espana47_hora_25.gif" alt="Animación de la colonia de hormigas sobre el mapa de España con el valor de la hora en 25 euros" loading="lazy"></div>
+              <div><h4>(b) Algoritmo genético · costo final 3 666.76 €</h4><img src="utils/gifs2/ga_espana47_hora_25.gif" alt="Animación del algoritmo genético sobre el mapa de España con el valor de la hora en 25 euros" loading="lazy"></div>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-h35" aria-labelledby="tab-h35" tabindex="0" hidden>
+            <div class="figure-pair">
+              <div><h4>(a) Colonia de hormigas · costo final 3 517.69 €</h4><img src="utils/gifs2/aco_espana47_hora_35.gif" alt="Animación de la colonia de hormigas sobre el mapa de España con el valor de la hora en 35 euros" loading="lazy"></div>
+              <div><h4>(b) Algoritmo genético · costo final 4 637.69 €</h4><img src="utils/gifs2/ga_espana47_hora_35.gif" alt="Animación del algoritmo genético sobre el mapa de España con el valor de la hora en 35 euros" loading="lazy"></div>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-h60" aria-labelledby="tab-h60" tabindex="0" hidden>
+            <div class="figure-pair">
+              <div><h4>(a) Colonia de hormigas · costo final 5 502.11 €</h4><img src="utils/gifs2/aco_espana47_hora_60.gif" alt="Animación de la colonia de hormigas sobre el mapa de España con el valor de la hora en 60 euros" loading="lazy"></div>
+              <div><h4>(b) Algoritmo genético · costo final 7 108.64 €</h4><img src="utils/gifs2/ga_espana47_hora_60.gif" alt="Animación del algoritmo genético sobre el mapa de España con el valor de la hora en 60 euros" loading="lazy"></div>
+            </div>
+          </div>
+        </div>
+        <p class="figure-note"><em>Nota.</em> Una corrida por método y valor de \(v\), con semilla 42, 60 individuos y 150 iteraciones. Fuente: elaboración propia con scikit-opt y la matriz de costos de la Ecuación 14.</p>
+      </figure>
+      <p>Las Figuras 9 y 10 reúnen la mejor ruta final de cada método para los cinco valores de la hora. Las rutas de la colonia de hormigas son compactas y casi no se cruzan (Figura 9); las del algoritmo genético tienen muchos cruces y saltos largos entre regiones lejanas (Figura 10).</p>
+      <div class="figure-pair">
+        <figure class="figure" id="fig-9">
+          <p class="figure-title">Figura 9</p>
+          <p class="figure-subtitle">Mejor ruta final de la colonia de hormigas para cada valor de la hora</p>
+          <img src="utils/gifs2/comparativa_final_aco.png" alt="Cinco mapas de España con las mejores rutas de la colonia de hormigas, compactas y con pocos cruces" loading="lazy">
+          <p class="figure-note"><em>Nota.</em> Fuente: elaboración propia.</p>
+        </figure>
+        <figure class="figure" id="fig-10">
+          <p class="figure-title">Figura 10</p>
+          <p class="figure-subtitle">Mejor ruta final del algoritmo genético para cada valor de la hora</p>
+          <img src="utils/gifs2/comparativa_final_ga.png" alt="Cinco mapas de España con las mejores rutas del algoritmo genético, con muchos cruces y saltos largos" loading="lazy">
+          <p class="figure-note"><em>Nota.</em> Fuente: elaboración propia.</p>
+        </figure>
+      </div>
+      <h4>Desglose del costo</h4>
+      <p>Las Tablas 12 y 13 desglosan el costo de la mejor ruta que encontró cada método. ACO gana en los cinco casos.</p>
+      <div class="table-wrap"><table><caption>Tabla 12. Resultados de la colonia de hormigas según el valor de la hora del vendedor. Fuente: elaboración propia.</caption>
+        <thead><tr><th class="numeric">\(v\) (€/h)</th><th class="numeric">Costo total (€)</th><th class="numeric">Distancia (km)</th><th class="numeric">Tiempo (h)</th><th class="numeric">Combustible (€)</th><th class="numeric">Peajes (€)</th><th class="numeric">Tiempo vendedor (€)</th><th class="numeric">Cómputo (s)</th></tr></thead><tbody>
+        <tr><td class="numeric">0</td><td class="numeric"><strong>578.14</strong></td><td class="numeric">6 513.62</td><td class="numeric">81.83</td><td class="numeric">555.29</td><td class="numeric">22.85</td><td class="numeric">0.00</td><td class="numeric">17.93</td></tr>
+        <tr><td class="numeric">15</td><td class="numeric"><strong>1 868.39</strong></td><td class="numeric">6 856.47</td><td class="numeric">84.07</td><td class="numeric">584.52</td><td class="numeric">22.85</td><td class="numeric">1 261.02</td><td class="numeric">17.05</td></tr>
+        <tr><td class="numeric">25</td><td class="numeric"><strong>2 648.53</strong></td><td class="numeric">6 592.13</td><td class="numeric">81.78</td><td class="numeric">561.98</td><td class="numeric">42.15</td><td class="numeric">2 044.40</td><td class="numeric">16.33</td></tr>
+        <tr><td class="numeric">35</td><td class="numeric"><strong>3 517.69</strong></td><td class="numeric">6 739.31</td><td class="numeric">83.03</td><td class="numeric">574.53</td><td class="numeric">37.15</td><td class="numeric">2 906.01</td><td class="numeric">15.61</td></tr>
+        <tr><td class="numeric">60</td><td class="numeric"><strong>5 502.11</strong></td><td class="numeric">6 680.50</td><td class="numeric">81.28</td><td class="numeric">569.52</td><td class="numeric">55.95</td><td class="numeric">4 876.64</td><td class="numeric">16.77</td></tr>
+      </tbody></table></div>
+      <div class="table-wrap"><table><caption>Tabla 13. Resultados del algoritmo genético según el valor de la hora del vendedor. Fuente: elaboración propia.</caption>
+        <thead><tr><th class="numeric">\(v\) (€/h)</th><th class="numeric">Costo total (€)</th><th class="numeric">Distancia (km)</th><th class="numeric">Tiempo (h)</th><th class="numeric">Combustible (€)</th><th class="numeric">Peajes (€)</th><th class="numeric">Tiempo vendedor (€)</th><th class="numeric">Cómputo (s)</th></tr></thead><tbody>
+        <tr><td class="numeric">0</td><td class="numeric"><strong>835.34</strong></td><td class="numeric">9 547.48</td><td class="numeric">113.48</td><td class="numeric">813.94</td><td class="numeric">21.40</td><td class="numeric">0.00</td><td class="numeric">0.88</td></tr>
+        <tr><td class="numeric">15</td><td class="numeric"><strong>2 454.67</strong></td><td class="numeric">9 155.78</td><td class="numeric">110.01</td><td class="numeric">780.54</td><td class="numeric">24.05</td><td class="numeric">1 650.08</td><td class="numeric">0.94</td></tr>
+        <tr><td class="numeric">25</td><td class="numeric"><strong>3 666.76</strong></td><td class="numeric">9 384.52</td><td class="numeric">112.51</td><td class="numeric">800.01</td><td class="numeric">54.05</td><td class="numeric">2 812.70</td><td class="numeric">0.90</td></tr>
+        <tr><td class="numeric">35</td><td class="numeric"><strong>4 637.69</strong></td><td class="numeric">9 042.44</td><td class="numeric">108.82</td><td class="numeric">770.87</td><td class="numeric">57.95</td><td class="numeric">3 808.87</td><td class="numeric">0.90</td></tr>
+        <tr><td class="numeric">60</td><td class="numeric"><strong>7 108.64</strong></td><td class="numeric">8 695.38</td><td class="numeric">105.40</td><td class="numeric">741.30</td><td class="numeric">43.55</td><td class="numeric">6 323.79</td><td class="numeric">0.89</td></tr>
+      </tbody></table></div>
+      <p class="small muted">En las Tablas 12 y 13, costo total = combustible + peajes + \(v\) · tiempo. Una sola corrida por fila, con semilla 42. Los totales pueden diferir en centavos de los que muestran las Figuras 9 y 10 por el redondeo del desglose.</p>
+      <p>La Figura 11 compara ambos métodos en el valor de referencia \(v=25\) €/h: ACO obtiene una ruta un 28 % más barata, pero tarda unas 18 veces más.</p>
+      <div class="dual-charts" id="fig-11">
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 11a. Costo total a 25 €/h</h3><p>Costo de la mejor ruta encontrada, en euros.</p></div><span class="chart-tag">Menor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="Costo total a 25 euros por hora: colonia de hormigas 2649 euros; algoritmo genético 3667 euros.">
+            <div class="bar-chart-row"><span class="bar-chart-label">Colonia de hormigas</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:72.2%"></div></div><span class="bar-chart-val">2 649</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">Algoritmo genético</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:100%"></div></div><span class="bar-chart-val">3 667</span></div>
+          </div>
+          <p class="chart-foot">Fuente: elaboración propia a partir de las Tablas 12 y 13.</p>
+        </div>
+        <div class="chart-card"><div class="chart-head"><div><h3>Figura 11b. Tiempo de cómputo a 25 €/h</h3><p>Segundos de una corrida de 150 iteraciones.</p></div><span class="chart-tag">Menor es mejor</span></div>
+          <div class="bar-chart" role="img" aria-label="Tiempo de cómputo a 25 euros por hora: colonia de hormigas 16.33 segundos; algoritmo genético 0.90 segundos.">
+            <div class="bar-chart-row"><span class="bar-chart-label">Colonia de hormigas</span><div class="bar-chart-track"><div class="bar-chart-fill" style="width:100%"></div></div><span class="bar-chart-val">16.33 s</span></div>
+            <div class="bar-chart-row"><span class="bar-chart-label">Algoritmo genético</span><div class="bar-chart-track"><div class="bar-chart-fill alt" style="width:5.5%"></div></div><span class="bar-chart-val">0.90 s</span></div>
+          </div>
+          <p class="chart-foot">Fuente: elaboración propia a partir de las Tablas 12 y 13.</p>
+        </div>
+      </div>
+      <h4>Peso de cada componente del costo</h4>
+      <p>La Tabla 14 muestra qué fracción del costo de la mejor ruta de ACO corresponde a cada componente. A partir de 15 €/h, el tiempo del vendedor domina; con 25 €/h explica el 77 % y con 60 €/h, el 89 %. El combustible se mantiene entre 555 y 585 € y los peajes no pasan de 56 €.</p>
+      <div class="table-wrap"><table><caption>Tabla 14. Composición del costo de la mejor ruta de la colonia de hormigas. Fuente: elaboración propia a partir de la Tabla 12.</caption>
+        <thead><tr><th class="numeric">\(v\) (€/h)</th><th class="numeric">Combustible + peajes \(F+P\) (€)</th><th class="numeric">Tiempo \(T\) (h)</th><th class="numeric">Combustible</th><th class="numeric">Peajes</th><th class="numeric">Tiempo</th><th>Composición</th></tr></thead><tbody>
+        <tr><td class="numeric">0</td><td class="numeric">578.14</td><td class="numeric">81.83</td><td class="numeric">96.0 %</td><td class="numeric">4.0 %</td><td class="numeric">0.0 %</td><td><div class="cost-split" aria-hidden="true"><span class="fuel" style="width:96%"></span><span class="toll" style="width:4%"></span></div></td></tr>
+        <tr><td class="numeric">15</td><td class="numeric">607.37</td><td class="numeric">84.07</td><td class="numeric">31.3 %</td><td class="numeric">1.2 %</td><td class="numeric">67.5 %</td><td><div class="cost-split" aria-hidden="true"><span class="fuel" style="width:31.3%"></span><span class="toll" style="width:1.2%"></span><span class="time" style="width:67.5%"></span></div></td></tr>
+        <tr><td class="numeric">25</td><td class="numeric">604.13</td><td class="numeric">81.78</td><td class="numeric">21.2 %</td><td class="numeric">1.6 %</td><td class="numeric">77.2 %</td><td><div class="cost-split" aria-hidden="true"><span class="fuel" style="width:21.2%"></span><span class="toll" style="width:1.6%"></span><span class="time" style="width:77.2%"></span></div></td></tr>
+        <tr><td class="numeric">35</td><td class="numeric">611.68</td><td class="numeric">83.03</td><td class="numeric">16.3 %</td><td class="numeric">1.1 %</td><td class="numeric">82.6 %</td><td><div class="cost-split" aria-hidden="true"><span class="fuel" style="width:16.3%"></span><span class="toll" style="width:1.1%"></span><span class="time" style="width:82.6%"></span></div></td></tr>
+        <tr><td class="numeric">60</td><td class="numeric">625.47</td><td class="numeric">81.28</td><td class="numeric">10.4 %</td><td class="numeric">1.0 %</td><td class="numeric">88.6 %</td><td><div class="cost-split" aria-hidden="true"><span class="fuel" style="width:10.4%"></span><span class="toll" style="width:1%"></span><span class="time" style="width:88.6%"></span></div></td></tr>
+      </tbody></table></div>
+      <div class="legend"><span><i style="background:#367b9f"></i>Combustible</span><span><i style="background:#a45e12"></i>Peajes</span><span><i style="background:#34a197"></i>Tiempo del vendedor</span></div>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="discusion">
+      <p class="section-kicker">05 · Interpretación</p><h2>Discusión</h2>
+      <p class="lead-paragraph">Esta sección responde las preguntas de la introducción. Primero se explica, a partir de la geometría de cada función, qué aportó cada familia de métodos; después se analiza el problema combinatorio y la influencia del valor de la hora.</p>
+
+      <h3>5.1 La geometría explica el resultado</h3>
+      <p>La Tabla 15 reúne la tasa de éxito y el costo equivalente de los cuatro métodos en las dos funciones. Leída junto con la Tabla 1, permite separar las dos causas de fracaso del gradiente.</p>
+      <div class="table-wrap"><table><caption>Tabla 15. Tasa de éxito y costo equivalente por función, método y dimensión. Fuente: elaboración propia a partir de las Tablas 6, 7, 9 y 10.</caption>
+        <thead><tr><th>Método</th><th class="numeric">Schwefel 2D</th><th class="numeric">Schwefel 3D</th><th class="numeric">Rosenbrock 2D</th><th class="numeric">Rosenbrock 3D</th></tr></thead><tbody>
+        <tr><td>Descenso por gradiente</td><td class="numeric">3 % · 2 214</td><td class="numeric">0 % · 3 449</td><td class="numeric">0 % · 8 000</td><td class="numeric">0 % · 12 000</td></tr>
+        <tr><td>Algoritmo evolutivo</td><td class="numeric">53 % · 4 576</td><td class="numeric">43 % · 7 242</td><td class="numeric">57 % · 61 884</td><td class="numeric">3 % · 76 040</td></tr>
+        <tr><td>PSO</td><td class="numeric">47 % · 6 775</td><td class="numeric">37 % · 7 884</td><td class="numeric">100 % · 21 813</td><td class="numeric">100 % · 80 040</td></tr>
+        <tr><td>Evolución diferencial</td><td class="numeric"><strong>100 % · 5 040</strong></td><td class="numeric"><strong>97 % · 8 343</strong></td><td class="numeric"><strong>100 % · 5 092</strong></td><td class="numeric"><strong>100 % · 8 815</strong></td></tr>
+      </tbody></table></div>
+      <p class="small muted">Cada celda muestra la tasa de éxito y \(E_{eq}\). Por la diferencia de criterios de parada (Tabla 2), los costos se comparan entre métodos de una misma columna, no entre columnas de distinta función.</p>
+
+      <h4>Número de mínimos locales: Schwefel</h4>
+      <p>En Schwefel el gradiente falla porque hay demasiados valles. Solo conoce la pendiente del punto donde está, así que baja al valle en el que empezó (Figura 3); de los \(8^d\) valles, solo uno es el global. Con un punto inicial uniforme, la probabilidad de caer en su cuenca es pequeña, y eso es lo que muestran el 3 % de éxito en 2D y el 0 % en 3D (Tablas 6 y 7). Dentro del valle, en cambio, la función es suave y localmente convexa, y el gradiente converge con pocas evaluaciones: por eso es el más barato. Su fracaso no es de convergencia sino de <em>exploración</em>.</p>
+      <p>Los heurísticos reparten puntos por todo el dominio y por eso encuentran el valle global mucho más a menudo. Cuando fallan no lo hacen al azar: sus peores valores, 118.44, 236.88 y 355.32, son múltiplos exactos de 118.44, es decir, la población quedó en el valle señuelo en una, dos o tres coordenadas. Con el mismo criterio de parada, los tres gastan una cantidad parecida de evaluaciones, entre 4 500 y 8 500 (Figura 5b); lo que los distingue es la fiabilidad (Figura 5a). DE acierta casi siempre porque sus pasos nacen de diferencias entre individuos (Ecuación 9): son grandes mientras la población está repartida entre valles y se encogen cuando se concentra en uno. PSO y el algoritmo evolutivo, en cambio, convergen antes de haber descartado el valle señuelo.</p>
+      <p>El criterio de parada resultó decisivo para que la comparación fuera justa. Sin él, el algoritmo evolutivo seguía iterando hasta 59 000 evaluaciones en 2D y 76 000 en 3D con la misma tasa de éxito, porque su mutación tarda en apagarse (Ecuación 7) y la población no se junta sola. Esas evaluaciones no mejoraban el resultado.</p>
+
+      <h4>Condicionamiento: Rosenbrock</h4>
+      <p>Rosenbrock tiene un único mínimo, así que el fracaso del gradiente no se debe a mínimos locales sino al <strong>mal condicionamiento</strong>. En el óptimo, la matriz hessiana en 2D es</p>
+      <div class="formula-box"><div class="math">\[\nabla^2 f(1,1) = \begin{pmatrix} 802 & -400 \\ -400 & 200 \end{pmatrix}, \qquad \lambda_{\max}\approx 1001.6,\quad \lambda_{\min}\approx 0.40,\quad \kappa=\frac{\lambda_{\max}}{\lambda_{\min}}\approx 2.5\times10^{3}. \tag{21}\]</div></div>
+      <p>El descenso por gradiente con paso fijo solo es estable en una región cuadrática si \(\eta<2/\lambda_{\max}\) (<a class="cite" href="#ref-nocedal">Nocedal y Wright, 2006</a>), que aquí es \(\eta<0.002\) incluso cerca del óptimo, y menos aún lejos de él, donde la curvatura transversal al valle crece. Ese límite es del mismo orden que el umbral de divergencia observado en la Tabla 11. Pero con un paso tan pequeño, el avance a lo largo del fondo del valle, cuya curvatura es \(\lambda_{\min}\approx0.4\), es lentísimo: la componente del error en esa dirección se reduce en un factor \(1-\eta\lambda_{\min}\approx 1-4\times10^{-5}\) por iteración con \(\eta=10^{-4}\). Esto es lo que se ve en la Figura 6: el punto cae rápido al valle y luego se arrastra por él sin llegar en 2000 iteraciones. El gradiente queda atrapado entre dos males: un paso grande diverge y uno pequeño no avanza.</p>
+      <p>Las metaheurísticas no dependen de la escala del gradiente. PSO y DE alcanzaron el umbral en el 100 % de las corridas en ambas dimensiones (Tablas 9 y 10). PSO fue el más preciso, con media de \(2.22\times10^{-20}\) en 2D, porque cuando las partículas se concentran cerca del mínimo ajustan su velocidad de forma muy fina (Figura 7). DE fue el más eficiente: logró el éxito con 5 092 evaluaciones equivalentes en 2D, 4.3 veces menos que PSO y 1.6 veces menos que el gradiente, que además no llegó. En 3D la diferencia crece: 8 815 evaluaciones de DE frente a 80 040 de PSO, 9.1 veces menos. El algoritmo evolutivo fue el menos robusto: su mejor corrida es competitiva, pero su desviación estándar es alta y su éxito cae del 57 % al 3 % al pasar a 3D, lo que indica que la combinación de elitismo y mutación decreciente pierde la diversidad necesaria para seguir un valle curvo en más dimensiones.</p>
+      <p>Llama la atención que la media del gradiente en Rosenbrock sea menor en 3D (2.29) que en 2D (4.89). No debe leerse como una mejora: la tasa de éxito es 0 % en ambos casos y los valores dependen de dónde cayó el punto inicial dentro de un dominio amplio. Con 30 corridas y una desviación estándar del mismo orden que la media, la diferencia no es concluyente.</p>
+
+      <h4>Qué aportó cada familia</h4>
+      <p>La Tabla 16 relaciona cada propiedad geométrica de la Tabla 1 con el efecto observado sobre cada familia de métodos.</p>
+      <div class="table-wrap"><table><caption>Tabla 16. Relación entre la geometría de cada función y el aporte de cada familia de métodos. Fuente: elaboración propia.</caption>
+        <thead><tr><th>Propiedad geométrica</th><th>Efecto sobre el gradiente</th><th>Efecto sobre los heurísticos</th></tr></thead><tbody>
+        <tr><td>Convexidad local dentro de un valle (ambas)</td><td>Ventaja: converge rápido y con pocas evaluaciones una vez dentro del valle correcto</td><td>Refinan más despacio, porque no usan la pendiente</td></tr>
+        <tr><td>Muchos mínimos locales (Schwefel, \(8^d\))</td><td>Fracaso: queda en el valle donde empezó (3 % y 0 % de éxito)</td><td>Ventaja: la población explora varios valles a la vez; DE acierta el 97 %–100 %</td></tr>
+        <tr><td>Mal condicionamiento (Rosenbrock, \(\kappa\approx2.5\times10^3\))</td><td>Fracaso: el paso estable es diminuto y el avance por el valle es lentísimo (0 % de éxito)</td><td>Ventaja: no dependen de la escala del gradiente; PSO y DE aciertan el 100 %</td></tr>
+        <tr><td>Aumento de dimensión (2D → 3D)</td><td>Empeora en ambas funciones</td><td>DE apenas lo nota; PSO pierde precisión pero no éxito en Rosenbrock; el EA se degrada</td></tr>
+      </tbody></table></div>
+      <p>En síntesis, el <strong>gradiente aporta eficiencia local</strong>: cuando el punto ya está en la cuenca correcta y el problema está bien condicionado, es el método más barato. Los <strong>heurísticos aportan exploración global</strong> y robustez frente a la escala del problema, a cambio de más evaluaciones. La regla conservadora de \(2d\) evaluaciones por gradiente no cambia esta lectura: incluso si el gradiente costara una sola evaluación, su tasa de éxito seguiría siendo cero. Una estrategia razonable, que queda como trabajo futuro, es híbrida: usar DE para encontrar el valle correcto y el gradiente para pulir la solución.</p>
+
+      <h3>5.2 Colonia de hormigas frente a algoritmo genético</h3>
+      <p>La colonia de hormigas encontró rutas más baratas que el algoritmo genético con los cinco valores de la hora (Figura 8; Tablas 12 y 13). Sus recorridos miden entre 6 500 y 6 900 km, mientras que los del genético miden entre 8 700 y 9 500 km. A cambio, ACO tarda entre 15 y 18 segundos frente a menos de uno (Figura 11).</p>
+      <p>La diferencia empieza desde la primera iteración. En las curvas de costo de la Figura 8, el valor inicial de ACO ya es mucho menor que el del GA. La razón está en la Ecuación 16: con \(\beta=2\), la visibilidad \(\eta_{ij}=1/C_{ij}\) hace que incluso las primeras hormigas, sin feromona acumulada, prefieran ir a la ciudad más cercana o más barata. El GA, en cambio, parte de permutaciones aleatorias y solo usa la matriz de costos para evaluarlas. Por eso las rutas del GA conservan cruces y saltos largos entre regiones (Figura 10), mientras que las de ACO avanzan casi siempre hacia la ciudad vecina y apenas se cruzan (Figura 9).</p>
+      <p>El GA tampoco había terminado de converger: su mejor valor aparece entre las generaciones 136 y 149 de 150, así que con más generaciones probablemente se habría acercado a ACO. Con el presupuesto común de unos 9 000 recorridos, sin embargo, la información heurística de ACO le da una ventaja clara.</p>
+
+      <h3>5.3 ¿Cambia la ruta óptima al variar el valor de la hora?</h3>
+      <p>Las rutas que entrega ACO son distintas para cada valor: dos rutas cualesquiera comparten entre 27 y 34 de sus 47 tramos. Pero esa diferencia no demuestra que la ruta óptima cambie. Si se toma la ruta hallada con 0 €/h y se evalúa con el costo de 15, 25, 35 o 60 €/h, resulta más barata (1 805.6, 2 623.9, 3 442.2 y 5 488.0 €) que la que la colonia encontró para esos mismos valores (1 868.4, 2 648.5, 3 517.7 y 5 502.1 €). Parte de la variación entre rutas viene, por tanto, de la búsqueda estocástica y no del parámetro.</p>
+      <p>La Ecuación 15 permite ir un paso más allá con los datos de la Tabla 14. Cada ruta encontrada define una recta \(L_R(v)=(F_R+P_R)+v\,T_R\). Las rutas de 15 y 35 €/h están dominadas por la de 0 €/h, porque tienen a la vez más horas y mayor costo de combustible y peajes. La de 25 €/h ahorra solo 0.05 h a cambio de 25.99 € más, así que solo convendría por encima de unos 520 €/h. La única que compite es la de 60 €/h, que ahorra 0.55 h a cambio de 47.33 € más:</p>
+      <div class="formula-box"><div class="math">\[v^* = \frac{625.47 - 578.14}{81.83 - 81.28} = \frac{47.33}{0.55} \approx 86 \text{ €/h}. \tag{22}\]</div></div>
+      <p>Entre las rutas encontradas, la ruta de 0 €/h es la mejor para cualquier \(v\) por debajo de unos 86 €/h (entre 84 y 88 €/h según el redondeo de los tiempos), y solo a partir de ese valor la ruta más rápida pasaría a ser más barata. La explicación es que en la red española distancia y tiempo están muy correlacionados y los peajes pesan poco (Tabla 14): la ruta más corta ya es casi la más rápida, así que valorar más el tiempo apenas cambia el orden óptimo dentro del rango estudiado.</p>
+      <div class="callout warning"><strong>Alcance de esta respuesta.</strong><p>El umbral de 86 €/h se calcula sobre la envolvente de las rutas que encontró una sola corrida de ACO por valor, no sobre el óptimo verdadero de cada \(v\). Para afirmarlo con rigor habría que repetir cada caso con varias semillas, comparar la distribución de costos y, idealmente, contrastar con un solucionador exacto para ATSP de 47 ciudades.</p></div>
+
+      <h3>5.4 Lo común a las dos etapas</h3>
+      <p>Las dos etapas cuentan la misma historia desde ángulos distintos. En las funciones continuas, el método que mejor combina exploración y refinamiento (DE) gana; en el TSP, el método que incorpora información del problema desde el principio (ACO, a través de la visibilidad) gana. En ambos casos, el método que solo usa información local (el gradiente) o que parte de soluciones sin estructura (el GA con población aleatoria) necesita mucho más esfuerzo para llegar al mismo sitio, o no llega.</p>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="conclusiones">
+      <p class="section-kicker">06 · Cierre</p><h2>Conclusiones y limitaciones</h2>
+      <h3>6.1 Conclusiones</h3>
+      <ol>
+        <li><strong>El gradiente es eficiente, pero miope.</strong> Fue el método más barato en Schwefel y el que mejor refina dentro de un valle, pero acertó el mínimo global en 1 de 120 corridas en total (Tabla 15). En Schwefel falla por la cantidad de mínimos locales; en Rosenbrock, por el mal condicionamiento, que obliga a un paso tan pequeño que el método no recorre el valle.</li>
+        <li><strong>La evolución diferencial fue el método más fiable.</strong> Alcanzó entre el 97 % y el 100 % de éxito en las cuatro configuraciones con un costo comparable o menor que el de los demás heurísticos.</li>
+        <li><strong>PSO es el más preciso en Rosenbrock, pero el más caro</strong>, y en Schwefel converge prematuramente al valle señuelo en más de la mitad de las corridas.</li>
+        <li><strong>El algoritmo evolutivo es el menos robusto</strong> y se degrada al aumentar la dimensión, sobre todo en Rosenbrock (del 57 % al 3 %).</li>
+        <li><strong>En el TSP, la colonia de hormigas supera al algoritmo genético</strong> en los cinco valores de la hora, con rutas entre un 29 % y un 44 % más baratas, a cambio de unas 18 veces más tiempo de cómputo.</li>
+        <li><strong>El tiempo del vendedor domina el costo</strong> desde valores bajos de \(v\) (77 % a 25 €/h). Aun así, entre las rutas encontradas, la ruta de mínimo combustible sigue siendo la más barata hasta unos 86 €/h, porque distancia y tiempo están muy correlacionados.</li>
+      </ol>
+      <h3>6.2 Limitaciones</h3>
+      <div class="grid-2">
+        <article class="info-card"><h3>Protocolos distintos por función</h3><p>Las reglas de parada del gradiente y de los heurísticos no son las mismas en Schwefel y en Rosenbrock, y todos los métodos comparten el límite de iteraciones, no el de evaluaciones.</p></article>
+        <article class="info-card"><h3>Hiperparámetros sin ajustar</h3><p>Las metaheurísticas usaron valores estándar y la paciencia de 50 iteraciones se fijó de antemano. Parte del desempeño puede deberse a esa elección y no al algoritmo.</p></article>
+        <article class="info-card"><h3>Gradiente sin reinicios</h3><p>El descenso por gradiente se corrió con paso fijo y sin reinicios aleatorios ni búsqueda de línea, que podrían mejorar su desempeño en ambas funciones.</p></article>
+        <article class="info-card"><h3>Una corrida por caso en el TSP</h3><p>Cada combinación de método y valor de la hora se corrió una sola vez con la semilla 42, y no se contrastó con un óptimo conocido, así que no se sabe cuánto se alejan las rutas de él.</p></article>
+        <article class="info-card"><h3>Datos de costo simplificados</h3><p>La matriz de peajes es simétrica y se cargó a mano; el combustible usa un consumo y un precio únicos para todo el recorrido.</p></article>
+        <article class="info-card"><h3>Datos con fecha</h3><p>Los peajes y precios corresponden a octubre de 2026. La red de peajes española cambia con frecuencia, por lo que los resultados son una fotografía de esa fecha.</p></article>
+      </div>
+      <h3>6.3 Trabajo futuro</h3>
+      <ul>
+        <li>Hibridar métodos: DE o PSO para explorar y descenso por gradiente para refinar en la región prometedora.</li>
+        <li>Unificar el criterio de parada por presupuesto de evaluaciones en ambas funciones y estudiar la sensibilidad de cada heurístico a sus hiperparámetros.</li>
+        <li>Repetir el TSP con al menos 30 semillas por valor de la hora, más generaciones para el GA y una búsqueda local 2-opt, y contrastar con un solucionador exacto.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="ia">
+      <p class="section-kicker">07 · Herramientas y verificación</p><h2>Uso de inteligencia artificial</h2>
+      <p>Durante el trabajo se usaron herramientas de inteligencia artificial generativa como apoyo en varias etapas. Las sugerencias se incorporaron después de revisarlas frente a pruebas empíricas, fuentes primarias y verificación matemática; la herramienta no sustituye la comprobación experimental ni la responsabilidad del equipo sobre el código y las conclusiones. La Tabla 17 resume los usos principales.</p>
+      <div class="table-wrap"><table><caption>Tabla 17. Usos principales de la inteligencia artificial y su revisión. Fuente: elaboración propia.</caption>
+        <thead><tr><th>#</th><th>Tarea</th><th>Prompt principal</th><th>Impacto en el resultado</th><th>Revisión realizada</th></tr></thead><tbody>
+        <tr><td>1</td><td>Código base de los optimizadores y del motor de visualización</td><td><em>Por transcribir</em></td><td>Aceleró la implementación inicial de GD, PSO, DE y EA y de los GIF.</td><td>Revisión, adaptación y corrección manual; validación con las tasas de éxito y los mínimos conocidos.</td></tr>
+        <tr><td>2</td><td>Explicación de conceptos</td><td><em>Por transcribir</em></td><td>Explicaciones sobre la geometría de Rosenbrock, las ecuaciones de PSO y DE y el cruce BLX-\(\alpha\).</td><td>Contraste con las fuentes primarias citadas en la sección 2.</td></tr>
+        <tr><td>3</td><td>Depuración de errores</td><td><em>Por transcribir</em></td><td>Identificación de causas probables de errores de ejecución.</td><td>Pruebas empíricas antes de aceptar cada corrección.</td></tr>
+        <tr><td>4</td><td>Estructura y redacción del informe</td><td>Unificar las páginas de Schwefel, Rosenbrock y el viajante en un único informe con orden procedimental, siguiendo la estructura del Trabajo 2.</td><td>Reorganización del contenido, numeración continua de figuras, tablas y ecuaciones, y análisis del umbral de \(v\) (Ecuación 22).</td><td>Verificación de cada cifra contra las tablas originales y de cada referencia contra su fuente.</td></tr>
+      </tbody></table></div>
+      <div class="callout warning"><strong>Por completar.</strong><p>Transcribir los prompts literales más relevantes de las filas 1 a 3, indicando la herramienta usada en cada caso.</p></div>
+      <h3>7.1 Impacto y cacería de errores</h3>
+      <p>El uso de IA aceleró la implementación y permitió resolver dudas conceptuales rápidamente, pero exigió supervisión constante: varios fragmentos generados contenían errores sutiles que solo aparecieron al probarlos. Algunos puntos de control que resultaron útiles para detectar errores, vinieran o no de la IA, fueron:</p>
+      <ul>
+        <li><strong>Comprobar contra el óptimo conocido.</strong> Los peores valores de los heurísticos en Schwefel (118.44, 236.88, 355.32) son múltiplos exactos de la penalización del valle señuelo; un valor que no encajara con esa estructura habría delatado un error en la función o en el dominio.</li>
+        <li><strong>Revisar el orden de las coordenadas.</strong> OSRM espera longitud y latitud; con el orden invertido las ciudades caen en el océano.</li>
+        <li><strong>Desconfiar de los hiperparámetros por defecto.</strong> La tasa de aprendizaje que funcionaba en Schwefel hace diverger el gradiente en Rosenbrock (Tabla 11).</li>
+        <li><strong>Verificar cada referencia.</strong> Al unificar el informe se encontró que los metadatos de una referencia (título y páginas del metaanálisis de Wardman et al.) no correspondían a la publicación real y se corrigieron; también se retiró una fuente que no se usaba en el texto. Una referencia inexistente o mal citada es exactamente el tipo de error que una IA produce con total seguridad.</li>
+        <li><strong>Revisar la coherencia interna.</strong> El umbral de divergencia del gradiente aparecía como \(\eta\ge0.002\) en un párrafo y como \(\eta\ge0.0012\) en la tabla del barrido; se dejó el valor de la tabla, que es el medido.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================= -->
+    <section class="section" id="referencias">
+      <p class="section-kicker">08 · Fuentes</p><h2>Referencias</h2>
+      <ol class="reference-list apa">
+        <li id="ref-applegate">Applegate, D. L., Bixby, R. E., Chvátal, V., y Cook, W. J. (2006). <em>The traveling salesman problem: A computational study</em>. Princeton University Press.</li>
+        <li id="ref-dantzig">Dantzig, G., Fulkerson, R., y Johnson, S. (1954). Solution of a large-scale traveling-salesman problem. <em>Journal of the Operations Research Society of America, 2</em>(4), 393–410. <a href="https://doi.org/10.1287/opre.2.4.393" target="_blank" rel="noopener noreferrer">https://doi.org/10.1287/opre.2.4.393</a></li>
+        <li id="ref-dorigo">Dorigo, M., Maniezzo, V., y Colorni, A. (1996). Ant system: Optimization by a colony of cooperating agents. <em>IEEE Transactions on Systems, Man, and Cybernetics, Part B (Cybernetics), 26</em>(1), 29–41. <a href="https://doi.org/10.1109/3477.484436" target="_blank" rel="noopener noreferrer">https://doi.org/10.1109/3477.484436</a></li>
+        <li id="ref-eiben">Eiben, A. E., y Smith, J. E. (2015). <em>Introduction to evolutionary computing</em> (2.ª ed.). Springer. <a href="https://doi.org/10.1007/978-3-662-44874-8" target="_blank" rel="noopener noreferrer">https://doi.org/10.1007/978-3-662-44874-8</a></li>
+        <li id="ref-eshelman">Eshelman, L. J., y Schaffer, J. D. (1993). Real-coded genetic algorithms and interval-schemata. En L. D. Whitley (Ed.), <em>Foundations of genetic algorithms</em> (Vol. 2, pp. 187–202). Morgan Kaufmann.</li>
+        <li id="ref-goldberg">Goldberg, D. E. (1989). <em>Genetic algorithms in search, optimization, and machine learning</em>. Addison-Wesley.</li>
+        <li id="ref-goldberg-lingle">Goldberg, D. E., y Lingle, R. (1985). Alleles, loci, and the traveling salesman problem. En J. J. Grefenstette (Ed.), <em>Proceedings of the First International Conference on Genetic Algorithms and Their Applications</em> (pp. 154–159). Lawrence Erlbaum.</li>
+        <li id="ref-sko">Guo, F. (s. f.). <em>scikit-opt: Genetic algorithm, particle swarm optimization, simulated annealing, ant colony optimization algorithm, immune algorithm, artificial fish swarm algorithm in Python</em> [Software]. GitHub. <a href="https://github.com/guofei9987/scikit-opt" target="_blank" rel="noopener noreferrer">https://github.com/guofei9987/scikit-opt</a></li>
+        <li id="ref-ine">Instituto Nacional de Estadística. (2026). <em>Encuesta trimestral de coste laboral (ETCL): Coste laboral por hora efectiva por sectores y ramas de actividad (CNAE-09, sección G)</em>. Recuperado el 11 de octubre de 2026, de <a href="https://www.ine.es/dynt3/inebase/es/index.htm?padre=457&amp;capsel=458" target="_blank" rel="noopener noreferrer">https://www.ine.es/dynt3/inebase/es/index.htm?padre=457&amp;capsel=458</a></li>
+        <li id="ref-jamil">Jamil, M., y Yang, X.-S. (2013). A literature survey of benchmark functions for global optimisation problems. <em>International Journal of Mathematical Modelling and Numerical Optimisation, 4</em>(2), 150–194. <a href="https://doi.org/10.1504/IJMMNO.2013.055204" target="_blank" rel="noopener noreferrer">https://doi.org/10.1504/IJMMNO.2013.055204</a></li>
+        <li id="ref-kennedy">Kennedy, J., y Eberhart, R. (1995). Particle swarm optimization. En <em>Proceedings of ICNN'95 – International Conference on Neural Networks</em> (Vol. 4, pp. 1942–1948). IEEE. <a href="https://doi.org/10.1109/ICNN.1995.488968" target="_blank" rel="noopener noreferrer">https://doi.org/10.1109/ICNN.1995.488968</a></li>
+        <li id="ref-luxen">Luxen, D., y Vetter, C. (2011). Real-time routing with OpenStreetMap data. En <em>Proceedings of the 19th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems</em> (pp. 513–516). ACM. <a href="https://doi.org/10.1145/2093973.2094062" target="_blank" rel="noopener noreferrer">https://doi.org/10.1145/2093973.2094062</a></li>
+        <li id="ref-mitma">Ministerio de Transportes y Movilidad Sostenible. (2026). <em>Autopistas de peaje: Red de Carreteras del Estado. Tarifas y concesiones vigentes</em>. Gobierno de España. Recuperado el 10 de octubre de 2026, de <a href="https://www.transportes.gob.es/carreteras/peajes-y-concesiones" target="_blank" rel="noopener noreferrer">https://www.transportes.gob.es/carreteras/peajes-y-concesiones</a></li>
+        <li id="ref-miteco">Ministerio para la Transición Ecológica y el Reto Demográfico. (2026). <em>Geoportal Gasolineras: Localización y precio de instalaciones de repostaje</em>. Gobierno de España. Recuperado el 10 de octubre de 2026, de <a href="https://geoportalgasolineras.es" target="_blank" rel="noopener noreferrer">https://geoportalgasolineras.es</a></li>
+        <li id="ref-nocedal">Nocedal, J., y Wright, S. J. (2006). <em>Numerical optimization</em> (2.ª ed.). Springer. <a href="https://doi.org/10.1007/978-0-387-40065-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1007/978-0-387-40065-5</a></li>
+        <li id="ref-reinelt">Reinelt, G. (1991). TSPLIB—A traveling salesman problem library. <em>ORSA Journal on Computing, 3</em>(4), 376–384. <a href="https://doi.org/10.1287/ijoc.3.4.376" target="_blank" rel="noopener noreferrer">https://doi.org/10.1287/ijoc.3.4.376</a></li>
+        <li id="ref-rosenbrock">Rosenbrock, H. H. (1960). An automatic method for finding the greatest or least value of a function. <em>The Computer Journal, 3</em>(3), 175–184. <a href="https://doi.org/10.1093/comjnl/3.3.175" target="_blank" rel="noopener noreferrer">https://doi.org/10.1093/comjnl/3.3.175</a></li>
+        <li id="ref-schwefel">Schwefel, H.-P. (1981). <em>Numerical optimization of computer models</em>. John Wiley &amp; Sons.</li>
+        <li id="ref-storn">Storn, R., y Price, K. (1997). Differential evolution: A simple and efficient heuristic for global optimization over continuous spaces. <em>Journal of Global Optimization, 11</em>(4), 341–359. <a href="https://doi.org/10.1023/A:1008202821328" target="_blank" rel="noopener noreferrer">https://doi.org/10.1023/A:1008202821328</a></li>
+        <li id="ref-surjanovic">Surjanovic, S., y Bingham, D. (2013). <em>Virtual library of simulation experiments: Test functions and datasets</em>. Simon Fraser University. <a href="https://www.sfu.ca/~ssurjano/" target="_blank" rel="noopener noreferrer">https://www.sfu.ca/~ssurjano/</a></li>
+        <li id="ref-wardman">Wardman, M., Chintakayala, V. P. K., y de Jong, G. (2016). Values of travel time in Europe: Review and meta-analysis. <em>Transportation Research Part A: Policy and Practice, 94</em>, 93–111. <a href="https://doi.org/10.1016/j.tra.2016.08.019" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.tra.2016.08.019</a></li>
+      </ol>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="footer-inner"><div><div class="footer-title">Optimización numérica, metaheurística y combinatoria</div><div class="footer-note">Proyecto académico · Redes neuronales y algoritmos bioinspirados · Universidad Nacional de Colombia · 2026</div></div><a class="back-top" href="#inicio">Volver al inicio <span aria-hidden="true">↑</span></a></div></footer>
+
+<script defer src="assets/js/math.js"></script>
+<script defer src="assets/js/reading-progress.js"></script>
+<script defer src="assets/js/toc.js"></script>
+<script defer src="assets/js/tabs.js"></script>
 </body>
 </html>
