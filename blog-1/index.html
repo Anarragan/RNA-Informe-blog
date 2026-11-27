@@ -436,7 +436,15 @@
     <!-- ================================================= -->
     <section class="section" id="reproducibilidad">
       <p class="section-kicker">05 · Repetir el trabajo</p><h2>Reproducibilidad</h2>
-      <div class="callout warning"><strong>PENDIENTE.</strong><p>Instalación, un comando por experimento, versiones, semillas y configuración.</p></div>
+      <p>El código y los archivos de configuración están en el <a href="https://github.com/Anarragan/RNA-Trabajo1-Optimizacion-Metaheuristica-Combinatoria/tree/develop" target="_blank" rel="noopener noreferrer">repositorio del proyecto</a>. Lo que este informe ya documenta es lo siguiente: la Parte 1 se implementó en Python con NumPy, con semilla \(42+i\) en la corrida \(i\) de Rosenbrock y la configuración de <code>configs/CLI_defaults_rosenbrock.json</code> (Tabla 1); la Parte 2 usa scikit-opt con semilla 42 y los datos guardados en CSV, entre ellos <code>peajes_espana_eur.csv</code> (secciones 3.2 y 3.3).</p>
+      <div class="callout warning"><strong>PENDIENTE.</strong>
+        <ul>
+          <li>Instalación: versión de Python y dependencias con sus versiones.</li>
+          <li>Un comando por experimento: Rosenbrock, Schwefel, barrido de \(\eta\), TSP con ACO y con GA, y generación de figuras y GIFs.</li>
+          <li>Semillas de Schwefel y archivo de configuración de esa función.</li>
+          <li>Cómo regenerar las matrices de distancia, tiempo y peajes (OSRM y HERE), o indicar que se usan los CSV guardados.</li>
+        </ul>
+      </div>
     </section>
 
     <!-- ================================================= -->
@@ -444,28 +452,57 @@
       <p class="section-kicker">06 · Herramientas</p><h2>Uso de inteligencia artificial</h2>
       <p>Durante el trabajo se usaron herramientas de inteligencia artificial generativa como apoyo en varias etapas. Las sugerencias se incorporaron después de revisarlas frente a pruebas empíricas, fuentes primarias y verificación matemática; la herramienta no sustituye la comprobación experimental ni la responsabilidad del equipo sobre el código y las conclusiones. La Tabla 11 resume los usos principales.</p>
       <div class="table-wrap"><table><caption>Tabla 11. Usos principales de la inteligencia artificial y su revisión. Fuente: elaboración propia.</caption>
-        <thead><tr><th>#</th><th>Tarea</th><th>Prompt principal</th><th>Impacto en el resultado</th><th>Revisión realizada</th></tr></thead><tbody>
-        <tr><td>1</td><td>Código base de los optimizadores y del motor de visualización</td><td><em>Por transcribir</em></td><td>Aceleró la implementación inicial de GD, PSO, DE y EA y de los GIF.</td><td>Revisión, adaptación y corrección manual; validación con las tasas de éxito y los mínimos conocidos.</td></tr>
-        <tr><td>2</td><td>Explicación de conceptos</td><td><em>Por transcribir</em></td><td>Explicaciones sobre la geometría de Rosenbrock, las ecuaciones de PSO y DE y el cruce BLX-\(\alpha\).</td><td>Contraste con las fuentes primarias citadas en la sección 2.</td></tr>
-        <tr><td>3</td><td>Depuración de errores</td><td><em>Por transcribir</em></td><td>Identificación de causas probables de errores de ejecución.</td><td>Pruebas empíricas antes de aceptar cada corrección.</td></tr>
-        <tr><td>4</td><td>Estructura y redacción del informe</td><td>Unificar las páginas de Schwefel, Rosenbrock y el viajante en un único informe con orden procedimental, siguiendo la estructura del Trabajo 2.</td><td>Reorganización del contenido, numeración continua de figuras, tablas y ecuaciones.</td><td>Verificación de cada cifra contra las tablas originales y de cada referencia contra su fuente.</td></tr>
+        <thead><tr><th>#</th><th>Tarea</th><th>Herramienta</th><th>Prompt principal</th><th>Impacto en el resultado</th><th>Revisión realizada</th></tr></thead><tbody>
+        <tr><td>1</td><td>Código base de los optimizadores y del motor de visualización</td><td><strong>PENDIENTE</strong></td><td><strong>PENDIENTE</strong>: transcribir el prompt literal</td><td>Aceleró la implementación inicial de GD, PSO, DE y EA y de los GIF.</td><td>Revisión, adaptación y corrección manual; validación con las tasas de éxito y los mínimos conocidos.</td></tr>
+        <tr><td>2</td><td>Explicación de conceptos</td><td><strong>PENDIENTE</strong></td><td><strong>PENDIENTE</strong>: transcribir el prompt literal</td><td>Explicaciones sobre la geometría de Rosenbrock, las ecuaciones de PSO y DE y el cruce BLX-\(\alpha\).</td><td>Contraste con las fuentes primarias citadas en la sección 2.</td></tr>
+        <tr><td>3</td><td>Depuración de errores</td><td><strong>PENDIENTE</strong></td><td><strong>PENDIENTE</strong>: transcribir el prompt literal</td><td>Identificación de causas probables de errores de ejecución.</td><td>Pruebas empíricas antes de aceptar cada corrección.</td></tr>
+        <tr><td>4</td><td>Primera unificación del informe</td><td><strong>PENDIENTE</strong></td><td>Unificar las páginas de Schwefel, Rosenbrock y el viajante en un único informe con orden procedimental, siguiendo la estructura del Trabajo 2.</td><td>Reorganización del contenido y numeración continua de figuras, tablas y ecuaciones.</td><td>Verificación de cada cifra contra las tablas originales y de cada referencia contra su fuente.</td></tr>
+        <tr><td>5</td><td>Reorganización según <code>ESTRUCTURA_BLOG.md</code> y actualización de la Parte 2</td><td>Claude Code (Claude Opus 5.5)</td><td>«Lee ESTRUCTURA_BLOG.md. Muéstrame qué vas a mover y qué falta, sin modificar nada todavía.»</td><td>Estructura actual del informe; Parte 2 con la matriz de peajes de HERE; porcentajes de ACO y GA y Tablas 8 a 10 recalculados.</td><td>Cada cifra se comparó con <code>pages/viajante.html</code> actualizado y los valores derivados se recalcularon con un script. El equipo detectó dos errores de la herramienta (sección 7).</td></tr>
       </tbody></table></div>
-      <div class="callout warning"><strong>Por completar.</strong><p>Transcribir los prompts literales más relevantes de las filas 1 a 3, indicando la herramienta usada en cada caso.</p></div>
-      
     </section>
 
     <!-- ================================================= -->
     <section class="section" id="caceria">
       <p class="section-kicker">07 · Verificación</p><h2>Cacería de la alucinación</h2>
-      <p>El uso de IA aceleró la implementación y permitió resolver dudas conceptuales rápidamente, pero exigió supervisión constante: varios fragmentos generados contenían errores sutiles que solo aparecieron al probarlos. Algunos puntos de control que resultaron útiles para detectar errores, vinieran o no de la IA, fueron:</p>
+      <p>Esta sección documenta las respuestas de la IA que resultaron falsas. Para cada hallazgo se registran el prompt literal, la respuesta, por qué se sospechó, la evidencia, la corrección y la lección. Solo se presenta como error de la IA lo que tiene prompt y evidencia.</p>
+      <div class="callout warning"><strong>PENDIENTE: faltan hallazgos.</strong><p>Se exigen al menos 5 hallazgos de al menos 3 categorías. Hay 2 documentados, de 2 categorías. Los prompts de las filas 1 a 4 de la Tabla 11 no están transcritos, así que aún no pueden aportar hallazgos.</p></div>
+
+      <h3>7.1 Hallazgos documentados</h3>
+      <article class="info-card">
+        <span class="number">HALLAZGO 1 · Cifras calculadas con datos desactualizados</span>
+        <h3>Porcentajes de ACO frente al GA</h3>
+        <dl>
+          <dt>Prompt</dt><dd>«Lee ESTRUCTURA_BLOG.md. Muéstrame qué vas a mover y qué falta, sin modificar nada todavía.» (Claude Code, 27 de noviembre de 2026).</dd>
+          <dt>Respuesta</dt><dd>La herramienta afirmó que las cifras de la guía («GA 32–46 % más caro; ACO 24–32 % más barato») no salían de las tablas, y propuso escribir «23–31 % más barato».</dd>
+          <dt>Sospecha</dt><dd>El equipo sabía que existía una versión de <code>viajante.html</code> con peajes de HERE en la que ACO cuesta 2 740.42 € a 25 €/h. La respuesta, en cambio, se basaba en las tablas anteriores, con solo 13 pares de peajes cargados a mano.</dd>
+          <dt>Evidencia</dt><dd>La rama local estaba 25 commits por detrás de la remota. La versión con HERE estaba en <code>origin/Ana</code> y <code>origin/main</code> desde el commit 84a3263 (23 de noviembre de 2026). Con esos datos, el GA es entre un 32.2 % y un 46.1 % más caro y ACO entre un 24.3 % y un 31.5 % más barato (Tabla 8).</dd>
+          <dt>Corrección</dt><dd>Se actualizó el repositorio y la Parte 2 se rehízo con los datos de HERE.</dd>
+          <dt>Lección</dt><dd>Antes de contrastar cifras hay que actualizar el repositorio y confirmar qué versión de los datos se está leyendo.</dd>
+        </dl>
+      </article>
+      <article class="info-card">
+        <span class="number">HALLAZGO 2 · Afirmación de inexistencia sin verificar</span>
+        <h3>La sección «antes y después» de los peajes</h3>
+        <dl>
+          <dt>Prompt</dt><dd>El mismo del hallazgo 1.</dd>
+          <dt>Respuesta</dt><dd>«No encontré esa sección ni en index.html ni en viajante.html. Parece que ya se eliminó.»</dd>
+          <dt>Sospecha</dt><dd>El equipo tenía una versión de <code>viajante.html</code> con la sección «Antes y después de completar la matriz de peajes».</dd>
+          <dt>Evidencia</dt><dd>La sección está en <code>blog-1/pages/viajante.html</code> de las ramas remotas. La herramienta solo había buscado en la copia local desactualizada.</dd>
+          <dt>Corrección</dt><dd>Se revisaron todas las ramas. La sección no se incluye en este informe porque así lo indica <code>ESTRUCTURA_BLOG.md</code>, no porque no exista.</dd>
+          <dt>Lección</dt><dd>«No lo encontré» no equivale a «no existe»: hay que decir dónde se buscó.</dd>
+        </dl>
+      </article>
+
+      <h3>7.2 Verificaciones hechas</h3>
+      <p>Estas comprobaciones detectaron o descartaron errores, pero no hay constancia de qué prompt los produjo. Por eso no se presentan como errores de la IA.</p>
       <ul>
         <li><strong>Comprobar contra el óptimo conocido.</strong> Los peores valores de los heurísticos en Schwefel (118.44, 236.88, 355.32) son múltiplos exactos de la penalización del valle señuelo; un valor que no encajara con esa estructura habría delatado un error en la función o en el dominio.</li>
         <li><strong>Revisar el orden de las coordenadas.</strong> OSRM espera longitud y latitud; con el orden invertido las ciudades caen en el océano.</li>
         <li><strong>Desconfiar de los hiperparámetros por defecto.</strong> La tasa de aprendizaje que funcionaba en Schwefel hace diverger el gradiente en Rosenbrock (Tabla 2).</li>
-        <li><strong>Verificar cada referencia.</strong> Al unificar el informe se encontró que los metadatos de una referencia (título y páginas del metaanálisis de Wardman et al.) no correspondían a la publicación real y se corrigieron; también se retiró una fuente que no se usaba en el texto. Una referencia inexistente o mal citada es exactamente el tipo de error que una IA produce con total seguridad.</li>
         <li><strong>Revisar la coherencia interna.</strong> El umbral de divergencia del gradiente aparecía como \(\eta\ge0.002\) en un párrafo y como \(\eta\ge0.0012\) en la tabla del barrido; se dejó el valor de la tabla, que es el medido.</li>
+        <li><strong>Verificar cada referencia.</strong> Los metadatos de Wardman et al. (2016) difieren entre páginas: <code>viajante.html</code> usa otro título y las páginas 213–228, mientras que este informe conserva la versión ya corregida al unificarlo (páginas 93–111, mismo DOI). El Instituto Geográfico Nacional aparece en las fuentes de <code>viajante.html</code>, pero ninguna frase lo cita ni dice para qué se usó, así que no se incluye.</li>
+        <li><strong>Revisar el sentido de los porcentajes.</strong> <code>viajante.html</code> dice que las rutas de ACO son «32 % a 46 % más económicas», pero ese intervalo es el sobrecosto del GA; el ahorro de ACO es del 24 % al 32 % (Tabla 8).</li>
       </ul>
-    
     </section>
 
     <!-- ================================================= -->
